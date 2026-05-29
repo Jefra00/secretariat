@@ -1,0 +1,24 @@
+{% extends "base/base1.html" %}
+{% block title %}Certificat — {{ inscription.course.titre }}{% endblock %}
+
+{% block content %}
+<section class="max-w-3xl mx-auto py-10 px-6">
+  <div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow text-center">
+    <h1 class="text-2xl font-bold mb-3">🎓 Certificat de réussite</h1>
+    <p class="text-slate-600 mb-4">Félicitations <strong>{{ inscription.user.get_full_name|default:inscription.user.username }}</strong> !</p>
+
+    <p class="text-sm text-slate-500 mb-6">Cours : <strong>{{ inscription.course.titre }}</strong></p>
+
+    {% if certificat_url %}
+      <a href="{{ certificat_url }}" class="bg-primary text-white px-5 py-2 rounded hover:bg-primary/90" target="_blank">⬇️ Télécharger mon certificat</a>
+      <p class="text-xs text-slate-500 mt-3">Le certificat est généré au format PDF.</p>
+    {% else %}
+      <p class="text-red-500">Le certificat n'a pas pu être généré. Contactez le support.</p>
+    {% endif %}
+
+    <div class="mt-6">
+      <a href="{% url 'elearning:dashboard' %}" class="text-primary hover:underline">← Retour au tableau de bord</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

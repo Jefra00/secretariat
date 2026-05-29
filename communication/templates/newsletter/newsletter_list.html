@@ -1,0 +1,23 @@
+{% extends "base/base1.html" %}
+{% block title %}Newsletters{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto py-10 px-6">
+  <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-8">✉️ Nos newsletters</h1>
+
+  <div class="space-y-6">
+    {% for n in newsletters %}
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm hover:shadow-md transition">
+        <h2 class="text-xl font-semibold text-primary">{{ n.sujet }}</h2>
+        <p class="text-slate-600 dark:text-slate-300 mt-2 line-clamp-3">{{ n.contenu|truncatewords:30 }}</p>
+        <p class="text-xs text-slate-500 mt-3">{{ n.date_creation|date:"d M Y" }} • {{ n.get_statut_display }}</p>
+        <a href="{% url 'communication:newsletter_detail' n.pk %}" class="text-primary text-sm font-medium hover:underline mt-2 inline-block">
+          📬 Lire la newsletter
+        </a>
+      </div>
+    {% empty %}
+      <p class="text-slate-500 text-center">Aucune newsletter disponible.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

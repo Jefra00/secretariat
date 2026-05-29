@@ -1,0 +1,32 @@
+{% extends "base/base1.html" %}
+{% block title %}S'inscrire — {{ course.titre }}{% endblock %}
+
+{% block content %}
+<section class="max-w-2xl mx-auto py-10 px-6">
+  <div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow">
+    <h1 class="text-2xl font-bold mb-4">Inscription : {{ course.titre }}</h1>
+    <p class="text-sm text-slate-500 mb-4">Prix : <strong>{{ course.prix }} €</strong> — Durée : {{ course.duree }}</p>
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      <label class="block text-sm font-medium">Choisir une session (optionnel)</label>
+      <select name="session" class="w-full border rounded p-2">
+        <option value="">— Sans session spécifique —</option>
+        {% for s in sessions %}
+          <option value="{{ s.id }}">{{ s.date_debut|date:"d M Y" }}{% if s.date_fin %} — {{ s.date_fin|date:"d M Y" }}{% endif %} • {{ s.lieu|default:"En ligne" }}</option>
+        {% endfor %}
+      </select>
+
+      <div class="flex items-center gap-3">
+        <button type="submit" class="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90">Confirmer l'inscription</button>
+        <a href="{% url 'elearning:course_detail' course.id %}" class="text-slate-500 hover:underline">Annuler</a>
+      </div>
+    </form>
+
+    <div class="mt-6 text-xs text-slate-500">
+      <p>Vous serez redirigé vers votre tableau de bord après l'inscription.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

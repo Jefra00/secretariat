@@ -1,0 +1,206 @@
+{% extends 'base/base1.html' %}
+{% load static %}
+
+{% block title %}Espace Client - {{ user.get_full_name|default:user.username }}{% endblock %}
+
+{% block content %}
+<body class="antialiased scroll-smooth transition-colors duration-500 ease-in-out bg-gradient-to-br from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+
+<!-- Section utilisateur connecté -->
+<section class="relative bg-gradient-to-r from-primary/10 via-accent/10 to-slate-50 dark:from-primary/20 dark:via-accent/20 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 fade-in">
+  <div class="max-w-7xl mx-auto px-6 py-8 sm:py-12 flex flex-col sm:flex-row items-center justify-between gap-6">
+    
+    <!-- Profil utilisateur -->
+    <div class="flex items-center gap-4">
+      <div class="relative">
+        {% if user.avatar %}
+          <img src="{{ user.avatar.url }}" alt="Avatar de {{ user.username }}" class="w-16 h-16 rounded-full object-cover border-2 border-primary shadow-md hover:shadow-lg transition-all duration-500">
+        {% else %}
+          <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined text-3xl">account_circle</span>
+          </div>
+        {% endif %}
+        <span class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full animate-pulse" title="Connecté"></span>
+      </div>
+
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50">
+          Bonjour, {{ user.first_name|default:user.username }} 👋
+        </h2>
+        <p class="text-slate-600 dark:text-slate-400 text-base italic" id="greeting">
+          Heureux de vous revoir sur votre espace client ✨
+        </p>
+      </div>
+    </div>
+
+    <!-- Statistiques utilisateur -->
+    <div class="grid grid-cols-3 gap-4 text-center">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-500">
+        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Commandes</p>
+        <p class="text-xl font-bold text-slate-900 dark:text-white">{{ commandes_total }}</p>
+      </div>
+
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-500">
+        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">En cours</p>
+        <p class="text-xl font-bold text-blue-600 dark:text-blue-400">{{ commandes_en_cours }}</p>
+      </div>
+
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-500">
+        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Terminées</p>
+        <p class="text-xl font-bold text-green-600 dark:text-green-400">{{ commandes_terminees }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="flex-1 px-4 sm:px-8 lg:px-16 py-10 sm:py-16">
+  <div class="mx-auto max-w-7xl flex flex-col gap-10">
+
+    <div class="text-center flex flex-col items-center gap-4 fade-in">
+      <h1 class="text-slate-900 dark:text-slate-50 text-4xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tighter max-w-3xl animate-fade">
+        Solutions sur mesure pour votre entreprise
+      </h1>
+      <p class="text-slate-600 dark:text-slate-400 text-lg max-w-2xl">
+        Découvrez nos solutions sur mesure pour alléger votre charge de travail administrative et numérique.
+      </p>
+    </div>
+
+    <!-- Grille dynamique des services -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8" id="services-grid">
+      {% for service in services %}
+        <div class="service-card group relative flex flex-col gap-4 p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-2xl hover:-translate-y-2 transform transition-all duration-500 ease-out overflow-hidden cursor-pointer"
+             data-category="{{ service.category.slug }}">
+             
+          <span class="absolute top-4 right-4 text-xs bg-primary/10 text-primary px-3 py-1 rounded-full font-medium">
+            {{ service.category.name }}
+          </span>
+
+          <!-- Icône ou image -->
+          <div class="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center text-primary group-hover:bg-primary/30 transition-colors duration-500">
+            {% if service.icon_name %}
+              <span class="material-symbols-outlined text-3xl">{{ service.icon_name }}</span>
+            {% elif service.image %}
+              <img src="{{ service.image.url }}" alt="{{ service.nom }}" class="w-10 h-10 object-cover rounded-lg">
+            {% else %}
+              <span class="material-symbols-outlined text-3xl text-gray-400">help</span>
+            {% endif %}
+          </div>
+
+          <!-- Texte -->
+          <div class="flex flex-col gap-2">
+            <h3 class="text-slate-900 dark:text-slate-50 text-lg font-bold group-hover:text-primary transition-colors duration-500">{{ service.nom }}</h3>
+            <p class="text-slate-600 dark:text-slate-400 text-sm">{{ service.description|truncatewords:18 }}</p>
+          </div>
+
+          <!-- Liens d’action -->
+          <div class="flex items-center justify-between mt-auto">
+            <a href="{% url 'services:detail' service.slug %}"
+               class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline hover:translate-x-1 transition-transform">
+              En savoir plus
+              <span class="material-symbols-outlined text-base">arrow_forward</span>
+            </a>
+
+            <a href="{% url 'commandes:creer_commande' service.id %}"
+               class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:underline hover:scale-105 transition-transform">
+              Choisir ce service
+              <span class="material-symbols-outlined text-base">shopping_cart</span>
+            </a>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-center text-gray-500 dark:text-gray-400 col-span-3">
+          Aucun service disponible pour le moment.
+        </p>
+      {% endfor %}
+    </div>
+  </div>
+</main>
+
+<!-- Benefits Section -->
+<section class="py-20 bg-gradient-to-br from-primary/5 via-slate-50 to-accent/5 dark:from-primary/10 dark:via-slate-900 dark:to-accent/10 fade-in">
+  <div class="mx-auto max-w-7xl px-4 sm:px-8 lg:px-16">
+    <div class="text-center mb-16">
+      <h2 class="text-slate-900 dark:text-slate-50 text-3xl sm:text-4xl font-black leading-tight tracking-tight mb-4">
+        Pourquoi Nous Choisir ?
+      </h2>
+      <p class="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
+        Des avantages concrets qui font la différence
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Benefit 1 -->
+      <div class="benefit-card group bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-200 dark:border-slate-800 hover:-translate-y-2">
+        <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+          <span class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform">verified_user</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-slate-50 mb-3">Confidentialité Totale</h3>
+        <p class="text-slate-600 dark:text-slate-400">Vos données sont protégées avec les plus hauts standards de sécurité.</p>
+      </div>
+
+      <!-- Benefit 2 -->
+      <div class="benefit-card group bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-200 dark:border-slate-800 hover:-translate-y-2">
+        <div class="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
+          <span class="material-symbols-outlined text-4xl text-accent group-hover:scale-110 transition-transform">support_agent</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-slate-50 mb-3">Support Réactif</h3>
+        <p class="text-slate-600 dark:text-slate-400">Une équipe disponible 7j/7 pour répondre à vos besoins urgents.</p>
+      </div>
+
+      <!-- Benefit 3 -->
+      <div class="benefit-card group bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-200 dark:border-slate-800 hover:-translate-y-2">
+        <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+          <span class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform">savings</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-slate-50 mb-3">Tarifs Transparents</h3>
+        <p class="text-slate-600 dark:text-slate-400">Aucun coût caché, des devis clairs et des prix compétitifs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 mt-16 fade-in">
+  <div class="mx-auto max-w-7xl px-4 sm:px-8 lg:px-16 py-16">
+    <div class="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 dark:from-primary/20 dark:via-accent/20 dark:to-primary/20 p-10 rounded-xl flex flex-col lg:flex-row items-center justify-between gap-8 text-center lg:text-left shadow-inner">
+      <div class="flex flex-col gap-2">
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50">Prêt à déléguer ?</h2>
+        <p class="text-slate-600 dark:text-slate-400">Contactez-nous pour un devis gratuit et découvrez comment nous pouvons vous aider.</p>
+      </div>
+      <a class="relative flex min-w-[160px] max-w-[480px] items-center justify-center rounded-lg h-12 px-6 bg-primary text-white font-bold tracking-wide hover:bg-primary/90 hover:scale-105 transition-all duration-500 group overflow-hidden" href="contacts.html">
+        <span class="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+        <span class="relative z-10">Contactez-nous</span>
+      </a>
+    </div>
+
+    <div class="flex flex-col sm:flex-row justify-between items-center mt-12 gap-6">
+      <p class="text-slate-500 dark:text-slate-400 text-sm">© 2024 Secrétariat Pro. Tous droits réservés.</p>
+      <div class="flex items-center gap-6">
+        <a class="text-slate-500 dark:text-slate-400 hover:text-primary hover:scale-110 transition-all duration-300" href="#">
+          <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path></svg>
+        </a>
+        <a class="text-slate-500 dark:text-slate-400 hover:text-primary hover:scale-110 transition-all duration-300" href="#">
+          <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path clip-rule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" fill-rule="evenodd"></path></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Bonne matinée ☀️" :
+    hour < 18 ? "Bon après-midi 🌤️" :
+    "Bonne soirée 🌙";
+  document.getElementById("greeting").textContent = greeting;
+</script>
+
+<style>
+  .fade-in { opacity: 0; transform: translateY(20px); animation: fadeInUp 0.8s ease forwards; }
+  @keyframes fadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+</body>
+{% endblock %}

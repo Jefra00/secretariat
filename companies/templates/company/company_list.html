@@ -1,0 +1,44 @@
+{% extends "base/base1.html" %}
+{% block title %}Entreprises clientes{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto py-10 px-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold">🏢 Entreprises clientes</h1>
+    <a href="{% url 'company:company_create' %}" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90">
+      ➕ Nouvelle entreprise
+    </a>
+  </div>
+
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for c in companies %}
+      <div class="bg-white dark:bg-slate-900 border rounded-lg p-5 shadow hover:shadow-md transition">
+        <div class="flex items-center gap-4">
+          {% if c.logo %}
+            <img src="{{ c.logo.url }}" class="w-16 h-16 rounded-full object-cover">
+          {% else %}
+            <div class="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-500 font-bold">
+              {{ c.nom|first|upper }}
+            </div>
+          {% endif %}
+          <div>
+            <h2 class="text-lg font-semibold">{{ c.nom }}</h2>
+            <p class="text-sm text-slate-500">{{ c.secteur }}</p>
+          </div>
+        </div>
+
+        <div class="mt-4 text-sm text-slate-500">
+          <p>{{ c.coordonnees }}</p>
+          <p>Commandes : <strong>{{ c.nombre_commandes }}</strong> — Note : ⭐ {{ c.note_globale }}</p>
+        </div>
+
+        <div class="mt-4">
+          <a href="{% url 'company:company_detail' c.id %}" class="text-primary hover:underline">Voir détails</a>
+        </div>
+      </div>
+    {% empty %}
+      <p class="text-slate-500">Aucune entreprise enregistrée.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

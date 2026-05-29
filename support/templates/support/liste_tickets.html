@@ -1,0 +1,105 @@
+{% extends "base/base1.html" %}
+{% block title %}Mes tickets de support{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto py-12 px-6">
+  
+  <!-- 🧭 En-tête -->
+  <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-900 dark:text-white">🎧 Support client</h1>
+      <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">
+        Retrouvez ici l’ensemble de vos demandes d’assistance. Cliquez sur un ticket pour en voir le détail.
+      </p>
+    </div>
+    <a href="{% url 'support:nouveau_ticket' %}" 
+       class="bg-primary text-white px-5 py-2.5 rounded-lg font-semibold shadow hover:bg-primary/90 transition">
+      ➕ Nouveau ticket
+    </a>
+  </div>
+
+  {% if tickets %}
+    <!-- 🧾 Tableau -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md rounded-2xl overflow-hidden">
+      <table class="min-w-full text-sm">
+        <thead class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 uppercase text-xs">
+          <tr>
+            <th class="p-3">Référence</th>
+            <th class="p-3">Sujet</th>
+            <th class="p-3">Statut</th>
+            <th class="p-3">Priorité</th>
+            <th class="p-3">Créé le</th>
+            <th class="p-3 text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in tickets %}
+            <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+              <td class="p-3 font-medium text-primary">
+                <a href="{% url 'support:details_ticket' t.reference %}" class="hover:underline">
+                  {{ t.reference }}
+                </a>
+              </td>
+              <td class="p-3">{{ t.sujet }}</td>
+              <td class="p-3">
+                <span class="px-2 py-1 text-xs rounded bg-{{ t.statut_badge }}-100 text-{{ t.statut_badge }}-800 dark:bg-{{ t.statut_badge }}-900/40 dark:text-{{ t.statut_badge }}-300">
+                  {{ t.get_statut_display }}
+                </span>
+              </td>
+              <td class="p-3">{{ t.get_priorite_display }}</td>
+              <td class="p-3">{{ t.date_creation|date:"d M Y H:i" }}</td>
+              <td class="p-3 text-center">
+                <a href="{% url 'support:details_ticket' t.reference %}" 
+                   class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition">
+                  <span class="material-symbols-outlined text-sm">visibility</span>
+                  Détail
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 📄 Pagination -->
+    {% if tickets.has_other_pages %}
+      <div class="flex justify-center items-center mt-8 space-x-2 text-sm">
+        {% if tickets.has_previous %}
+          <a href="?page={{ tickets.previous_page_number }}" 
+             class="px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded hover:bg-primary/10">
+            ⬅️ Précédent
+          </a>
+        {% endif %}
+
+        {% for page_num in tickets.paginator.page_range %}
+          {% if tickets.number == page_num %}
+            <span class="px-3 py-2 bg-primary text-white rounded">{{ page_num }}</span>
+          {% elif page_num > tickets.number|add:'-3' and page_num < tickets.number|add:'3' %}
+            <a href="?page={{ page_num }}" class="px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded hover:bg-primary/10">
+              {{ page_num }}
+            </a>
+          {% endif %}
+        {% endfor %}
+
+        {% if tickets.has_next %}
+          <a href="?page={{ tickets.next_page_number }}" 
+             class="px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded hover:bg-primary/10">
+            Suivant ➡️
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% else %}
+    <!-- 📭 Aucun ticket -->
+    <div class="text-center py-16 bg-white dark:bg-slate-900 rounded-xl shadow border border-slate-200 dark:border-slate-800">
+      <p class="text-slate-500 dark:text-slate-400 text-lg mb-4">
+        Vous n’avez encore ouvert aucun ticket d’assistance.
+      </p>
+      <a href="{% url 'support:nouveau_ticket' %}" 
+         class="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-primary/90 transition">
+        ➕ Créer mon premier ticket
+      </a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

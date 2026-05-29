@@ -1,0 +1,250 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ service.nom }} - Secrétariat Pro{% endblock %}
+
+{% block content %}
+
+<section class="relative w-full h-[70vh] overflow-hidden rounded-b-[3rem]">
+    <div
+      class="absolute inset-0 bg-cover bg-center"
+      style="background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80'); filter: brightness(0.5); background-attachment: fixed;">
+    </div>
+
+    <div class="relative z-10 flex flex-col justify-center items-center text-center h-full text-white px-6 md:px-12">
+      <h1 class="text-6xl font-extrabold drop-shadow-xl mb-6">
+        <span class="text-primary">Secrétariat Pro</span> Blog
+      </h1>
+      <p class="max-w-2xl text-lg text-gray-100 leading-relaxed">
+        Rejoignez notre communauté et explorez des histoires inspirantes, des astuces pratiques et des retours d’expérience réels.
+      </p>
+    </div>
+  </section>
+
+<main class="flex-grow">
+<div class="container mx-auto max-w-5xl px-4 py-8 md:py-12">
+
+<!-- ===== Fil d’Ariane ===== -->
+
+
+<!-- ===== HeroSection (image principale du service) ===== -->
+<div class="@container">
+<div class="w-full">
+<div class="flex min-h-[480px] flex-col gap-6 bg-cover bg-center bg-no-repeat rounded-xl items-start justify-end p-6 md:p-10" 
+     style="background-image: linear-gradient(rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%), url('{% if service.image %}{{ service.image.url }}{% else %}{% static 'img/default-service.jpg' %}{% endif %}');">
+<div class="flex flex-col gap-2 text-left">
+<h1 class="text-white text-4xl font-black leading-tight tracking-tighter md:text-5xl">{{ service.nom }}</h1>
+<h2 class="text-white/90 text-base font-normal leading-normal max-w-2xl md:text-lg">{{ service.description }}</h2>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===== Textes associés (Section dynamique) ===== -->
+{% if textes %}
+<div class="flex flex-col gap-10 px-0 py-16 @container">
+  {% for texte in textes %}
+  <div class="bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 rounded-xl p-8 flex flex-col gap-4">
+    {% if texte.titre %}
+      <h2 class="text-gray-900 dark:text-white tracking-tight text-2xl font-bold leading-tight">{{ texte.titre }}</h2>
+    {% endif %}
+
+    <p class="text-gray-600 dark:text-gray-300 text-base leading-relaxed whitespace-pre-line">{{ texte.contenu }}</p>
+
+    <!-- ✅ Nouveau bloc : prix et bouton commande -->
+    <div class="flex items-center justify-between mt-4">
+      <div>
+        {% if texte.nombre_documents %}
+        <p class="text-sm text-slate-500">{{ texte.nombre_documents }} document{{ texte.nombre_documents|pluralize }} à traiter</p>
+        {% endif %}
+        <p class="text-lg font-bold text-primary">{{ texte.prix }} FCFA</p>
+      </div>
+      <a href="{% url 'commandes:creer_commande_texte' texte.id %}"
+         class="bg-primary text-white px-5 py-2 rounded-lg font-semibold shadow hover:shadow-lg hover:bg-primary/90 transition">
+        Passer la commande
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+<!-- ===== Processus en 4 étapes (fixe) ===== -->
+<div class="py-16">
+<h2 class="text-gray-900 dark:text-white text-2xl font-bold leading-tight tracking-tight text-center mb-12">Notre Processus en 4 Étapes Simples</h2>
+<div class="grid grid-cols-1 gap-8 md:grid-cols-4">
+<div class="flex flex-col items-center text-center">
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20 text-primary mb-4">
+<span class="text-xl font-bold">1</span>
+</div>
+<h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Prise de Contact</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400">Échange initial pour comprendre votre projet et vos objectifs.</p>
+</div>
+<div class="flex flex-col items-center text-center">
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20 text-primary mb-4">
+<span class="text-xl font-bold">2</span>
+</div>
+<h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Analyse du Besoin</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400">Évaluation approfondie pour proposer une solution adaptée.</p>
+</div>
+<div class="flex flex-col items-center text-center">
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20 text-primary mb-4">
+<span class="text-xl font-bold">3</span>
+</div>
+<h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Mise en Œuvre</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400">Réalisation rapide et professionnelle de votre projet.</p>
+</div>
+<div class="flex flex-col items-center text-center">
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20 text-primary mb-4">
+<span class="text-xl font-bold">4</span>
+</div>
+<h3 class="font-bold text-lg mb-2 text-gray-900 dark:text-white">Livraison & Suivi</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400">Livraison finale et accompagnement post-projet.</p>
+</div>
+</div>
+</div>
+
+<!-- ===== Galerie d’images dynamiques (ServiceImage) ===== -->
+{% if images %}
+<div class="py-16">
+  <div class="text-center mb-12">
+    <h2 class="text-gray-900 dark:text-white text-2xl font-bold leading-tight tracking-tight mb-4">Nos Réalisations</h2>
+    <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+      Découvrez quelques exemples de réalisations pour <strong>{{ service.nom }}</strong>.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    {% for img in images %}
+    <div class="group relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all">
+      <img src="{{ img.image.url }}" alt="{{ img.titre|default:service.nom }}" class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105">
+      {% if img.titre %}
+      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+        <span class="text-white text-sm font-semibold">{{ img.titre }}</span>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ===== Le reste de ta page (Pricing, Témoignages, Contact) inchangé ===== -->
+<!-- Pricing Section -->
+<div class="py-16">
+<div class="bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 rounded-xl p-8 md:p-12 text-center">
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white">Besoin d'un devis sur mesure ?</h2>
+<p class="mt-2 mb-6 max-w-xl mx-auto text-gray-500 dark:text-gray-400">Chaque projet est unique. Contactez-nous pour obtenir une offre personnalisée parfaitement adaptée à vos besoins.</p>
+<button class="flex mx-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-wide hover:bg-primary/90 transition-colors">
+<span class="truncate">Demander un Devis</span>
+</button>
+</div>
+</div>
+<!-- Testimonial Section -->
+<div class="py-16">
+<h2 class="text-gray-900 dark:text-white text-2xl font-bold leading-tight tracking-tight text-center mb-12">Ce que disent nos clients</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+<p class="text-gray-600 dark:text-gray-300 mb-4">"L'équipe a été incroyablement professionnelle et réactive. Mon dossier a été accepté sans aucun problème. Je recommande vivement !"</p>
+<p class="font-bold text-gray-900 dark:text-white">- Aïssatou B.</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Étudiante en Master</p>
+</div>
+<div class="bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+<p class="text-gray-600 dark:text-gray-300 mb-4">"Un service impeccable qui m'a fait gagner un temps précieux et a considérablement réduit mon stress. Merci pour votre accompagnement."</p>
+<p class="font-bold text-gray-900 dark:text-white">- Mohamed K.</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Étudiant en Licence</p>
+</div>
+</div>
+</div>
+<!-- Contact Form Section -->
+<div class="py-16">
+<div class="bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 rounded-xl p-8 md:p-12">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+<div>
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white">Prêt à démarrer votre projet ?</h2>
+<p class="mt-2 text-gray-500 dark:text-gray-400">Remplissez le formulaire ci-contre pour nous faire part de vos besoins. Nous vous recontacterons dans les plus brefs délais pour discuter de votre projet Campus France.</p>
+</div>
+<form class="flex flex-col gap-4">
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="name">Nom complet</label>
+<input class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-background-light dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary" id="name" name="name" placeholder="Votre nom" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="email">Email</label>
+<input class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-background-light dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary" id="email" name="email" placeholder="email@exemple.com" type="email"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="message">Message</label>
+<textarea class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-background-light dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary" id="message" name="message" rows="4">Je suis intéressé(e) par le service d'accompagnement Campus France.</textarea>
+</div>
+<button class="w-full md:w-auto flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-wide hover:bg-primary/90 transition-colors" type="submit">
+<span class="truncate">Envoyer ma demande</span>
+</button>
+</form>
+</div>
+
+
+</div>
+<!-- Autres services -->
+<div class="py-16 border-t border-gray-200 dark:border-gray-700 mt-12">
+  <div class="text-center mb-12">
+    <h2 class="text-gray-900 dark:text-white text-2xl font-bold leading-tight tracking-tight mb-4">
+      Découvrez aussi nos autres services
+    </h2>
+    <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+      Vous pourriez être intéressé(e) par ces services complémentaires à {{ service.nom }}.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="services-grid">
+    {% for s in autres_services %}
+      <div class="service-card flex flex-col gap-4 p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300" data-category="{{ s.category.slug }}">
+        
+        <div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+          {% if s.image %}
+            <img src="{{ s.image.url }}" alt="{{ s.nom }}" class="w-10 h-10 object-cover rounded-lg">
+          {% elif s.icon_name %}
+            <span class="material-symbols-outlined text-3xl">{{ s.icon_name }}</span>
+          {% else %}
+            <span class="material-symbols-outlined text-3xl text-gray-400">help</span>
+          {% endif %}
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <h3 class="text-slate-900 dark:text-slate-50 text-lg font-bold">{{ s.nom }}</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm">{{ s.description|truncatewords:20 }}</p>
+
+          <div class="mt-3 flex items-center justify-between">
+            <p class="text-primary font-semibold">
+              {{ s.prix_final }} €
+              {% if s.remise > 0 %}
+                <span class="text-gray-500 line-through text-xs ml-2">{{ s.prix_base }} €</span>
+              {% endif %}
+            </p>
+            <span class="text-xs text-gray-500 dark:text-gray-400">{{ s.delai_estime }}</span>
+          </div>
+        </div>
+
+        <a href="{% url 'services:detail' s.slug %}" class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline mt-auto">
+          En savoir plus
+          <span class="material-symbols-outlined text-base">arrow_forward</span>
+        </a>
+      </div>
+    {% empty %}
+      <p class="text-center text-gray-500 dark:text-gray-400 col-span-3">
+        Aucun autre service disponible pour le moment.
+      </p>
+    {% endfor %}
+  </div>
+</div>
+
+</div>
+</div>
+
+
+</div>
+</main>
+</div>
+</body>
+{% endblock %}

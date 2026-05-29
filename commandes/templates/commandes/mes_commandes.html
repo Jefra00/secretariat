@@ -1,0 +1,206 @@
+{% extends "base/base1.html" %}
+{% load fichier_filters %}
+{% block title %}Mes commandes{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto py-12 px-6">
+
+  <!-- 🧭 En-tête -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-10 gap-4">
+    <h1 class="text-3xl font-bold text-slate-900 dark:text-white">📦 Mes commandes</h1>
+    <a href="{% url 'espace_client' %}" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition">
+      + Nouvelle commande
+    </a>
+  </div>
+
+  <!-- 📊 Statistiques -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow p-4 text-center">
+      <p class="text-slate-500 text-sm">Total</p>
+      <p class="text-2xl font-bold text-primary">{{ stats.total }}</p>
+    </div>
+    <div class="bg-amber-50 dark:bg-amber-900/30 rounded-xl shadow p-4 text-center">
+      <p class="text-amber-600 text-sm">En attente</p>
+      <p class="text-xl font-semibold">{{ stats.en_attente }}</p>
+    </div>
+    <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl shadow p-4 text-center">
+      <p class="text-blue-600 text-sm">En cours</p>
+      <p class="text-xl font-semibold">{{ stats.en_cours }}</p>
+    </div>
+    <div class="bg-green-50 dark:bg-green-900/30 rounded-xl shadow p-4 text-center">
+      <p class="text-green-600 text-sm">Terminées</p>
+      <p class="text-xl font-semibold">{{ stats.terminees }}</p>
+    </div>
+  </div>
+
+  {% if commandes %}
+  <div class="space-y-6">
+    {% for commande in commandes %}
+    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-lg transition duration-300">
+
+      <!-- 🧾 En-tête -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+        <div>
+          <h3 class="text-xl font-semibold text-slate-900 dark:text-white">{{ commande.service.nom }}</h3>
+          <p class="text-sm text-slate-500">
+            Commande <strong>{{ commande.code_commande }}</strong> • {{ commande.date_commande|date:"d M Y" }}
+          </p>
+        </div>
+        {% include "commandes/partials/_badge_statut.html" with statut=commande.statut %}
+      </div>
+
+      <!-- 💰 Détails -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm mb-4">
+        <div><p class="text-slate-500">Montant</p><p class="font-semibold">{{ commande.montant_final }} €</p></div>
+        <div><p class="text-slate-500">Paiement</p><p class="font-semibold">{{ commande.get_mode_paiement_display }}</p></div>
+        <div><p class="text-slate-500">Adresse</p><p class="font-semibold">{{ commande.adresse|default:"—" }}</p></div>
+        <div><p class="text-slate-500">Délai estimé</p><p class="font-semibold">{{ commande.temps_restant }}</p></div>
+      </div>
+
+      <!-- 🧾 Reçu de paiement / Facture -->
+      {% if commande.paiements.exists %}
+        {% for paiement in commande.paiements.all %}
+          {% if paiement.facture %}
+          <div class="mt-4 border-t pt-4">
+            <h4 class="font-semibold mb-3 text-slate-800 dark:text-slate-200">🧾 Reçu / Facture</h4>
+            <div class="flex flex-wrap items-center gap-3">
+              <p class="text-sm text-slate-600 dark:text-slate-400">
+                Facture <strong>{{ paiement.facture.numero_facture }}</strong> — 
+                émise le {{ paiement.facture.date_emission|date:"d M Y" }}
+              </p>
+
+              {% if paiement.facture.pdf_url %}
+                <a href="{{ paiement.facture.pdf_url }}" target="_blank"
+                   class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition">
+                   👁️ Voir le reçu
+                </a>
+                <a href="{{ paiement.facture.pdf_url }}" download
+                   class="px-4 py-2 bg-slate-200 text-slate-800 rounded-md hover:bg-slate-300 transition">
+                   ⬇️ Télécharger
+                </a>
+              {% else %}
+                <p class="text-slate-500 text-sm italic">Le reçu sera disponible après validation complète du paiement.</p>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+      <!-- 📎 Fichiers soumis par le client -->
+      {% if commande.fichiers.all %}
+      <div class="mt-6 border-t pt-4">
+        <h4 class="font-semibold mb-3 text-slate-800 dark:text-slate-200">📎 Vos fichiers envoyés</h4>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {% for f in commande.fichiers.all %}
+          <div class="group relative bg-slate-50 dark:bg-slate-800 rounded-lg p-4 flex flex-col items-center shadow-sm hover:shadow-md transition duration-200">
+
+            {% if f.fichier.url|lower|endswith:".pdf" %}
+              <span class="material-symbols-outlined text-5xl text-red-500 mb-2">picture_as_pdf</span>
+            {% elif f.fichier.url|lower|endswith:".doc" or f.fichier.url|lower|endswith:".docx" %}
+              <span class="material-symbols-outlined text-5xl text-blue-500 mb-2">description</span>
+            {% elif f.fichier.url|lower|endswith:".png" or f.fichier.url|lower|endswith:".jpg" or f.fichier.url|lower|endswith:".jpeg" %}
+              <img src="{{ f.fichier.url }}" alt="{{ f.fichier.name }}" class="w-20 h-20 object-cover rounded-md mb-2 cursor-pointer" onclick="openModal('{{ f.fichier.url }}')">
+            {% else %}
+              <span class="material-symbols-outlined text-5xl text-slate-400 mb-2">insert_drive_file</span>
+            {% endif %}
+
+            <p class="text-xs text-center truncate w-full">{{ f.nom|default:f.fichier.name }}</p>
+            <p class="text-[10px] text-slate-500 mt-1">{{ f.date_ajout|date:"d M Y à H:i" }}</p>
+
+            <a href="{{ f.fichier.url }}" target="_blank" class="absolute inset-0 opacity-0 group-hover:opacity-100 bg-black/40 text-white text-xs flex items-center justify-center rounded-lg transition">
+              👁️ Voir
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 💬 Notes client -->
+      {% if commande.notes_client %}
+      <div class="mt-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-md">
+        <p class="text-sm italic text-slate-700 dark:text-slate-300">“{{ commande.notes_client }}”</p>
+      </div>
+      {% endif %}
+
+      <!-- ⚙️ Actions -->
+      <div class="mt-6 flex flex-wrap justify-end gap-4 text-sm">
+        {% if commande.statut == 'termine' %}
+          <a href="{% url 'commandes:resultats_commande' commande.code_commande %}" 
+             class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
+            Voir les résultats
+          </a>
+        {% elif commande.statut == 'en_attente' %}
+          <a href="{% url 'commandes:modifier_commande' commande.code_commande %}" class="text-primary font-medium hover:underline">Modifier</a>
+          <a href="#" class="text-rose-600 font-medium hover:underline">Annuler</a>
+        {% endif %}
+        <a href="{% url 'services:detail' commande.service.slug %}" 
+           class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300 hover:underline">
+          Voir le service <span class="material-symbols-outlined text-base">arrow_forward</span>
+        </a>
+      </div>
+
+    </div>
+    {% endfor %}
+
+    <!-- 📄 Pagination -->
+    {% if commandes.has_other_pages %}
+      <div class="flex justify-center mt-10 space-x-2">
+        {% if commandes.has_previous %}
+          <a href="?page={{ commandes.previous_page_number }}" 
+             class="px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-md text-slate-700 dark:text-slate-300 hover:bg-slate-200">
+            ← Précédent
+          </a>
+        {% endif %}
+        
+        {% for num in commandes.paginator.page_range %}
+          {% if num == commandes.number %}
+            <span class="px-3 py-2 bg-primary text-white rounded-md">{{ num }}</span>
+          {% else %}
+            <a href="?page={{ num }}" 
+               class="px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-md hover:bg-primary hover:text-white transition">
+              {{ num }}
+            </a>
+          {% endif %}
+        {% endfor %}
+        
+        {% if commandes.has_next %}
+          <a href="?page={{ commandes.next_page_number }}" 
+             class="px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-md text-slate-700 dark:text-slate-300 hover:bg-slate-200">
+            Suivant →
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  {% else %}
+  <div class="text-center py-16">
+    <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">receipt_long</span>
+    <p class="text-lg text-slate-600 mb-2">Aucune commande enregistrée pour le moment.</p>
+    <a href="{% url 'services:liste' %}" class="text-primary font-semibold hover:underline">Découvrir nos services</a>
+  </div>
+  {% endif %}
+</section>
+
+<!-- 🪟 Modal pour prévisualiser les images -->
+<div id="fileModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+  <div class="bg-white dark:bg-slate-900 rounded-lg p-4 max-w-3xl w-full text-center relative">
+    <button onclick="closeModal()" class="absolute top-3 right-3 text-slate-500 hover:text-slate-800 dark:hover:text-white">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <img id="modalImage" src="" alt="aperçu" class="mx-auto max-h-[80vh] rounded-md shadow">
+  </div>
+</div>
+
+<script>
+function openModal(url) {
+  document.getElementById('modalImage').src = url;
+  document.getElementById('fileModal').classList.remove('hidden');
+}
+function closeModal() {
+  document.getElementById('fileModal').classList.add('hidden');
+}
+</script>
+{% endblock %}

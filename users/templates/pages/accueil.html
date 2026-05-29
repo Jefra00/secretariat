@@ -1,0 +1,530 @@
+{% extends 'base/base.html' %}
+{% load static %}  <!-- ✅ Ajoute ceci si ce n'est pas déjà dans `base.html` -->
+
+{% block title %}Tableau de Bord{% endblock %}
+
+
+{% block content %}
+
+<section class="relative w-full h-[70vh] overflow-hidden rounded-b-[3rem]">
+    <div
+      class="absolute inset-0 bg-cover bg-center"
+      style="background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80'); filter: brightness(0.5); background-attachment: fixed;">
+    </div>
+
+    <div class="relative z-10 flex flex-col justify-center items-center text-center h-full text-white px-6 md:px-12">
+      <h1 class="text-6xl font-extrabold drop-shadow-xl mb-6">
+        <span class="text-primary">Secrétariat Pro</span> Blog
+      </h1>
+      <p class="max-w-2xl text-lg text-gray-100 leading-relaxed">
+        Rejoignez notre communauté et explorez des histoires inspirantes, des astuces pratiques et des retours d’expérience réels.
+      </p>
+    </div>
+  </section>
+
+
+            <main class="px-4 md:px-8 lg:px-16 xl:px-24">
+              <!-- HeroSection -->
+              <section class="py-16 sm:py-24 @container" id="accueil">
+                <div
+                  class="flex flex-col-reverse gap-10 @[864px]:flex-row @[864px]:items-center"
+                >
+                  <div
+                    class="flex flex-col gap-6 text-center @[864px]:text-left @[864px]:w-1/2"
+                  >
+                    <div class="flex flex-col gap-4">
+                      <h1
+                        class="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-tight @[480px]:text-5xl @[480px]:leading-tight"
+                      >
+                        Votre Partenaire Administratif et Numérique
+                      </h1>
+                      <p
+                        class="text-text-muted-light dark:text-text-muted-dark text-base font-normal leading-normal @[480px]:text-lg"
+                      >
+                        Simplifiez votre gestion, accélérez votre croissance.
+                        Nous offrons des services administratifs et numériques
+                        fiables pour vous aider à vous concentrer sur votre cœur
+                        de métier.
+                      </p>
+                    </div>
+                    <div
+                      class="flex-wrap gap-4 flex justify-center @[864px]:justify-start"
+                    >
+                      <a
+                        class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] transition-transform hover:scale-105"
+                        href="{% url 'services:liste' %}"
+                      >
+                        <span class="truncate">Découvrir nos services</span>
+                      </a>
+                      <a
+                        class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-card-light dark:bg-card-dark border border-slate-200 dark:border-slate-700 text-text-light dark:text-text-dark text-base font-bold leading-normal tracking-[0.015em] transition-transform hover:scale-105"
+                        href="contacts.html"
+                      >
+                        <span class="truncate">Nous contacter</span>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="w-full @[864px]:w-1/2 relative">
+                    <div
+                      class="relative w-full overflow-hidden rounded-xl shadow-lg"
+                    >
+                      <!-- Hero Carousel -->
+                      <div
+                        id="hero-carousel"
+                        class="flex transition-transform duration-500 ease-in-out"
+                      >
+                        <!-- Image Slide 1 -->
+                        <div
+                          class="w-full flex-shrink-0 aspect-video bg-cover bg-center"
+                          data-alt="Un espace de travail moderne, propre et organisé avec un ordinateur portable et des plantes"
+                          style="
+                            background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDrOHzhtQzaxE_QebwmIY8QtMcCroGAJg9KIpgJDlxw-1gaJznrVxeNctdVV95pyhCe0sbOAPFDBUQRmgyUGxFdtY_M02ll2fSn7qKZZAwCgBUlTLdHB03jUUy_6Z32b6iFFMPW-L1Eg7X__jazaDk6QO1pXTxZ5CY1uXcNVKHm9Mhx_nzmFXpcdkbxEyi6N7ZrMWulu1Tke93n1VYbUgPS8pglybs6kcISJbh0ZDmaN8d99EFsek9OXiThvNrGXoPduLOL2T40DVE');
+                          "
+                        ></div>
+                        <!-- Image Slide 2 -->
+                        <div
+                          class="w-full flex-shrink-0 aspect-video bg-cover bg-center"
+                          data-alt="Équipe professionnelle collaborant autour d'une table avec ordinateurs et documents"
+                          style="
+                            background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC4OTYzRUUyYho9GHyfVFcyB9bva4P1RDdOpE6KCHFeKKZ8oXort4FwrzoQydxbtr9jjeQto_Vp2KH54NRJVijXzYYkjjGEOSQP9VSAMIY9ETCGRQqvuiv9nRjq4t5plhOaPouX0AqYTmdar05l8ZUZqa58yjEbgZKffRxqVKGiuLTWOHdejt7BD_8RM9W_Cbc5lJ0imWnVz52_MQSYi7t3F_iyZm4ilYID_1aXCSiql00FC80BpQ6H2pIAlrv7p98KM-yqW81CVsg');
+                          "
+                        ></div>
+                        <!-- Image Slide 3 -->
+                        <div
+                          class="w-full flex-shrink-0 aspect-video bg-cover bg-center"
+                          data-alt="Bureau moderne avec ordinateurs, écrans et matériel professionnel"
+                          style="
+                            background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD0HoXsuBk5R06OgHxzlA4tgUC282Xpnp0HPt5Hjx3FPZPxn5RJ_M7Z1TzecZULQ8cPMjE2FEEDpPODgPR3qM7TXkMNx0Pk2giMOU1iQp008a7tNj69uXyf7pv95Y8XqF7MNcH0KQDJxmqo0SRst-2XZcxRBBLByeD3Mr__yQfx1OzQDi2n6WSCnebKSRMUKoOE5PD-VqPVTs5w5wlNU43h2eXg0F2gTK-UTF5W3_8-vyqWazzLFeTMIbFdajke8bjEZmtOAtmQN8E');
+                          "
+                        ></div>
+                      </div>
+                      <!-- Navigation Buttons -->
+                      <button
+                        id="prev-hero"
+                        class="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-card-light/80 dark:bg-card-dark/80 hover:bg-card-light dark:hover:bg-card-dark transition z-10 backdrop-blur-sm"
+                      >
+                        <span
+                          class="material-symbols-outlined text-white drop-shadow-lg"
+                          >arrow_back_ios_new</span
+                        >
+                      </button>
+                      <button
+                        id="next-hero"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-card-light/80 dark:bg-card-dark/80 hover:bg-card-light dark:hover:bg-card-dark transition z-10 backdrop-blur-sm"
+                      >
+                        <span
+                          class="material-symbols-outlined text-white drop-shadow-lg"
+                          >arrow_forward_ios</span
+                        >
+                      </button>
+                      <!-- Dots Indicators -->
+                      <div
+                        class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10"
+                      >
+                        <span class="hero-dot active" data-index="0"></span>
+                        <span class="hero-dot" data-index="1"></span>
+                        <span class="hero-dot" data-index="2"></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+<!-- Key Services Section -->
+<section class="py-12 sm:py-20" id="services">
+  <h2 class="text-text-light dark:text-text-dark text-2xl md:text-3xl font-bold leading-tight tracking-tight text-center pb-10">
+    Nos Services Clés
+  </h2>
+
+  <div class="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-6">
+    {% for service in services_populaires %}
+      <div
+        class="flex flex-col gap-3 text-center items-center bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-sm hover:shadow-md transition-transform hover:-translate-y-1.5 duration-300"
+      >
+        <div class="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary mb-3">
+          {% if service.icon_name %}
+            <span class="material-symbols-outlined text-3xl">{{ service.icon_name }}</span>
+          {% elif service.image %}
+            <img src="{{ service.image.url }}" alt="{{ service.nom }}" class="w-10 h-10 object-cover rounded-full">
+          {% else %}
+            <span class="material-symbols-outlined text-3xl text-gray-400">help</span>
+          {% endif %}
+        </div>
+
+        <p class="text-text-light dark:text-text-dark text-lg font-semibold leading-snug">
+          {{ service.nom }}
+        </p>
+
+        <p class="text-text-muted-light dark:text-text-muted-dark text-sm leading-relaxed">
+          {{ service.description|truncatewords:18 }}
+        </p>
+
+        <a href="{% url 'services:detail' service.slug %}" 
+           class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline mt-2">
+          En savoir plus
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+      </div>
+    {% empty %}
+      <p class="text-center text-gray-500 dark:text-gray-400 col-span-3">
+        Aucun service populaire pour le moment.
+      </p>
+    {% endfor %}
+  </div>
+
+  <!-- Bouton pour voir tous les services -->
+  <div class="text-center mt-12">
+    <a href="{% url 'services:liste' %}"
+       class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white font-semibold text-sm rounded-lg shadow-sm hover:bg-primary/90 transition-colors">
+      Découvrir tous nos services
+      <span class="material-symbols-outlined text-sm">arrow_forward</span>
+    </a>
+  </div>
+</section>
+
+
+              <!-- "Perfect Approach" Section -->
+              <section class="py-16 sm:py-24 @container" id="approche">
+                <div
+                  class="flex flex-col gap-12 @[864px]:flex-row @[864px]:items-center"
+                >
+                  <div class="flex flex-col gap-4 @[864px]:w-1/2">
+                    <h2
+                      class="text-text-light dark:text-text-dark text-3xl font-bold leading-tight tracking-tight @[480px]:text-4xl"
+                    >
+                      Une Approche Parfaite Pour Des Résultats Impeccables
+                    </h2>
+                    <p
+                      class="text-text-muted-light dark:text-text-muted-dark text-base font-normal leading-normal @[480px]:text-lg"
+                    >
+                      Notre méthodologie est conçue pour garantir la plus haute
+                      qualité de service, en alliant technologie de pointe et
+                      expertise humaine pour répondre précisément à vos besoins.
+                    </p>
+                  </div>
+                  <div
+                    class="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-6 @[864px]:w-1/2"
+                  >
+                    <div class="flex flex-col gap-3">
+                      <span
+                        class="material-symbols-outlined text-4xl text-accent"
+                        >verified</span
+                      >
+                      <p
+                        class="text-text-light dark:text-text-dark text-lg font-bold leading-normal"
+                      >
+                        Précision
+                      </p>
+                      <p
+                        class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal"
+                      >
+                        Chaque tâche est exécutée avec une attention méticuleuse
+                        aux détails pour un résultat sans erreur.
+                      </p>
+                    </div>
+                    <div class="flex flex-col gap-3">
+                      <span
+                        class="material-symbols-outlined text-4xl text-accent"
+                        >rocket_launch</span
+                      >
+                      <p
+                        class="text-text-light dark:text-text-dark text-lg font-bold leading-normal"
+                      >
+                        Rapidité
+                      </p>
+                      <p
+                        class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal"
+                      >
+                        Nous nous engageons à respecter les délais les plus
+                        stricts sans compromettre la qualité.
+                      </p>
+                    </div>
+                    <div class="flex flex-col gap-3">
+                      <span
+                        class="material-symbols-outlined text-4xl text-accent"
+                        >shield</span
+                      >
+                      <p
+                        class="text-text-light dark:text-text-dark text-lg font-bold leading-normal"
+                      >
+                        Fiabilité
+                      </p>
+                      <p
+                        class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal"
+                      >
+                        Un partenaire de confiance sur lequel vous pouvez
+                        compter pour tous vos besoins administratifs.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+              <!-- Statistics Section -->
+              <section
+                class="py-16 sm:py-24 bg-gradient-to-br from-primary/5 to-accent/5"
+              >
+                <div class="mx-auto px-4 max-w-7xl">
+                  <div class="text-center mb-12">
+                    <h2
+                      class="text-text-light dark:text-text-dark text-3xl font-bold leading-tight tracking-tight mb-4"
+                    >
+                      Des Résultats Concrets
+                    </h2>
+                    <p
+                      class="text-text-muted-light dark:text-text-muted-dark text-base max-w-2xl mx-auto"
+                    >
+                      Notre engagement se reflète dans nos chiffres et la
+                      satisfaction de nos clients
+                    </p>
+                  </div>
+                  <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+                    <div class="stat-card group">
+                      <div
+                        class="bg-card-light dark:bg-card-dark rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                      >
+                        <div class="flex items-center justify-center mb-3">
+                          <span
+                            class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform"
+                            >trending_up</span
+                          >
+                        </div>
+                        <div
+                          class="text-4xl md:text-5xl font-black text-primary mb-2"
+                          data-target="500"
+                        >
+                          0
+                        </div>
+                        <div
+                          class="text-text-muted-light dark:text-text-muted-dark text-sm font-medium"
+                        >
+                          Clients Satisfaits
+                        </div>
+                      </div>
+                    </div>
+                    <div class="stat-card group">
+                      <div
+                        class="bg-card-light dark:bg-card-dark rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                      >
+                        <div class="flex items-center justify-center mb-3">
+                          <span
+                            class="material-symbols-outlined text-4xl text-accent group-hover:scale-110 transition-transform"
+                            >workspace_premium</span
+                          >
+                        </div>
+                        <div
+                          class="text-4xl md:text-5xl font-black text-accent mb-2"
+                          data-target="15"
+                        >
+                          0
+                        </div>
+                        <div
+                          class="text-text-muted-light dark:text-text-muted-dark text-sm font-medium"
+                        >
+                          Années d'Expérience
+                        </div>
+                      </div>
+                    </div>
+                    <div class="stat-card group">
+                      <div
+                        class="bg-card-light dark:bg-card-dark rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                      >
+                        <div class="flex items-center justify-center mb-3">
+                          <span
+                            class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform"
+                            >auto_awesome</span
+                          >
+                        </div>
+                        <div
+                          class="text-4xl md:text-5xl font-black text-primary mb-2"
+                          data-target="98"
+                        >
+                          0
+                        </div>
+                        <div
+                          class="text-text-muted-light dark:text-text-muted-dark text-sm font-medium"
+                        >
+                          % de Satisfaction
+                        </div>
+                      </div>
+                    </div>
+                    <div class="stat-card group">
+                      <div
+                        class="bg-card-light dark:bg-card-dark rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                      >
+                        <div class="flex items-center justify-center mb-3">
+                          <span
+                            class="material-symbols-outlined text-4xl text-accent group-hover:scale-110 transition-transform"
+                            >inventory_2</span
+                          >
+                        </div>
+                        <div
+                          class="text-4xl md:text-5xl font-black text-accent mb-2"
+                          data-target="1000"
+                        >
+                          0
+                        </div>
+                        <div
+                          class="text-text-muted-light dark:text-text-muted-dark text-sm font-medium"
+                        >
+                          Projets Réalisés
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+              <!-- Testimonials Carousel -->
+              <section class="py-16 sm:py-24">
+                <div class="flex flex-col items-center gap-12">
+                  <h2
+                    class="text-text-light dark:text-text-dark text-3xl font-bold leading-tight tracking-tight text-center"
+                  >
+                    Ils nous font confiance
+                  </h2>
+                  <div class="relative w-full max-w-2xl overflow-hidden">
+                    <div
+                      id="testimonial-carousel"
+                      class="flex transition-transform duration-500 ease-in-out"
+                    >
+                      <!-- Slide 1 -->
+                      <div class="w-full flex-shrink-0 px-4">
+                        <div
+                          class="flex flex-col items-center gap-6 rounded-xl bg-card-light dark:bg-card-dark p-8 text-center shadow-md"
+                        >
+                          <img
+                            class="size-20 rounded-full object-cover"
+                            data-alt="Photo de Marie Dubois"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAh17F1d6wNGU-pPvBLGo007DV0ZUYnos6qcjtsc22wqz33fgLAc1w9Ub17WYU34e9PRA7u9Ch18EU0k6iT-53-rJ6xhZXK4QTlCYMvo3GB5dVTJH4EEVLbXKMLnKGTDmDhkzZms8HTNWPHCmXPMPevsKuZg1YhbCUXr3QAIjgT5I2tQX0TojZ9m49MtocbEzFI7STb3k00Qc7fmafcK4_b48c_36ub0-0tj_UtWxvfLXmyQRLUJzso8xSPf_9jhNteBM_eCmsz_yE"
+                          />
+                          <blockquote
+                            class="text-text-muted-light dark:text-text-muted-dark text-lg italic"
+                          >
+                            "Le professionnalisme et la réactivité de
+                            Secrétariat Pro ont transformé notre gestion
+                            administrative. Un gain de temps inestimable !"
+                          </blockquote>
+                          <div
+                            class="font-bold text-text-light dark:text-text-dark"
+                          >
+                            <p>Marie Dubois</p>
+                            <p class="text-sm font-medium text-primary">
+                              CEO, Tech Innov
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Slide 2 -->
+                      <div class="w-full flex-shrink-0 px-4">
+                        <div
+                          class="flex flex-col items-center gap-6 rounded-xl bg-card-light dark:bg-card-dark p-8 text-center shadow-md"
+                        >
+                          <img
+                            class="size-20 rounded-full object-cover"
+                            data-alt="Photo de Thomas Martin"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiux5y_uQduKMBNZTYAmHxxmLHzR-mOe85hzcKo7FpR3nDxU2L9QBlf62yS9pBVjSfq9PwPQH9xF7posulXVmFIycINsVcjUrK1kP8AwE5h4dBu1GyrKoVCaaknHB_ouoSUTqj2qwd8BaMcOH0mo3MvVmkTU7Veq7_YSArSwI1UfSL3BlOr1qO2jbFFyZ8eRG7_R81Jpqv45TNhf_3HqPJao9hJCF3C8JdxVNGd-S3kl82OZV9LMTsZ-QwdlsncdlqyD0vAFTU-Ys"
+                          />
+                          <blockquote
+                            class="text-text-muted-light dark:text-text-muted-dark text-lg italic"
+                          >
+                            "Un service hors pair ! L'équipe répond toujours
+                            dans les délais et avec une qualité impeccable. Je
+                            recommande sans hésitation."
+                          </blockquote>
+                          <div
+                            class="font-bold text-text-light dark:text-text-dark"
+                          >
+                            <p>Thomas Martin</p>
+                            <p class="text-sm font-medium text-primary">
+                              Directeur, Startup Plus
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Slide 3 -->
+                      <div class="w-full flex-shrink-0 px-4">
+                        <div
+                          class="flex flex-col items-center gap-6 rounded-xl bg-card-light dark:bg-card-dark p-8 text-center shadow-md"
+                        >
+                          <img
+                            class="size-20 rounded-full object-cover"
+                            data-alt="Photo de Sophie Laurent"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxczI4hBUI1tdw4O2YXnC7fXSlZX9QhbdlI0AG7lfQIZrMaOloOQGDJQnw5_mGkRbBgJ0P4Ml_IPSWEqKDpj-cuOjQaIY97yFDBsrEqcw-A57ckAvu3r_MAHBM5KV1VMXeem3wx1zwxmVNjFUhRiixltsonjHy-9DJyThYWqEpjgGXjSomUac3i3bavbEhQ47lmwO8s0SIqqBb1Dg-JJ_3CAGE17gtxjXkeHdXsnzoXCQgW9Qven4aaSqeNvOFO7MV77JgzD7ARJ8"
+                          />
+                          <blockquote
+                            class="text-text-muted-light dark:text-text-muted-dark text-lg italic"
+                          >
+                            "Grâce à Secrétariat Pro, j'ai enfin pu me
+                            concentrer sur ma croissance. Leur expertise est
+                            précieuse et leur approche vraiment
+                            professionnelle."
+                          </blockquote>
+                          <div
+                            class="font-bold text-text-light dark:text-text-dark"
+                          >
+                            <p>Sophie Laurent</p>
+                            <p class="text-sm font-medium text-primary">
+                              Fondatrice, Digital Agency
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="absolute inset-y-0 left-0 flex items-center">
+                      <button
+                        id="prev-testimonial"
+                        class="p-2 rounded-full bg-card-light/50 dark:bg-card-dark/50 hover:bg-card-light dark:hover:bg-card-dark transition z-10"
+                      >
+                        <span class="material-symbols-outlined"
+                          >arrow_back_ios_new</span
+                        >
+                      </button>
+                    </div>
+                    <div class="absolute inset-y-0 right-0 flex items-center">
+                      <button
+                        id="next-testimonial"
+                        class="p-2 rounded-full bg-card-light/50 dark:bg-card-dark/50 hover:bg-card-light dark:hover:bg-card-dark transition z-10"
+                      >
+                        <span class="material-symbols-outlined"
+                          >arrow_forward_ios</span
+                        >
+                      </button>
+                    </div>
+                    <div class="flex justify-center gap-2 mt-6">
+                      <span class="dot active" data-index="0"></span>
+                      <span class="dot" data-index="1"></span>
+                      <span class="dot" data-index="2"></span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+              <!-- Final CTA -->
+              <section class="py-16 sm:py-24" id="cta">
+                <div
+                  class="bg-primary/90 text-white p-12 rounded-xl text-center flex flex-col items-center gap-6 shadow-2xl"
+                >
+                  <h2
+                    class="text-3xl font-bold leading-tight tracking-tight sm:text-4xl"
+                  >
+                    Prêt à optimiser votre administration ?
+                  </h2>
+                  <p class="max-w-2xl text-lg">
+                    Donnons vie à votre projet. Contactez-nous dès aujourd'hui
+                    pour discuter de vos besoins et obtenir une solution sur
+                    mesure.
+                  </p>
+                  <a
+                    class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-14 px-8 bg-white text-primary text-lg font-bold leading-normal tracking-[0.015em] mt-4 transition-transform hover:scale-105"
+                    href="contacts.html"
+                  >
+                    <span class="truncate">Demander un Devis Gratuit</span>
+                  </a>
+                </div>
+              </section>
+            </main>
+            <!-- Footer -->
+            
+          </div>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}

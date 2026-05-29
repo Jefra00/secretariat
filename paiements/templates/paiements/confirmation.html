@@ -1,0 +1,24 @@
+{% extends "base/base.html" %}
+{% block title %}Confirmation du paiement{% endblock %}
+
+{% block content %}
+<section class="max-w-3xl mx-auto py-16 px-6 text-center">
+  <h1 class="text-3xl font-bold text-green-600 mb-4">✅ Paiement en attente de validation</h1>
+  <p class="text-slate-600 dark:text-slate-300 mb-6">
+    Votre commande <strong>{{ paiement.order.code_commande }}</strong> a bien été enregistrée.
+  </p>
+
+  <div class="bg-white dark:bg-slate-800 rounded-xl shadow p-6 border border-slate-200 dark:border-slate-700">
+    <p><strong>Montant :</strong> {{ paiement.montant }} €</p>
+    <p><strong>Mode :</strong> {{ paiement.mode|capfirst }}</p>
+    <p><strong>Statut :</strong> {{ paiement.get_statut_display }}</p>
+  </div>
+
+  <div class="mt-8">
+    <a href="{% url 'commandes:mes_commandes' %}" 
+       class="px-5 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition">
+      Voir mes commandes
+    </a>
+  </div>
+</section>
+{% endblock %}

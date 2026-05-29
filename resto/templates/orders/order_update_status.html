@@ -1,0 +1,27 @@
+{% extends "base/base.html" %}
+{% block title %}Modifier Statut{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto py-10">
+
+    <h1 class="text-2xl font-bold mb-6">Modifier le statut</h1>
+
+    <form method="POST" class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow">
+        {% csrf_token %}
+
+        <label class="block mb-3 font-semibold">Nouveau statut :</label>
+        <select name="status" class="w-full rounded border p-2 bg-slate-50 dark:bg-slate-800">
+            {% for code, label in statuses %}
+            <option value="{{ code }}" {% if order.status == code %}selected{% endif %}>
+                {{ label }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <button class="mt-4 px-4 py-2 bg-primary text-white rounded-lg">
+            Enregistrer
+        </button>
+    </form>
+
+</div>
+{% endblock %}

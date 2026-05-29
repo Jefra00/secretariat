@@ -1,0 +1,130 @@
+
+/* Effet glassmorphism sur le header */
+header {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: background-color 0.3s ease;
+}
+
+.dark header {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Animation du logo */
+header svg {
+    transition: all 0.3s ease;
+}
+
+header:hover svg {
+    transform: rotate(5deg) scale(1.1);
+}
+
+/* Animation des images de l'équipe */
+.grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3 img {
+    transition: all 0.3s ease;
+}
+
+/* Amélioration des cartes de valeurs */
+.grid.grid-cols-\\[repeat\\(auto-fit\\,minmax\\(240px\\,1fr\\)\\)\\] > div {
+    position: relative;
+    overflow: hidden;
+}
+
+.grid.grid-cols-\\[repeat\\(auto-fit\\,minmax\\(240px\\,1fr\\)\\)\\] > div::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(51,140,230,0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.grid.grid-cols-\\[repeat\\(auto-fit\\,minmax\\(240px\\,1fr\\)\\)\\] > div:hover::before {
+    opacity: 1;
+}
+
+/* Amélioration de la timeline */
+.space-y-12 > div {
+    transition: all 0.6s ease-out;
+}
+
+.space-y-12 > div > div:nth-child(2) {
+    transition: all 0.3s ease;
+}
+
+.space-y-12 > div:hover > div:nth-child(2) {
+    transform: scale(1.15);
+    box-shadow: 0 8px 25px rgba(51,140,230,0.3);
+}
+
+/* Animation de la ligne de timeline */
+.absolute.left-1\\/2 {
+    animation: timelineGlow 3s ease-in-out infinite;
+}
+
+@keyframes timelineGlow {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(51, 140, 230, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(51, 140, 230, 0.6);
+    }
+}
+
+/* Section CTA améliorée */
+.bg-primary\\/10.rounded-xl {
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-primary\\/10.rounded-xl::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(51,140,230,0.15) 0%, transparent 70%);
+    animation: pulseBackground 4s ease-in-out infinite;
+}
+
+@keyframes pulseBackground {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .space-y-12 > div {
+        flex-direction: column;
+    }
+    
+    .space-y-12 > div > div:first-child,
+    .space-y-12 > div > div:last-child {
+        text-align: center !important;
+        padding: 0 !important;
+    }
+    
+    .absolute.left-1\\/2 {
+        left: 2rem !important;
+    }
+    
+    .space-y-12 > div > div:nth-child(2) {
+        margin: 1rem 0;
+    }
+}
+
+/* Smooth transitions */
+* {
+    transition: color 0.3s ease, background-color 0.3s ease;
+}

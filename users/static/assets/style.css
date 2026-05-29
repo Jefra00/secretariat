@@ -1,0 +1,174 @@
+/* Animations CSS */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.dot,
+.hero-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.dot.active,
+.hero-dot.active {
+    background-color: #3498db;
+    width: 30px;
+    border-radius: 6px;
+}
+
+.dot:hover {
+    background-color: #3498db;
+    opacity: 0.7;
+}
+
+.hero-dot:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: scale(1.2);
+}
+
+/* Amélioration du carrousel */
+#testimonial-carousel,
+#hero-carousel {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+#testimonial-carousel > div,
+#hero-carousel > div {
+    min-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Style spécifique pour le carrousel hero */
+#hero-carousel > div {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Ombre sur les boutons de navigation hero */
+#prev-hero,
+#next-hero {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#prev-hero:hover,
+#next-hero:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Responsive pour les statistiques et le carrousel hero */
+@media (max-width: 640px) {
+    .stat-card .text-4xl {
+        font-size: 2rem !important;
+    }
+    
+    .stat-card .text-5xl {
+        font-size: 2.5rem !important;
+    }
+    
+    /* Boutons de navigation hero sur mobile */
+    #prev-hero,
+    #next-hero {
+        padding: 0.5rem;
+        width: 2rem;
+        height: 2rem;
+    }
+    
+    #prev-hero span,
+    #next-hero span {
+        font-size: 1rem;
+    }
+    
+    /* Dots hero sur mobile */
+    .hero-dot {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .hero-dot.active {
+        width: 20px;
+        height: 8px;
+    }
+}
+
+/* Animations des cartes de services */
+.flex.flex-col.gap-4.text-center.items-center {
+    transition: all 0.3s ease;
+}
+
+.flex.flex-col.gap-4.text-center.items-center:hover {
+    transform: translateY(-8px) scale(1.02);
+}
+
+/* Effet glassmorphism sur le header */
+header {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Animation du logo */
+header svg {
+    transition: all 0.3s ease;
+}
+
+header:hover svg {
+    transform: rotate(5deg) scale(1.1);
+}
+
+/* Hover effect sur les boutons */
+a:hover,
+button:hover {
+    transition: all 0.2s ease;
+}
+
+/* Gradient animé pour les cartes */
+.stat-card > div {
+    background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0.95) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card > div::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.stat-card:hover > div::before {
+    left: 100%;
+}
+
+.dark .stat-card > div {
+    background: linear-gradient(135deg, rgba(44,62,80,1) 0%, rgba(44,62,80,0.95) 100%);
+}
+
+.dark .stat-card > div::before {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+}
+
+/* Animation des icônes */
+.material-symbols-outlined {
+    transition: all 0.3s ease;
+}
+
+.group:hover .material-symbols-outlined {
+    filter: drop-shadow(0 4px 8px rgba(52, 152, 219, 0.3));
+}

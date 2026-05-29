@@ -1,0 +1,646 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Secrétariat Pro - Votre Partenaire Administratif et Numérique</title>
+
+    <!-- Tailwind et polices -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+
+    <!-- Fichier CSS Django -->
+    <link rel="stylesheet" href="{% static 'assets/style.css' %}" />
+
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#3498db",
+              "background-light": "#ecf0f1",
+              "background-dark": "#111921",
+              "text-light": "#2c3e50",
+              "text-dark": "#ecf0f1",
+              "text-muted-light": "#34495e",
+              "text-muted-dark": "#bdc3c7",
+              "card-light": "#ffffff",
+              "card-dark": "#2c3e50",
+              accent: "#e67e22",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              lg: "0.75rem",
+              xl: "1rem",
+              full: "9999px",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      body {
+        scroll-behavior: smooth;
+      }
+    </style>
+    
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#197fe6",
+              "background-light": "#f6f7f8",
+              "background-dark": "#111921",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings:
+            'FILL' 1
+        }
+    </style>
+
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#197fe6",
+              "background-light": "#f6f7f8",
+              "background-dark": "#111921",
+              "accent": "#e67e22",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+    </style>
+
+
+  </head>
+
+  <body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+    {% include 'base/navbar.html' %}  {# ton header / navbar ici #}
+
+
+    {% block content %}
+
+
+    
+    {% endblock %}
+
+
+{% include 'base/footer.html' %}  {# ton header / navbar ici #}
+
+    <script>
+      // ============ CARROUSEL HERO ============
+      let currentHeroSlide = 0;
+      const heroSlides = document.querySelectorAll("#hero-carousel > div");
+      const totalHeroSlides = heroSlides.length;
+      const heroDots = document.querySelectorAll(".hero-dot");
+      const heroCarousel = document.getElementById("hero-carousel");
+
+      function showHeroSlide(index) {
+        currentHeroSlide = index;
+        const offset = -currentHeroSlide * 100;
+        heroCarousel.style.transform = `translateX(${offset}%)`;
+
+        // Mise à jour des points indicateurs
+        heroDots.forEach((dot, i) => {
+          dot.classList.toggle("active", i === currentHeroSlide);
+        });
+      }
+
+      // Boutons de navigation Hero
+      document.getElementById("next-hero")?.addEventListener("click", () => {
+        currentHeroSlide = (currentHeroSlide + 1) % totalHeroSlides;
+        showHeroSlide(currentHeroSlide);
+      });
+
+      document.getElementById("prev-hero")?.addEventListener("click", () => {
+        currentHeroSlide =
+          (currentHeroSlide - 1 + totalHeroSlides) % totalHeroSlides;
+        showHeroSlide(currentHeroSlide);
+      });
+
+      // Clics sur les points Hero
+      heroDots.forEach((dot, i) => {
+        dot.addEventListener("click", () => showHeroSlide(i));
+      });
+
+      // Auto-play du carrousel Hero
+      let heroAutoPlayInterval = setInterval(() => {
+        currentHeroSlide = (currentHeroSlide + 1) % totalHeroSlides;
+        showHeroSlide(currentHeroSlide);
+      }, 4000);
+
+      // Pause au survol Hero
+      const heroContainer =
+        document.getElementById("hero-carousel")?.parentElement;
+      heroContainer?.addEventListener("mouseenter", () =>
+        clearInterval(heroAutoPlayInterval)
+      );
+      heroContainer?.addEventListener("mouseleave", () => {
+        heroAutoPlayInterval = setInterval(() => {
+          currentHeroSlide = (currentHeroSlide + 1) % totalHeroSlides;
+          showHeroSlide(currentHeroSlide);
+        }, 4000);
+      });
+
+      // ============ CARROUSEL DE TÉMOIGNAGES ============
+      let currentSlide = 0;
+      const slides = document.querySelectorAll("#testimonial-carousel > div");
+      const totalSlides = slides.length;
+      const dots = document.querySelectorAll(".dot");
+      const carousel = document.getElementById("testimonial-carousel");
+
+      function showSlide(index) {
+        currentSlide = index;
+        const offset = -currentSlide * 100;
+        carousel.style.transform = `translateX(${offset}%)`;
+
+        // Mise à jour des points indicateurs
+        dots.forEach((dot, i) => {
+          dot.classList.toggle("active", i === currentSlide);
+        });
+      }
+
+      // Boutons de navigation
+      document
+        .getElementById("next-testimonial")
+        ?.addEventListener("click", () => {
+          currentSlide = (currentSlide + 1) % totalSlides;
+          showSlide(currentSlide);
+        });
+
+      document
+        .getElementById("prev-testimonial")
+        ?.addEventListener("click", () => {
+          currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+          showSlide(currentSlide);
+        });
+
+      // Clics sur les points
+      dots.forEach((dot, i) => {
+        dot.addEventListener("click", () => showSlide(i));
+      });
+
+      // Auto-play du carrousel
+      let autoPlayInterval = setInterval(() => {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        showSlide(currentSlide);
+      }, 5000);
+
+      // Pause au survol
+      const carouselContainer = document.querySelector(".relative");
+      carouselContainer?.addEventListener("mouseenter", () =>
+        clearInterval(autoPlayInterval)
+      );
+      carouselContainer?.addEventListener("mouseleave", () => {
+        autoPlayInterval = setInterval(() => {
+          currentSlide = (currentSlide + 1) % totalSlides;
+          showSlide(currentSlide);
+        }, 5000);
+      });
+
+      // ============ ANIMATION DES STATISTIQUES ============
+      function animateCounter(element, target, duration = 2000) {
+        let start = 0;
+        const increment = target / (duration / 16);
+
+        function updateCounter() {
+          start += increment;
+          if (start < target) {
+            element.textContent = Math.floor(start);
+            requestAnimationFrame(updateCounter);
+          } else {
+            element.textContent = target;
+          }
+        }
+        updateCounter();
+      }
+
+      // Observer pour déclencher l'animation au scroll
+      const observerOptions = {
+        threshold: 0.3,
+        rootMargin: "0px",
+      };
+
+      const statsObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (
+            entry.isIntersecting &&
+            !entry.target.classList.contains("animated")
+          ) {
+            entry.target.classList.add("animated");
+            const statCards = entry.target.querySelectorAll(".stat-card");
+
+            statCards.forEach((card, index) => {
+              setTimeout(() => {
+                const targetElement = card.querySelector("[data-target]");
+                const target = parseInt(
+                  targetElement.getAttribute("data-target")
+                );
+                animateCounter(targetElement, target);
+              }, index * 150);
+            });
+
+            statsObserver.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      const statsSection = document.querySelector(".bg-gradient-to-br");
+      if (statsSection) {
+        statsObserver.observe(statsSection);
+      }
+
+      // ============ ANIMATION AU CHARGEMENT DE LA PAGE ============
+      window.addEventListener("load", () => {
+        const heroTitle = document.querySelector("h1");
+        const heroParagraph =
+          document.querySelector("section h1")?.nextElementSibling;
+        const heroButtons = document.querySelector(".flex-wrap.gap-4");
+
+        if (heroTitle) {
+          heroTitle.style.opacity = "0";
+          heroTitle.style.transform = "translateY(30px)";
+          heroTitle.style.transition = "all 0.8s ease-out";
+          setTimeout(() => {
+            heroTitle.style.opacity = "1";
+            heroTitle.style.transform = "translateY(0)";
+          }, 100);
+        }
+
+        if (heroParagraph) {
+          heroParagraph.style.opacity = "0";
+          heroParagraph.style.transform = "translateY(30px)";
+          heroParagraph.style.transition = "all 0.8s ease-out";
+          setTimeout(() => {
+            heroParagraph.style.opacity = "1";
+            heroParagraph.style.transform = "translateY(0)";
+          }, 300);
+        }
+
+        if (heroButtons) {
+          heroButtons.style.opacity = "0";
+          heroButtons.style.transform = "translateY(30px)";
+          heroButtons.style.transition = "all 0.8s ease-out";
+          setTimeout(() => {
+            heroButtons.style.opacity = "1";
+            heroButtons.style.transform = "translateY(0)";
+          }, 500);
+        }
+      });
+
+      // ============ SMOOTH SCROLL POUR LES LIENS D'ANCRE ============
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          const href = this.getAttribute("href");
+          if (href !== "#") {
+            e.preventDefault();
+            const target = document.querySelector(href);
+            if (target) {
+              target.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }
+          }
+        });
+      });
+
+      // ============ ANIMATION DES CARTES AU SCROLL ============
+      const cardObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = "1";
+              entry.target.style.transform = "translateY(0)";
+            }
+          });
+        },
+        {
+          threshold: 0.1,
+          rootMargin: "0px 0px -50px 0px",
+        }
+      );
+
+      document.querySelectorAll(".hover\\:-translate-y-2").forEach((card) => {
+        card.style.opacity = "0";
+        card.style.transform = "translateY(30px)";
+        card.style.transition = "all 0.6s ease-out";
+        cardObserver.observe(card);
+      });
+
+      // ============ PULSE EFFECT SUR LE BOUTON CTA ============
+      const ctaButton = document.querySelector("#cta a");
+      if (ctaButton) {
+        setInterval(() => {
+          ctaButton.style.animation = "pulse 2s ease-in-out";
+          setTimeout(() => {
+            ctaButton.style.animation = "";
+          }, 2000);
+        }, 6000);
+      }
+    </script>
+
+
+<script>
+// ============ FILTRES DE SERVICES ============
+const filterBtns = document.querySelectorAll('.filter-btn');
+const serviceCards = document.querySelectorAll('.service-card');
+
+filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const filter = btn.getAttribute('data-filter');
+        
+        // Mise à jour de l'état actif des boutons
+        filterBtns.forEach(b => {
+            b.classList.remove('active');
+            if (b === btn) {
+                b.classList.add('active');
+                // Style du bouton actif
+                b.className = b.className.replace(/bg-slate-200 dark:bg-slate-800/g, 'bg-primary/20 text-primary dark:bg-primary/30 dark:text-slate-50');
+            } else {
+                b.className = b.className.replace(/bg-primary\/20 text-primary dark:bg-primary\/30 dark:text-slate-50/g, 'bg-slate-200 dark:bg-slate-800');
+            }
+        });
+        
+        // Filtrage des cartes
+        serviceCards.forEach(card => {
+            const category = card.getAttribute('data-category');
+            card.style.display = 'none';
+            
+            if (filter === 'all' || category === filter) {
+                setTimeout(() => {
+                    card.style.display = 'block';
+                    card.style.animation = 'fadeIn 0.5s ease-in-out';
+                }, 50);
+            }
+        });
+    });
+});
+
+// ============ ANIMATIONS AU CHARGEMENT ============
+window.addEventListener('load', () => {
+    // Animation du titre principal
+    const h1 = document.querySelector('h1');
+    if (h1) {
+        h1.style.opacity = '0';
+        h1.style.transform = 'translateY(30px)';
+        h1.style.transition = 'all 0.8s ease-out';
+        setTimeout(() => {
+            h1.style.opacity = '1';
+            h1.style.transform = 'translateY(0)';
+        }, 100);
+    }
+    
+    // Animation des cartes de service
+    const cards = document.querySelectorAll('.service-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(50px)';
+        card.style.transition = `all 0.6s ease-out ${index * 0.1}s`;
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 300 + (index * 100));
+    });
+    
+    // Animation des benefit cards
+    const benefitCards = document.querySelectorAll('.benefit-card');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }, index * 150);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    benefitCards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(50px)';
+        card.style.transition = 'all 0.6s ease-out';
+        observer.observe(card);
+    });
+});
+
+// ============ SMOOTH SCROLL ============
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href !== '#') {
+            e.preventDefault();
+            const target = document.querySelector(href);
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+    });
+});
+
+// ============ EFFET PARALLAX AU SCROLL ============
+let lastScrollY = window.scrollY;
+
+window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const parallaxElements = document.querySelectorAll('.service-card');
+    
+    parallaxElements.forEach(element => {
+        const rect = element.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        
+        if (isVisible) {
+            const speed = 0.01;
+            const yPos = -(scrolled * speed);
+            element.style.transform = `translateY(${yPos}px)`;
+        }
+    });
+    
+    lastScrollY = scrolled;
+});
+
+// ============ ANIMATION AU SURVOL DES CARTES ============
+serviceCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-8px) scale(1.02)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+});
+</script>
+
+
+<script>
+  // Script simple pour ouvrir / fermer le menu Profil
+  document.addEventListener('DOMContentLoaded', function () {
+    const toggle = document.getElementById('profilToggle');
+    const menu = document.getElementById('profilMenu');
+    const icon = document.getElementById('profilIcon');
+
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.toggle('hidden');
+      icon.classList.toggle('rotate-180');
+    });
+
+    // Fermer le menu si on clique ailleurs
+    document.addEventListener('click', (e) => {
+      if (!menu.classList.contains('hidden') && !menu.contains(e.target) && e.target !== toggle) {
+        menu.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+      }
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.getElementById("profilToggle");
+    const menu = document.getElementById("profilMenu");
+    const icon = document.getElementById("profilIcon");
+
+    if (toggle && menu) {
+      toggle.addEventListener("click", () => {
+        menu.classList.toggle("hidden");
+        icon.classList.toggle("rotate-180");
+      });
+      document.addEventListener("click", (e) => {
+        if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+          menu.classList.add("hidden");
+          icon.classList.remove("rotate-180");
+        }
+      });
+    }
+  });
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const menuToggle = document.getElementById("menuToggle");
+  const menuClose = document.getElementById("menuClose");
+  const mobileMenu = document.getElementById("mobileMenu");
+  const panel = document.getElementById("mobileMenuPanel");
+
+  const openMenu = () => {
+    mobileMenu.classList.remove("hidden");
+    setTimeout(() => panel.classList.remove("translate-x-full"), 10);
+  };
+
+  const closeMenu = () => {
+    panel.classList.add("translate-x-full");
+    setTimeout(() => mobileMenu.classList.add("hidden"), 250);
+  };
+
+  menuToggle?.addEventListener("click", openMenu);
+  menuClose?.addEventListener("click", closeMenu);
+  mobileMenu?.addEventListener("click", (e) => {
+    if (e.target === mobileMenu) closeMenu();
+  });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // ========== Menu profil (desktop) ==========
+  const toggle = document.getElementById("profilToggle");
+  const menu = document.getElementById("profilMenu");
+  const icon = document.getElementById("profilIcon");
+
+  if (toggle && menu) {
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu.classList.toggle("hidden");
+      icon.classList.toggle("rotate-180");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add("hidden");
+        icon.classList.remove("rotate-180");
+      }
+    });
+  }
+
+  // ========== Menu mobile ==========
+  const menuToggle = document.getElementById("menuToggle");
+  const menuClose = document.getElementById("menuClose");
+  const mobileMenu = document.getElementById("mobileMenu");
+  const panel = document.getElementById("mobileMenuPanel");
+
+  const openMenu = () => {
+    mobileMenu.classList.remove("hidden");
+    setTimeout(() => panel.classList.remove("translate-x-full"), 10);
+  };
+
+  const closeMenu = () => {
+    panel.classList.add("translate-x-full");
+    setTimeout(() => mobileMenu.classList.add("hidden"), 250);
+  };
+
+  menuToggle?.addEventListener("click", openMenu);
+  menuClose?.addEventListener("click", closeMenu);
+  mobileMenu?.addEventListener("click", (e) => {
+    if (e.target === mobileMenu) closeMenu();
+  });
+});
+</script>
+
+</body>
+
+</html>

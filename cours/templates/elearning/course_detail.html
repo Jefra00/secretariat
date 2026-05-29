@@ -1,0 +1,133 @@
+{% extends "base/base1.html" %}
+{% load static %}
+
+{% block title %}{{ course.titre }} - Secrétariat Pro{% endblock %}
+
+{% block content %}
+<main class="bg-slate-50 dark:bg-slate-950">
+
+  <!-- 🎥 HERO AVEC VIDÉO D'INTRO -->
+  <section class="relative h-[70vh] flex items-center justify-center overflow-hidden">
+    {% if course.video_intro %}
+      <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover">
+        <source src="{{ course.video_intro }}" type="video/mp4">
+      </video>
+    {% elif course.image_couverture %}
+      <img src="{{ course.image_couverture.url }}" class="absolute inset-0 w-full h-full object-cover object-center brightness-[.4]">
+    {% endif %}
+    <div class="absolute inset-0 bg-black/50"></div>
+
+    <div class="relative z-10 text-center px-6 text-white max-w-3xl">
+      <h1 class="text-4xl md:text-5xl font-extrabold mb-3">{{ course.titre }}</h1>
+      <p class="text-lg text-gray-200 mb-6">{{ course.presentation_ai|default:course.description|truncatechars:160 }}</p>
+      <a href="#inscription" class="bg-primary hover:bg-primary/90 px-6 py-3 rounded-lg font-semibold text-white shadow-lg">
+        🚀 Commencer la formation
+      </a>
+    </div>
+  </section>
+
+  <!-- 🔑 INFOS DU COURS -->
+  <section class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 py-16 px-6">
+    <div class="col-span-2 space-y-10">
+
+      <!-- 🧠 Description & Objectifs -->
+      <article class="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-lg">
+        <h2 class="text-2xl font-bold mb-4 text-slate-900 dark:text-white">À propos de la formation</h2>
+        <p class="text-slate-700 dark:text-slate-300 leading-relaxed">{{ course.description|linebreaks }}</p>
+
+        {% if course.presentation_ai %}
+          <div class="mt-6 border-t border-slate-200 dark:border-slate-700 pt-4">
+            <h3 class="text-lg font-semibold text-primary mb-2">✨ Résumé IA :</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 italic">{{ course.presentation_ai }}</p>
+          </div>
+        {% endif %}
+      </article>
+
+      <!-- 🎬 CHAPITRES ET LEÇONS -->
+      <article class="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-lg">
+        <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-white">🎬 Contenu de la formation</h2>
+
+        {% for chapitre in course.chapitres.all %}
+          <div class="mb-8 border-l-4 border-primary pl-4">
+            <h3 class="font-semibold text-lg mb-3 text-primary">Chapitre {{ chapitre.ordre }} : {{ chapitre.titre }}</h3>
+            <p class="text-slate-500 mb-3">{{ chapitre.description|default:"Aucune description." }}</p>
+
+            <ul class="space-y-3">
+              {% for lecon in chapitre.lecons.all %}
+                <li class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-3 rounded-lg">
+                  <div>
+                    <p class="font-medium text-slate-800 dark:text-white">{{ lecon.titre }}</p>
+                    <p class="text-sm text-slate-500">{{ lecon.duree_video|default:"Durée inconnue" }}</p>
+                  </div>
+
+                  {% if user.is_authenticated and inscrit %}
+                    <a href="{{ lecon.video_url }}" class="text-primary font-semibold hover:underline">▶ Voir</a>
+                  {% else %}
+                    {% if forloop.parentloop.first and forloop.first %}
+                      <a href="{{ lecon.video_url }}" class="text-primary font-semibold hover:underline">▶ Voir</a>
+                    {% else %}
+                      <button class="text-gray-400 cursor-not-allowed" title="Inscrivez-vous pour débloquer cette vidéo">🔒 Bloqué</button>
+                    {% endif %}
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% empty %}
+          <p class="text-slate-500 text-center">Aucun contenu n’est encore disponible pour ce cours.</p>
+        {% endfor %}
+      </article>
+
+      <!-- 📅 Sessions disponibles -->
+      <article id="inscription" class="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-lg">
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">📅 Sessions disponibles</h2>
+
+        {% if sessions %}
+          <div class="grid sm:grid-cols-2 gap-6">
+            {% for s in sessions %}
+              <div class="border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-white dark:bg-slate-900">
+                <div class="flex justify-between mb-2">
+                  <h4 class="font-semibold text-primary">{{ s.date_debut|date:"d M Y" }}{% if s.date_fin %} → {{ s.date_fin|date:"d M Y" }}{% endif %}</h4>
+                  <p class="text-sm text-slate-400">{{ s.lieu|default:"En ligne" }}</p>
+                </div>
+                <p class="text-sm text-slate-500 mb-3">Places disponibles : {{ s.capacite_max|add:"-s.inscrits" }}</p>
+                <a href="{% url 'elearning:inscrire_course' course.id %}?session={{ s.id }}" 
+                   class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition text-sm block text-center">
+                  ✅ S’inscrire
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-slate-500 text-center">Aucune session prévue. Formation disponible en ligne à la demande.</p>
+          <a href="{% url 'elearning:inscrire_course' course.id %}" class="block mt-4 bg-primary text-white py-3 rounded-lg text-center font-semibold">
+            🚀 S’inscrire maintenant
+          </a>
+        {% endif %}
+      </article>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="space-y-6 sticky top-24 self-start">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-lg">
+        {% if course.image_couverture %}
+          <img src="{{ course.image_couverture.url }}" class="w-full h-40 object-cover rounded-lg mb-4">
+        {% endif %}
+        <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">{{ course.titre }}</h3>
+        <ul class="text-slate-600 dark:text-slate-300 text-sm space-y-3">
+          <li>📘 Niveau : <strong>{{ course.get_niveau_display }}</strong></li>
+          <li>💻 Mode : <strong>{{ course.get_mode_display }}</strong></li>
+          <li>⏱ Durée : <strong>{{ course.duree }}</strong></li>
+          <li>💰 Prix : <strong class="text-primary text-lg">{{ course.prix }} €</strong></li>
+          <li>👥 Participants : {{ course.nombre_participants }}</li>
+        </ul>
+
+        <a href="{% url 'elearning:inscrire_course' course.id %}" class="block mt-6 bg-primary text-white py-3 rounded-lg hover:bg-primary/90 text-center font-semibold">
+          ✅ Rejoindre maintenant
+        </a>
+      </div>
+    </aside>
+  </section>
+
+</main>
+{% endblock %}

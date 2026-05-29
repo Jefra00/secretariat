@@ -1,0 +1,700 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}A propos{% endblock %}
+
+{% block content %}
+<main class="flex flex-col gap-12 sm:gap-16 md:gap-20">
+
+  <!-- HeroSection avec image FIXE -->
+  <section class="relative w-full h-[75vh] overflow-hidden">
+    <!-- Image d’arrière-plan fixe -->
+    <div
+      class="absolute inset-0 bg-cover bg-center bg-no-repeat"
+      style="
+        background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC4OTYzRUUyYho9GHyfVFcyB9bva4P1RDdOpE6KCHFeKKZ8oXort4FwrzoQydxbtr9jjeQto_Vp2KH54NRJVijXzYYkjjGEOSQP9VSAMIY9ETCGRQqvuiv9nRjq4t5plhOaPouX0AqYTmdar05l8ZUZqa58yjEbgZKffRxqVKGiuLTWOHdejt7BD_8RM9W_Cbc5lJ0imWnVz52_MQSYi7t3F_iyZm4ilYID_1aXCSiql00FC80BpQ6H2pIAlrv7p98KM-yqW81CVsg');
+        background-attachment: fixed;
+        filter: brightness(0.65);
+      "
+    ></div>
+
+    <!-- Contenu par-dessus -->
+    <div class="relative z-10 flex flex-col justify-center items-start h-full px-6 sm:px-10 md:px-16 lg:px-24 text-left text-white max-w-3xl">
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-black leading-tight drop-shadow-lg mb-4">
+        Votre Partenaire de Confiance pour une Gestion Optimisée
+      </h1>
+      <p class="text-base sm:text-lg md:text-xl text-gray-200 font-light leading-relaxed mb-8 drop-shadow-md">
+        Nous libérons les entrepreneurs des tâches administratives pour qu'ils puissent se concentrer sur leur cœur de métier.
+      </p>
+      <a
+        href="{% url 'services:liste' %}"
+        class="inline-flex items-center justify-center rounded-xl bg-primary hover:bg-primary/90 transition-colors text-white font-semibold text-base sm:text-lg px-6 py-3 shadow-lg"
+      >
+        Découvrez nos services
+      </a>
+    </div>
+  </section>
+
+  <!-- FeatureSection -->
+  <div class="flex flex-col gap-10 px-4 @container">
+    <div class="flex flex-col gap-4 text-center items-center">
+      <h2
+        class="text-[#0e141b] dark:text-white tracking-light text-[32px] font-bold leading-tight @[480px]:text-4xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em] max-w-[720px]"
+      >
+        Notre Mission &amp; Nos Valeurs
+      </h2>
+      <p
+        class="text-gray-700 dark:text-gray-400 text-base font-normal leading-normal max-w-[720px]"
+      >
+        Notre mission est de vous offrir un soutien administratif impeccable, basé sur des valeurs fondamentales qui guident chacune de nos actions.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4 p-0">
+      <div
+        class="flex flex-1 gap-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark p-6 flex-col items-center text-center"
+      >
+        <span class="material-symbols-outlined text-primary text-4xl mb-2">star</span>
+        <div class="flex flex-col gap-1">
+          <h3 class="text-[#0e141b] dark:text-white text-base font-bold leading-tight">Qualité</h3>
+          <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
+            Nous nous engageons à fournir des services de la plus haute qualité, avec une attention méticuleuse aux détails.
+          </p>
+        </div>
+      </div>
+
+      <div
+        class="flex flex-1 gap-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark p-6 flex-col items-center text-center"
+      >
+        <span class="material-symbols-outlined text-primary text-4xl mb-2">lock</span>
+        <div class="flex flex-col gap-1">
+          <h3 class="text-[#0e141b] dark:text-white text-base font-bold leading-tight">Confiance</h3>
+          <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
+            La confidentialité et l'intégrité sont au cœur de notre métier. Vos informations sont entre de bonnes mains.
+          </p>
+        </div>
+      </div>
+
+      <div
+        class="flex flex-1 gap-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark p-6 flex-col items-center text-center"
+      >
+        <span class="material-symbols-outlined text-primary text-4xl mb-2">bolt</span>
+        <div class="flex flex-col gap-1">
+          <h3 class="text-[#0e141b] dark:text-white text-base font-bold leading-tight">Efficacité</h3>
+          <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
+            Nous optimisons vos processus pour vous faire gagner du temps et améliorer votre productivité au quotidien.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Section -->
+              <div class="flex flex-col gap-6 px-4">
+                <div class="text-center">
+                  <h2
+                    class="text-[#0e141b] dark:text-white text-[28px] md:text-[32px] font-bold leading-tight tracking-[-0.015em]"
+                  >
+                    Notre Équipe d'Experts
+                  </h2>
+                  <p
+                    class="text-gray-700 dark:text-gray-400 text-base font-normal leading-normal max-w-2xl mx-auto mt-2"
+                  >
+                    Rencontrez les professionnels dévoués qui sont prêts à vous
+                    accompagner dans la réussite de vos projets.
+                  </p>
+                </div>
+                <div
+                  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+                >
+                  <!-- Team Member Card 1 -->
+                  <div
+                    class="flex flex-col items-center text-center bg-white dark:bg-gray-900/50 p-6 rounded-xl border border-gray-200 dark:border-gray-800"
+                  >
+                    <img
+                      alt="Portrait de Marc Dubois"
+                      class="w-28 h-28 rounded-full object-cover mb-4 border-4 border-primary/20"
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiux5y_uQduKMBNZTYAmHxxmLHzR-mOe85hzcKo7FpR3nDxU2L9QBlf62yS9pBVjSfq9PwPQH9xF7posulXVmFIycINsVcjUrK1kP8AwE5h4dBu1GyrKoVCaaknHB_ouoSUTqj2qwd8BaMcOH0mo3MvVmkTU7Veq7_YSArSwI1UfSL3BlOr1qO2jbFFyZ8eRG7_R81Jpqv45TNhf_3HqPJao9hJCF3C8JdxVNGd-S3kl82OZV9LMTsZ-QwdlsncdlqyD0vAFTU-Ys"
+                    />
+                    <h3
+                      class="text-lg font-bold text-[#0e141b] dark:text-white"
+                    >
+                      Marc Dubois
+                    </h3>
+                    <p class="text-sm text-primary font-medium">
+                      Fondateur &amp; Gérant
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                      Fort de 15 ans d'expérience en gestion administrative,
+                      Marc a fondé Secrétariat Pro pour aider les entrepreneurs
+                      à se concentrer sur leur croissance.
+                    </p>
+                  </div>
+                  <!-- Team Member Card 2 -->
+                  <div
+                    class="flex flex-col items-center text-center bg-white dark:bg-gray-900/50 p-6 rounded-xl border border-gray-200 dark:border-gray-800"
+                  >
+                    <img
+                      alt="Portrait de Sophie Lemaire"
+                      class="w-28 h-28 rounded-full object-cover mb-4 border-4 border-primary/20"
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxczI4hBUI1tdw4O2YXnC7fXSlZX9QhbdlI0AG7lfQIZrMaOloOQGDJQnw5_mGkRbBgJ0P4Ml_IPSWEqKDpj-cuOjQaIY97yFDBsrEqcw-A57ckAvu3r_MAHBM5KV1VMXeem3wx1zwxmVNjFUhRiixltsonjHy-9DJyThYWqEpjgGXjSomUac3i3bavbEhQ47lmwO8s0SIqqBb1Dg-JJ_3CAGE17gtxjXkeHdXsnzoXCQgW9Qven4aaSqeNvOFO7MV77JgzD7ARJ8"
+                    />
+                    <h3
+                      class="text-lg font-bold text-[#0e141b] dark:text-white"
+                    >
+                      Sophie Lemaire
+                    </h3>
+                    <p class="text-sm text-primary font-medium">
+                      Responsable Clientèle
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                      Sophie est votre point de contact privilégié. Elle
+                      s'assure que chaque client reçoit un service sur-mesure et
+                      une attention irréprochable.
+                    </p>
+                  </div>
+                  <!-- Team Member Card 3 -->
+                  <div
+                    class="flex flex-col items-center text-center bg-white dark:bg-gray-900/50 p-6 rounded-xl border border-gray-200 dark:border-gray-800"
+                  >
+                    <img
+                      alt="Portrait de Julien Petit"
+                      class="w-28 h-28 rounded-full object-cover mb-4 border-4 border-primary/20"
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGZaD8TwLFKvt4be-jakjSqN1bNpdfHB5xIJmGL9wouebepV88f9ndgZGC90xtaqH3Vvylv_5z-A8HyspYmbwcxffUqZVCbCTFuJjh6Q0zjSHmR8NMKRGw_5QLVn6joEfHYWl9etBYaXFiR4ci7ypEqwdXfqYHGTx8TiVstHUemffUs849OfjV6mQpyQlLmPVnMCaSQyvxxFPxQJ_A-AIpLgDasSnS8mnZi8HdfpYjGxUjUk31QZbowlKDu1QLoEqU1bLjtX_OlIE"
+                    />
+                    <h3
+                      class="text-lg font-bold text-[#0e141b] dark:text-white"
+                    >
+                      Julien Petit
+                    </h3>
+                    <p class="text-sm text-primary font-medium">
+                      Expert Numérique
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                      Spécialiste de la digitalisation, Julien vous accompagne
+                      dans l'optimisation de vos outils et la gestion de vos
+                      projets en ligne.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <!-- Trust Block / Social Proof -->
+              <div class="px-4 py-10">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                  <div class="flex flex-col items-center">
+                    <span
+                      class="material-symbols-outlined text-4xl text-primary mb-2"
+                      >sentiment_satisfied</span
+                    >
+                    <p
+                      class="text-4xl font-black text-[#0e141b] dark:text-white"
+                    >
+                      98%
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-400">
+                      de satisfaction client
+                    </p>
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <span
+                      class="material-symbols-outlined text-4xl text-primary mb-2"
+                      >workspace_premium</span
+                    >
+                    <p
+                      class="text-4xl font-black text-[#0e141b] dark:text-white"
+                    >
+                      +10
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-400">
+                      années d'expérience cumulée
+                    </p>
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <span
+                      class="material-symbols-outlined text-4xl text-primary mb-2"
+                      >groups</span
+                    >
+                    <p
+                      class="text-4xl font-black text-[#0e141b] dark:text-white"
+                    >
+                      +50
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-400">
+                      clients accompagnés
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <!-- CTA Section -->
+              <div
+                class="bg-primary/10 dark:bg-primary/20 rounded-xl mx-4 my-10 p-8 text-center flex flex-col items-center gap-6"
+              >
+                <h2
+                  class="text-2xl md:text-3xl font-bold text-[#0e141b] dark:text-white"
+                >
+                  Prêt à optimiser votre gestion ?
+                </h2>
+                <p class="text-gray-700 dark:text-gray-300 max-w-xl">
+                  Discutons de vos besoins et découvrez comment notre équipe
+                  peut vous aider à atteindre vos objectifs. Contactez-nous pour
+                  un devis personnalisé.
+                </p>
+                <a
+                  class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-colors"
+                  href="contacts.html"
+                >
+                  <span class="truncate">Contactez-nous</span>
+                </a>
+              </div>
+              <!-- Timeline / Our Story Section -->
+              <div class="px-4 py-16">
+                <div class="max-w-4xl mx-auto">
+                  <div class="text-center mb-16">
+                    <h2
+                      class="text-[#0e141b] dark:text-white text-[32px] md:text-4xl font-bold leading-tight mb-4"
+                    >
+                      Notre Histoire
+                    </h2>
+                    <p
+                      class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto"
+                    >
+                      Un parcours marqué par l'innovation et l'engagement client
+                    </p>
+                  </div>
+                  <div class="relative">
+                    <!-- Timeline line -->
+                    <div
+                      class="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-primary to-accent"
+                    ></div>
+                    <!-- Timeline items -->
+                    <div class="space-y-12">
+                      <!-- Timeline Item 1 -->
+                      <div class="relative flex items-center">
+                        <div class="flex-1 text-right pr-8">
+                          <h3
+                            class="text-xl font-bold text-[#0e141b] dark:text-white mb-2"
+                          >
+                            2024 - Innovation Continue
+                          </h3>
+                          <p class="text-gray-600 dark:text-gray-400">
+                            Nous continuons d'innover avec des solutions
+                            digitales avancées et une formation continue de
+                            notre équipe.
+                          </p>
+                        </div>
+                        <div
+                          class="relative z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center border-4 border-white dark:border-gray-900 shadow-lg"
+                        >
+                          <span class="material-symbols-outlined text-white"
+                            >rocket_launch</span
+                          >
+                        </div>
+                        <div class="flex-1 pl-8"></div>
+                      </div>
+                      <!-- Timeline Item 2 -->
+                      <div class="relative flex items-center">
+                        <div class="flex-1 pr-8"></div>
+                        <div
+                          class="relative z-10 w-12 h-12 bg-accent rounded-full flex items-center justify-center border-4 border-white dark:border-gray-900 shadow-lg"
+                        >
+                          <span class="material-symbols-outlined text-white"
+                            >trending_up</span
+                          >
+                        </div>
+                        <div class="flex-1 text-left pl-8">
+                          <h3
+                            class="text-xl font-bold text-[#0e141b] dark:text-white mb-2"
+                          >
+                            2022 - Expansion
+                          </h3>
+                          <p class="text-gray-600 dark:text-gray-400">
+                            Élargissement de nos services avec une équipe
+                            renforcée et de nouveaux partenariats stratégiques.
+                          </p>
+                        </div>
+                      </div>
+                      <!-- Timeline Item 3 -->
+                      <div class="relative flex items-center">
+                        <div class="flex-1 text-right pr-8">
+                          <h3
+                            class="text-xl font-bold text-[#0e141b] dark:text-white mb-2"
+                          >
+                            2019 - Fondation
+                          </h3>
+                          <p class="text-gray-600 dark:text-gray-400">
+                            Création de Secrétariat Pro avec une vision :
+                            libérer les entrepreneurs de la charge
+                            administrative.
+                          </p>
+                        </div>
+                        <div
+                          class="relative z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center border-4 border-white dark:border-gray-900 shadow-lg"
+                        >
+                          <span class="material-symbols-outlined text-white"
+                            >celebration</span
+                          >
+                        </div>
+                        <div class="flex-1 pl-8"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </main>
+
+            <footer class="bg-card-light dark:bg-card-dark mt-16" id="contact">
+              <div class="mx-auto w-full max-w-screen-xl p-8 py-10 lg:py-16">
+                <div class="md:flex md:justify-between">
+                  <div class="mb-8 md:mb-0 md:w-1/3">
+                    <a class="flex items-center gap-4 mb-4" href="accueil.html">
+                      <div class="size-6 text-primary">
+                        <svg
+                          fill="none"
+                          viewbox="0 0 48 48"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z"
+                            fill="currentColor"
+                          ></path>
+                        </svg>
+                      </div>
+                      <h2
+                        class="text-text-light dark:text-text-dark text-xl font-bold leading-tight"
+                      >
+                        Secrétariat Pro
+                      </h2>
+                    </a>
+                    <p class="text-text-muted-light dark:text-text-muted-dark">
+                      Votre partenaire de confiance pour une gestion
+                      administrative et numérique simplifiée.
+                    </p>
+                  </div>
+                  <div
+                    class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3 md:w-2/3"
+                  >
+                    <div>
+                      <h3
+                        class="mb-4 text-sm font-semibold uppercase text-text-light dark:text-text-dark"
+                      >
+                        Navigation
+                      </h3>
+                      <ul
+                        class="text-text-muted-light dark:text-text-muted-dark font-medium space-y-3"
+                      >
+                        <li>
+                          <a class="hover:text-primary" href="accueil.html"
+                            >Accueil</a
+                          >
+                        </li>
+                        <li>
+                          <a class="hover:text-primary" href="services.html"
+                            >Services</a
+                          >
+                        </li>
+                        <li>
+                          <a class="hover:text-primary" href="apropo.html"
+                            >À propos</a
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h3
+                        class="mb-4 text-sm font-semibold uppercase text-text-light dark:text-text-dark"
+                      >
+                        Contact
+                      </h3>
+                      <ul
+                        class="text-text-muted-light dark:text-text-muted-dark font-medium space-y-3"
+                      >
+                        <li>
+                          <a
+                            class="hover:text-primary"
+                            href="mailto:contact@secretariatpro.com"
+                            >contact@secretariatpro.com</a
+                          >
+                        </li>
+                        <li>
+                          <a class="hover:text-primary" href="tel:+33123456789"
+                            >+33 1 23 45 67 89</a
+                          >
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h3
+                        class="mb-4 text-sm font-semibold uppercase text-text-light dark:text-text-dark"
+                      >
+                        Suivez-nous
+                      </h3>
+                      <ul
+                        class="text-text-muted-light dark:text-text-muted-dark font-medium space-y-3"
+                      >
+                        <li>
+                          <a class="hover:text-primary" href="#">LinkedIn</a>
+                        </li>
+                        <li>
+                          <a class="hover:text-primary" href="#">Twitter</a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <hr
+                  class="my-6 border-slate-200 sm:mx-auto dark:border-slate-700 lg:my-8"
+                />
+                <div class="sm:flex sm:items-center sm:justify-between">
+                  <span
+                    class="text-sm text-text-muted-light dark:text-text-muted-dark sm:text-center"
+                    >© 2024
+                    <a class="hover:underline" href="#">Secrétariat Pro™</a>.
+                    Tous droits réservés.</span
+                  >
+                </div>
+              </div>
+            </footer>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // ============ ANIMATION AU CHARGEMENT ============
+      window.addEventListener("load", () => {
+        // Animation du titre principal
+        const h1 = document.querySelector("h1");
+        if (h1) {
+          h1.style.opacity = "0";
+          h1.style.transform = "translateY(30px)";
+          h1.style.transition = "all 0.8s ease-out";
+          setTimeout(() => {
+            h1.style.opacity = "1";
+            h1.style.transform = "translateY(0)";
+          }, 100);
+        }
+
+        // Animation des cartes de valeurs
+        const valueCards = document.querySelectorAll(
+          ".grid.grid-cols-\\[repeat\\(auto-fit\\,minmax\\(240px\\,1fr\\)\\)\\] > div"
+        );
+        valueCards.forEach((card, index) => {
+          card.style.opacity = "0";
+          card.style.transform = "translateY(30px)";
+          card.style.transition = `all 0.6s ease-out ${index * 0.15}s`;
+          setTimeout(() => {
+            card.style.opacity = "1";
+            card.style.transform = "translateY(0)";
+          }, 300 + index * 100);
+        });
+
+        // Animation des membres de l'équipe
+        const teamCards = document.querySelectorAll(
+          ".grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3 > div"
+        );
+        const teamObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry, index) => {
+              if (entry.isIntersecting) {
+                setTimeout(() => {
+                  entry.target.style.opacity = "1";
+                  entry.target.style.transform = "scale(1)";
+                }, index * 100);
+                teamObserver.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.2 }
+        );
+
+        teamCards.forEach((card) => {
+          card.style.opacity = "0";
+          card.style.transform = "scale(0.9)";
+          card.style.transition = "all 0.5s ease-out";
+          teamObserver.observe(card);
+        });
+
+        // Animation des statistiques
+        const statsSection = document.querySelectorAll(
+          ".grid.grid-cols-1.md\\:grid-cols-3 > div"
+        );
+        const statsObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry, index) => {
+              if (entry.isIntersecting) {
+                const numberElement = entry.target.querySelector(".text-4xl");
+                if (numberElement) {
+                  const finalValue = numberElement.textContent;
+                  animateCounter(numberElement, finalValue);
+                }
+                setTimeout(() => {
+                  entry.target.style.opacity = "1";
+                  entry.target.style.transform = "translateY(0)";
+                }, index * 100);
+                statsObserver.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.5 }
+        );
+
+        statsSection.forEach((stat, index) => {
+          stat.style.opacity = "0";
+          stat.style.transform = "translateY(30px)";
+          stat.style.transition = "all 0.6s ease-out";
+          statsObserver.observe(stat);
+        });
+
+        // Animation de la Timeline
+        const timelineItems = document.querySelectorAll(".space-y-12 > div");
+        const timelineObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry, index) => {
+              if (entry.isIntersecting) {
+                setTimeout(() => {
+                  entry.target.style.opacity = "1";
+                  entry.target.style.transform = "translateX(0)";
+                }, index * 200);
+                timelineObserver.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.3 }
+        );
+
+        timelineItems.forEach((item, index) => {
+          item.style.opacity = "0";
+          if (index % 2 === 0) {
+            item.style.transform = "translateX(-50px)";
+          } else {
+            item.style.transform = "translateX(50px)";
+          }
+          item.style.transition = "all 0.6s ease-out";
+          timelineObserver.observe(item);
+        });
+      });
+
+      // ============ FONCTION ANIMATION COMPTEUR ============
+      function animateCounter(element, target) {
+        const isPercentage = target.includes("%");
+        const isPlus = target.includes("+");
+        const numericTarget = parseInt(target.replace(/[^0-9]/g, ""));
+        let current = 0;
+        const duration = 2000;
+        const increment = numericTarget / (duration / 16);
+
+        function updateCounter() {
+          current += increment;
+          if (current < numericTarget) {
+            element.textContent =
+              (isPlus ? "+" : "") +
+              Math.floor(current) +
+              (isPercentage ? "%" : "");
+            requestAnimationFrame(updateCounter);
+          } else {
+            element.textContent = target;
+          }
+        }
+        updateCounter();
+      }
+
+      // ============ SMOOTH SCROLL ============
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          const href = this.getAttribute("href");
+          if (href !== "#") {
+            e.preventDefault();
+            const target = document.querySelector(href);
+            if (target) {
+              target.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }
+          }
+        });
+      });
+
+      // ============ EFFET PARALLAX SUR L'IMAGE HERO ============
+      window.addEventListener("scroll", () => {
+        const heroImage = document.querySelector(
+          '[data-alt*="équipe souriante"]'
+        );
+        if (heroImage) {
+          const scrolled = window.scrollY;
+          const rate = scrolled * 0.5;
+          heroImage.style.transform = `translateY(${rate}px)`;
+        }
+      });
+
+      // ============ ANIMATION DES CARTES AU SURVOL ============
+      const teamMemberCards = document.querySelectorAll(
+        ".grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3 > div"
+      );
+      teamMemberCards.forEach((card) => {
+        card.addEventListener("mouseenter", function () {
+          this.style.transform = "translateY(-10px)";
+          const img = this.querySelector("img");
+          if (img) {
+            img.style.transform = "scale(1.1)";
+          }
+        });
+
+        card.addEventListener("mouseleave", function () {
+          this.style.transform = "translateY(0)";
+          const img = this.querySelector("img");
+          if (img) {
+            img.style.transform = "scale(1)";
+          }
+        });
+      });
+
+      // ============ ANIMATION DES ICÔNES AU SURVOL ============
+      const iconContainers = document.querySelectorAll(
+        ".flex.flex-1.gap-3.rounded-lg"
+      );
+      iconContainers.forEach((container) => {
+        container.addEventListener("mouseenter", function () {
+          const icon = this.querySelector(".material-symbols-outlined");
+          if (icon) {
+            icon.style.transform = "scale(1.2) rotate(10deg)";
+          }
+        });
+
+        container.addEventListener("mouseleave", function () {
+          const icon = this.querySelector(".material-symbols-outlined");
+          if (icon) {
+            icon.style.transform = "scale(1) rotate(0deg)";
+          }
+        });
+      });
+
+      // ============ EFFET GLASSMORPHISM DYNAMIQUE ============
+      window.addEventListener("scroll", () => {
+        const header = document.querySelector("header");
+        if (window.scrollY > 50) {
+          header.style.backgroundColor = "rgba(246, 247, 248, 0.95)";
+        } else {
+          header.style.backgroundColor = "";
+        }
+      });
+    </script>
+<!-- ... (tout le reste de ta page — équipe, statistiques, CTA, timeline, footer, etc. inchangé) ... -->
+
+</main>
+
+<script>
+  // Animation au chargement (inchangée)
+  window.addEventListener("load", () => {
+    const h1 = document.querySelector("h1");
+    if (h1) {
+      h1.style.opacity = "0";
+      h1.style.transform = "translateY(30px)";
+      h1.style.transition = "all 0.8s ease-out";
+      setTimeout(() => {
+        h1.style.opacity = "1";
+        h1.style.transform = "translateY(0)";
+      }, 200);
+    }
+  });
+</script>
+{% endblock %}

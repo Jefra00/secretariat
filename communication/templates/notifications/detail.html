@@ -1,0 +1,21 @@
+{% extends "base/base1.html" %}
+{% block title %}Notification{% endblock %}
+
+{% block content %}
+<section class="max-w-3xl mx-auto py-12 px-6">
+  <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow">
+    <h1 class="text-2xl font-bold text-primary mb-3">{{ notif.titre }}</h1>
+    <p class="text-sm text-slate-500 mb-4">{{ notif.date_envoi|date:"d M Y H:i" }}</p>
+    <div class="text-slate-700 dark:text-slate-300 leading-relaxed">{{ notif.message|linebreaks }}</div>
+
+    {% if notif.url_action %}
+      <a href="{{ notif.url_action }}" class="inline-block mt-6 bg-primary text-white px-5 py-2 rounded-md hover:bg-primary/90 transition">
+        🔗 Ouvrir le lien
+      </a>
+    {% endif %}
+  </div>
+  <div class="mt-6 text-center">
+    <a href="{% url 'notifications:list' %}" class="text-primary hover:underline">← Retour aux notifications</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base/base.html" %}
+
+{% block title %}Commande #{{ order.id }}{% endblock %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto py-10">
+
+    <a href="{% url 'order_list' %}" class="text-primary mb-4 inline-block">
+        &larr; Retour
+    </a>
+
+    <div class="bg-white dark:bg-slate-900 shadow rounded-xl p-6">
+
+        <!-- HEADER -->
+        <h1 class="text-2xl font-bold mb-6">
+            Commande #{{ order.id }}
+        </h1>
+
+        <!-- QR CODE -->
+        {% if qr_code %}
+        <div class="text-center mb-8">
+            <h2 class="text-xl font-bold mb-3">QR Code de la commande</h2>
+
+            <img 
+                src="data:image/png;base64,{{ qr_code }}" 
+                alt="QR Code"
+                class="mx-auto w-48 h-48 border rounded-lg shadow"
+            >
+
+            <p class="mt-2 text-sm text-slate-500">
+                Code : {{ order.qr_code }}
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- INFOS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div>
+                <h2 class="font-semibold text-lg mb-2">Informations</h2>
+
+                <p><strong>Client :</strong> {{ order.user|default:"Invité" }}</p>
+                <p><strong>Adresse :</strong> {{ order.delivery_address|default:"-" }}</p>
+                <p><strong>Téléphone :</strong> {{ order.phone_number|default:"-" }}</p>
+                <p><strong>Date :</strong> {{ order.created_at|date:"d/m/Y H:i" }}</p>
+            </div>
+
+            <div>
+                <h2 class="font-semibold text-lg mb-2">Paiement</h2>
+
+                <p><strong>Sous-total :</strong> {{ order.subtotal }} FCFA</p>
+                <p><strong>Livraison :</strong> {{ order.delivery_fee }} FCFA</p>
+
+                <p class="text-xl font-bold mt-2">
+                    Total : {{ order.total }} FCFA
+                </p>
+            </div>
+
+        </div>
+
+        <!-- STATUT -->
+        <div class="mt-6">
+            <h2 class="font-semibold text-lg mb-2">Statut</h2>
+
+            <span class="px-3 py-1 rounded-full text-sm
+                {% if order.status == 'pending' %} bg-yellow-200 text-yellow-800
+                {% elif order.status == 'accepted' %} bg-blue-200 text-blue-800
+                {% elif order.status == 'in_progress' %} bg-purple-200 text-purple-800
+                {% elif order.status == 'done' %} bg-green-200 text-green-800
+                {% else %} bg-red-200 text-red-800 {% endif %}
+            ">
+                {{ order.get_status_display }}
+            </span>
+        </div>
+
+        <!-- ITEMS -->
+        <div class="mt-10">
+            <h2 class="text-xl font-bold mb-4">Articles</h2>
+
+            <div class="space-y-6">
+
+                {% for item in items %}
+                <div class="border p-4 rounded-lg dark:border-slate-700">
+
+                    <!-- TITRE + PRIX -->
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="font-semibold text-lg">
+                                {{ item.dish.title }}
+                            </p>
+
+                            <p class="text-sm text-slate-500">
+                                Restaurant : {{ item.dish.restaurant.nom|default:"-" }}
+                            </p>
+                        </div>
+
+                        <p class="font-semibold">
+                            {{ item.line_price }} FCFA
+                        </p>
+                    </div>
+
+                    <!-- QUANTITE -->
+                    <p class="text-sm text-slate-500 mt-1">
+                        Quantité : {{ item.quantity }}
+                    </p>
+
+                    <!-- INGREDIENTS -->
+                    {% if item.dish.ingredients.all %}
+                    <div class="mt-3">
+                        <p class="font-semibold">Ingrédients :</p>
+                        <ul class="ml-6 list-disc text-sm text-slate-600">
+                            {% for ing in item.dish.ingredients.all %}
+                                <li>{{ ing.name }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <!-- PERSONNALISATION -->
+          {% if item.ingredient_choices.exists %}
+<div class="mt-3">
+    <p class="font-semibold">Personnalisation :</p>
+
+    <ul class="ml-6 list-disc text-sm">
+        {% for choice in item.ingredient_choices.all %}
+            <li>
+                {% if choice.choice_type == "add" %}
+                    ➕ {{ choice.ingredient.name }}
+                {% elif choice.choice_type == "remove" %}
+                    ➖ {{ choice.ingredient.name }}
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+                    <!-- ADDONS -->
+                    {% if item.added_addons.all %}
+                    <div class="mt-3">
+                        <p class="font-semibold">Addons :</p>
+                        <ul class="ml-6 list-disc text-sm">
+                            {% for add in item.added_addons.all %}
+                                <li>{{ add.name }} (+{{ add.price }} FCFA)</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

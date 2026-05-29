@@ -1,0 +1,76 @@
+{% extends "base/base.html" %}
+{% block title %}Ingrédients Commande{% endblock %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto py-10">
+
+    <h1 class="text-3xl font-bold mb-6">
+        Ingrédients de la commande #{{ order.id }}
+    </h1>
+
+    {% for item in order.items.all %}
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow p-6 mb-6">
+
+        <h2 class="text-xl font-bold mb-4">
+            {{ item.quantity }} × {{ item.dish.title }}
+        </h2>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <input type="hidden" name="item_id" value="{{ item.id }}">
+
+            {% for ingredient in item.dish.ingredients.all %}
+            <div class="flex items-center justify-between py-2 border-b dark:border-slate-700">
+
+                <span>{{ ingredient.name }}</span>
+
+                <div class="flex gap-2">
+
+                    <button name="set_choice" value="{{ ingredient.id }}:keep"
+                        class="px-3 py-1 text-sm rounded 
+                        {% if item.ingredient_choices.filter(ingredient=ingredient, choice_type='keep').exists %}
+                            bg-blue-600 text-white
+                        {% else %}
+                            bg-slate-200 dark:bg-slate-700
+                        {% endif %}">
+                        Garder
+                    </button>
+
+                    <button name="set_choice" value="{{ ingredient.id }}:add"
+                        class="px-3 py-1 text-sm rounded 
+                        {% if item.ingredient_choices.filter(ingredient=ingredient, choice_type='add').exists %}
+                            bg-green-600 text-white
+                        {% else %}
+                            bg-slate-200 dark:bg-slate-700
+                        {% endif %}">
+                        Ajouter
+                    </button>
+
+                    <button name="set_choice" value="{{ ingredient.id }}:remove"
+                        class="px-3 py-1 text-sm rounded 
+                        {% if item.ingredient_choices.filter(ingredient=ingredient, choice_type='remove').exists %}
+                            bg-red-600 text-white
+                        {% else %}
+                            bg-slate-200 dark:bg-slate-700
+                        {% endif %}">
+                        Retirer
+                    </button>
+
+                </div>
+
+            </div>
+            {% endfor %}
+
+            <button class="mt-4 bg-primary text-white px-4 py-2 rounded-lg">
+                Enregistrer les changements
+            </button>
+        </form>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+{% endblock %}

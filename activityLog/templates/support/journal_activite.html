@@ -1,0 +1,63 @@
+{% extends "base/base1.html" %}
+{% block title %}Journal d’activité{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto py-10 px-6">
+  <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-8">
+    🕵️ Historique de vos activités
+  </h1>
+
+  {% if logs %}
+  <div class="overflow-x-auto bg-white dark:bg-slate-900 shadow rounded-2xl border border-slate-200 dark:border-slate-700">
+    <table class="min-w-full text-sm text-left">
+      <thead class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 uppercase">
+        <tr>
+          <th class="px-4 py-3">Date</th>
+          <th class="px-4 py-3">Catégorie</th>
+          <th class="px-4 py-3">Action</th>
+          <th class="px-4 py-3">Résultat</th>
+          <th class="px-4 py-3">IP</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+          <td class="px-4 py-3">{{ log.date_action|date:"d M Y H:i" }}</td>
+          <td class="px-4 py-3">
+            <i class="fas {{ log.icone_categorie }}"></i> {{ log.get_categorie_display }}
+          </td>
+          <td class="px-4 py-3">{{ log.action }}</td>
+          <td class="px-4 py-3">
+            {% if log.succes %}
+              <span class="text-green-600 font-semibold">✔ Succès</span>
+            {% else %}
+              <span class="text-red-600 font-semibold">❌ Échec</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3 text-slate-500">{{ log.ip_address|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="mt-6 flex justify-center">
+    {% if logs.has_previous %}
+      <a href="?page={{ logs.previous_page_number }}" class="px-3 py-1 border rounded-l">← Précédent</a>
+    {% endif %}
+    <span class="px-4 py-1 border-t border-b">{{ logs.number }} / {{ logs.paginator.num_pages }}</span>
+    {% if logs.has_next %}
+      <a href="?page={{ logs.next_page_number }}" class="px-3 py-1 border rounded-r">Suivant →</a>
+    {% endif %}
+  </div>
+  {% else %}
+    <p class="text-center text-slate-500 py-10">Aucune activité enregistrée pour le moment.</p>
+  {% endif %}
+
+  <!-- UX message -->
+  <p class="text-center text-slate-400 dark:text-slate-500 mt-10 italic">
+    « La transparence crée la confiance — consultez ici chaque action enregistrée 🧭 »
+  </p>
+</section>
+{% endblock %}

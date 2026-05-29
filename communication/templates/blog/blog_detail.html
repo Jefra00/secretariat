@@ -1,0 +1,22 @@
+{% extends "base/base1.html" %}
+{% block title %}{{ article.titre }}{% endblock %}
+
+{% block content %}
+<article class="max-w-4xl mx-auto py-10 px-6">
+  {% if article.image_couverture %}
+    <img src="{{ article.image_couverture.url }}" class="w-full h-72 object-cover rounded-xl mb-6">
+  {% endif %}
+  <h1 class="text-4xl font-bold text-slate-900 dark:text-white mb-2">{{ article.titre }}</h1>
+  <p class="text-slate-500 text-sm mb-6">
+    Publié le {{ article.date_publication|date:"d M Y" }} • {{ article.vues }} vues
+  </p>
+
+  <div class="prose dark:prose-invert max-w-none text-lg">
+    {{ article.contenu|safe }}
+  </div>
+
+  <div class="mt-8 text-center">
+    <a href="{% url 'communication:blog_list' %}" class="text-primary hover:underline">← Retour au blog</a>
+  </div>
+</article>
+{% endblock %}

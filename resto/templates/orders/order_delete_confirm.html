@@ -1,0 +1,30 @@
+{% extends "base/base.html" %}
+{% block title %}Supprimer Commande{% endblock %}
+
+{% block content %}
+
+<div class="max-w-lg mx-auto py-10">
+
+    <h1 class="text-2xl font-bold mb-4 text-red-600">
+        Supprimer Commande #{{ order.id }}
+    </h1>
+
+    <p class="mb-6 text-slate-600 dark:text-slate-300">
+        Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="flex gap-4">
+            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg">
+                Supprimer
+            </button>
+            <a href="{% url 'order_detail' order.id %}" class="px-4 py-2 bg-slate-300 rounded-lg">
+                Annuler
+            </a>
+        </div>
+    </form>
+
+</div>
+
+{% endblock %}

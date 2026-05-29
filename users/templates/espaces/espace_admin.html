@@ -1,0 +1,219 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Espace Client - {{ user.get_full_name|default:user.username }}{% endblock %}
+
+{% block content %}
+
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="sticky top-0 z-50 w-full bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+<div class="px-4 sm:px-8 lg:px-16 mx-auto max-w-7xl">
+<div class="flex items-center justify-between whitespace-nowrap border-b border-slate-200 dark:border-slate-800 py-4">
+<a class="flex items-center gap-4 text-slate-800 dark:text-slate-200" href="accueil.html">
+<div class="w-8 h-8 text-primary">
+<svg fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">Secrétariat Pro</h2>
+</a>
+<nav class="hidden md:flex items-center gap-9 text-slate-700 dark:text-slate-300">
+<a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" href="{% url 'comptes' %}">Creer Compte</a>
+<a class="text-sm font-medium leading-normal text-primary dark:text-primary" href="services.html">Services</a>
+<a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" href="apropo.html">À propos</a>
+<a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" href="contacts.html">Contact</a>
+</nav>
+<div class="flex items-center gap-4">
+<a class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors" href="contacts.html">
+<span class="truncate">Demander un devis</span>
+</a>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 px-4 sm:px-8 lg:px-16 py-10 sm:py-16">
+<div class="mx-auto max-w-7xl flex flex-col gap-10">
+<div class="text-center flex flex-col items-center gap-4">
+<h1 class="text-slate-900 dark:text-slate-50 text-4xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tighter max-w-3xl">
+                           Solutions sur mesure pour votre entreprise
+                        </h1>
+<p class="text-slate-600 dark:text-slate-400 text-lg max-w-2xl">
+                           Découvrez nos solutions sur mesure pour alléger votre charge de travail administrative et numérique.
+                        </p>
+</div>
+<div class="flex flex-col gap-6">
+<div class="flex flex-wrap items-center justify-center gap-3 p-3">
+<div class="filter-btn flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-primary/20 px-4 text-primary dark:bg-primary/30 dark:text-slate-50" data-filter="all">
+<p class="text-sm font-medium leading-normal">Tous</p>
+</div>
+<div class="filter-btn flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-slate-200 dark:bg-slate-800 px-4 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors" data-filter="digitaux">
+<p class="text-sm font-medium leading-normal">Services Digitaux</p>
+</div>
+<div class="filter-btn flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-slate-200 dark:bg-slate-800 px-4 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors" data-filter="administrative">
+<p class="text-sm font-medium leading-normal">Assistance Administrative</p>
+</div>
+<div class="filter-btn flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-slate-200 dark:bg-slate-800 px-4 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors" data-filter="formations">
+<p class="text-sm font-medium leading-normal">Formations</p>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="services-grid">
+<!-- Service Card 1 -->
+<div class="service-card flex flex-col gap-4 p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300" data-category="digitaux">
+<div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">groups</span>
+</div>
+<div class="flex flex-col gap-2">
+<h3 class="text-slate-900 dark:text-slate-50 text-lg font-bold">Gestion des Réseaux Sociaux</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm">Augmentez votre présence en ligne et engagez votre communauté.</p>
+</div>
+<a class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline" href="#">
+                                    En savoir plus
+                                    <span class="material-symbols-outlined text-base">arrow_forward</span>
+</a>
+</div>
+<!-- Service Card 2 -->
+<div class="service-card flex flex-col gap-4 p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300" data-category="digitaux">
+<div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">mail</span>
+</div>
+<div class="flex flex-col gap-2">
+<h3 class="text-slate-900 dark:text-slate-50 text-lg font-bold">Création de Newsletters</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm">Communiquez efficacement avec vos clients grâce à des campagnes ciblées.</p>
+</div>
+<a class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline" href="#">
+                                    En savoir plus
+                                    <span class="material-symbols-outlined text-base">arrow_forward</span>
+</a>
+</div>
+<!-- Service Card 3 -->
+<div class="service-card flex flex-col gap-4 p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300" data-category="administrative">
+<div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">graphic_eq</span>
+</div>
+<div class="flex flex-col gap-2">
+<h3 class="text-slate-900 dark:text-slate-50 text-lg font-bold">Transcription Audio</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm">Convertissez vos enregistrements audio en documents textes précis.</p>
+</div>
+<a class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline" href="#">
+                                    En savoir plus
+                                    <span class="material-symbols-outlined text-base">arrow_forward</span>
+</a>
+</div>
+<!-- Service Card 4 -->
+<div class="service-card flex flex-col gap-4 p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300" data-category="administrative">
+<div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">calendar_month</span>
+</div>
+<div class="flex flex-col gap-2">
+<h3 class="text-slate-900 dark:text-slate-50 text-lg font-bold">Gestion d'Agenda</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm">Libérez votre esprit et ne manquez plus jamais un rendez-vous important.</p>
+</div>
+<a class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline" href="#">
+                                    En savoir plus
+                                    <span class="material-symbols-outlined text-base">arrow_forward</span>
+</a>
+</div>
+<!-- Service Card 5 -->
+<div class="service-card flex flex-col gap-4 p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300" data-category="administrative">
+<div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">receipt_long</span>
+</div>
+<div class="flex flex-col gap-2">
+<h3 class="text-slate-900 dark:text-slate-50 text-lg font-bold">Facturation et Devis</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm">Assurez une gestion financière rigoureuse et professionnelle.</p>
+</div>
+<a class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline" href="#">
+                                    En savoir plus
+                                    <span class="material-symbols-outlined text-base">arrow_forward</span>
+</a>
+</div>
+<!-- Service Card 6 -->
+<div class="service-card flex flex-col gap-4 p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300" data-category="formations">
+<div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">model_training</span>
+</div>
+<div class="flex flex-col gap-2">
+<h3 class="text-slate-900 dark:text-slate-50 text-lg font-bold">Formation Outils Bureautiques</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm">Maîtrisez les logiciels essentiels pour booster votre productivité.</p>
+</div>
+<a class="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline" href="#">
+                                    En savoir plus
+                                    <span class="material-symbols-outlined text-base">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Benefits Section -->
+<section class="py-20 bg-gradient-to-br from-primary/5 via-slate-50 to-accent/5 dark:from-primary/10 dark:via-slate-900 dark:to-accent/10">
+<div class="mx-auto max-w-7xl px-4 sm:px-8 lg:px-16">
+<div class="text-center mb-16">
+<h2 class="text-slate-900 dark:text-slate-50 text-3xl sm:text-4xl font-black leading-tight tracking-tight mb-4">
+Pourquoi Nous Choisir ?
+</h2>
+<p class="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
+Des avantages concrets qui font la différence</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Benefit 1 -->
+<div class="benefit-card group bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-200 dark:border-slate-800">
+<div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform">verified_user</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-slate-50 mb-3">Confidentialité Totale</h3>
+<p class="text-slate-600 dark:text-slate-400">Vos données sont protégées avec les plus hauts standards de sécurité.</p>
+</div>
+<!-- Benefit 2 -->
+<div class="benefit-card group bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-200 dark:border-slate-800">
+<div class="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
+<span class="material-symbols-outlined text-4xl text-accent group-hover:scale-110 transition-transform">support_agent</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-slate-50 mb-3">Support Réactif</h3>
+<p class="text-slate-600 dark:text-slate-400">Une équipe disponible 7j/7 pour répondre à vos besoins urgents.</p>
+</div>
+<!-- Benefit 3 -->
+<div class="benefit-card group bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-200 dark:border-slate-800">
+<div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform">savings</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-slate-50 mb-3">Tarifs Transparents</h3>
+<p class="text-slate-600 dark:text-slate-400">Aucun coût caché, des devis clairs et des prix compétitifs.</p>
+</div>
+</div>
+</div>
+</section>
+<footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 mt-16">
+<div class="mx-auto max-w-7xl px-4 sm:px-8 lg:px-16 py-16">
+<div class="bg-primary/10 dark:bg-primary/20 p-8 sm:p-12 rounded-xl flex flex-col lg:flex-row items-center justify-between gap-8 text-center lg:text-left">
+<div class="flex flex-col gap-2">
+<h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50">Prêt à déléguer ?</h2>
+<p class="text-slate-600 dark:text-slate-400">Contactez-nous pour un devis gratuit et découvrez comment nous pouvons vous aider.</p>
+</div>
+<a class="flex min-w-[160px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors flex-shrink-0" href="contacts.html">
+<span class="truncate">Contactez-nous</span>
+</a>
+</div>
+<div class="flex flex-col sm:flex-row justify-between items-center mt-12 gap-6">
+<p class="text-slate-500 dark:text-slate-400 text-sm">© 2024 Secrétariat Pro. Tous droits réservés.</p>
+<div class="flex items-center gap-6">
+<a class="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<!-- Placeholder for social icon, e.g., Twitter -->
+<svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path></svg>
+</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+<!-- Placeholder for social icon, e.g., LinkedIn -->
+<svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24"><path clip-rule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" fill-rule="evenodd"></path></svg>
+</a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+</div>
+
+</body>
+
+{% endblock %}

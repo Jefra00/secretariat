@@ -1,0 +1,72 @@
+{% extends 'base/base1.html' %}
+{% load static %}
+
+{% block title %}Modifier mon profil{% endblock %}
+
+{% block content %}
+
+<main class="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-black tracking-tighter sm:text-5xl">Modifier mes informations</h1>
+        <p class="mt-4 text-lg text-text-muted-light dark:text-text-muted-dark">
+            Vous pouvez ici mettre à jour vos informations personnelles.
+        </p>
+    </div>
+
+    {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+                <div class="p-4 mb-4 rounded-lg 
+                    {% if message.tags == 'error' %}bg-red-100 text-red-700
+                    {% elif message.tags == 'success' %}bg-green-100 text-green-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="p-8 rounded-lg bg-foreground-light dark:bg-foreground-dark border border-slate-200 dark:border-slate-800 shadow-sm">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <!-- Avatar -->
+            <div class="flex flex-col items-center mb-6">
+                {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" alt="Avatar" class="w-24 h-24 rounded-full object-cover mb-3">
+                {% else %}
+                    <div class="w-24 h-24 rounded-full bg-gray-200 mb-3 flex items-center justify-center text-gray-500">Aucun</div>
+                {% endif %}
+                <label class="block text-sm font-medium mb-1">Changer votre photo :</label>
+                {{ form.avatar }}
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>{{ form.first_name.label_tag }} {{ form.first_name }}</div>
+                <div>{{ form.last_name.label_tag }} {{ form.last_name }}</div>
+            </div>
+
+            <div>{{ form.email.label_tag }} {{ form.email }}</div>
+            <div>{{ form.telephone.label_tag }} {{ form.telephone }}</div>
+            <div>{{ form.pays.label_tag }} {{ form.pays }}</div>
+            <div>{{ form.adresse.label_tag }} {{ form.adresse }}</div>
+            <div>{{ form.langue.label_tag }} {{ form.langue }}</div>
+            <div>{{ form.bio.label_tag }} {{ form.bio }}</div>
+
+            <button type="submit" class="w-full py-3 px-4 rounded-lg text-white bg-primary hover:bg-primary/90 transition">
+                Mettre à jour mes informations
+            </button>
+        </form>
+    </div>
+</main>
+
+<footer class="w-full border-t border-slate-200 dark:border-slate-800 bg-foreground-light dark:bg-foreground-dark mt-12">
+    <div class="max-w-7xl mx-auto py-8 px-4 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
+        <p>© 2025 Secrétariat Pro. Tous droits réservés.</p>
+    </div>
+</footer>
+
+</div>
+</div>
+</body>
+{% endblock %}

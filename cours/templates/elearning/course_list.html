@@ -1,0 +1,199 @@
+{% extends "base/base1.html" %}
+{% load static %}
+
+{% block title %}🎓 Nos Formations - Secrétariat Pro{% endblock %}
+
+{% block content %}
+<main class="flex flex-col gap-20">
+
+  <!-- 🎯 Hero Section -->
+  <section class="relative w-full h-[70vh] overflow-hidden rounded-b-[3rem]">
+    <div
+      class="absolute inset-0 bg-cover bg-center"
+      style="background-image: url('https://images.unsplash.com/photo-1554774853-b415df9eeb92?auto=format&fit=crop&w=1600&q=80'); filter: brightness(0.55); background-attachment: fixed;">
+    </div>
+
+    <div class="relative z-10 flex flex-col justify-center items-center text-center h-full text-white px-8 md:px-16">
+      <h1 class="text-5xl md:text-6xl font-extrabold drop-shadow-lg mb-4">
+        <span class="text-primary">Secrétariat Pro</span> Formations
+      </h1>
+      <p class="max-w-2xl text-lg md:text-xl text-gray-100 leading-relaxed">
+        Découvrez nos formations pratiques et interactives pour maîtriser les compétences clés du secrétariat moderne, du management et de la communication professionnelle.
+      </p>
+    </div>
+  </section>
+
+  <!-- 💡 Introduction -->
+  <section class="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center px-6">
+    <div>
+      <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+        🚀 Développez vos compétences, à votre rythme
+      </h2>
+      <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+        Nos formations sont conçues par des experts pour vous offrir une expérience d’apprentissage <strong>simple, claire et efficace</strong>.
+        Chaque module est interactif et vous donne les outils nécessaires pour progresser dans votre carrière.
+      </p>
+      <a href="#courses" class="inline-flex items-center text-primary hover:underline font-medium">
+        Voir les formations disponibles ↓
+      </a>
+    </div>
+    <img src="https://images.unsplash.com/photo-1554774853-b415df9eeb92?auto=format&fit=crop&w=1600&q=80"
+         alt="Apprentissage en ligne"
+         class="rounded-2xl shadow-lg hover:scale-[1.03] transition-transform duration-300">
+  </section>
+
+  <!-- 📚 Liste des cours -->
+<section id="courses" class="max-w-7xl mx-auto px-6 py-10">
+  <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-10 text-center">
+    🎓 Nos Formations Disponibles
+  </h2>
+
+  {% if courses %}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% for course in courses %}
+        <div class="course-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col">
+          
+          <!-- 🖼️ Image -->
+          <div class="relative">
+            <img src="{{ course.image_couverture.url }}" alt="{{ course.titre }}" class="w-full h-52 object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 hover:opacity-100 transition-opacity"></div>
+          </div>
+
+          <!-- 📘 Contenu -->
+          <div class="p-6 flex-grow flex flex-col justify-between">
+            <div>
+              <h3 class="text-xl font-semibold text-primary mb-2">{{ course.titre }}</h3>
+              
+              <!-- Description avec "Afficher plus / moins" -->
+              <p class="course-desc text-slate-600 dark:text-slate-300 text-[15px] leading-relaxed line-clamp-4">
+                {{ course.description|safe }}
+              </p>
+              <button class="toggle-desc mt-2 text-sm text-primary hover:underline font-medium">
+                Afficher plus
+              </button>
+            </div>
+
+            <div class="mt-4 text-sm text-slate-500 flex items-center justify-between">
+              <span>💰 <strong>{{ course.prix }} €</strong></span>
+              <span>⏱ {{ course.duree }}</span>
+            </div>
+          </div>
+
+          <!-- 🧭 Footer -->
+          <div class="p-4 border-t border-slate-100 dark:border-slate-800 text-center">
+            <a href="{% url 'elearning:course_detail' course.id %}"
+               class="inline-flex items-center justify-center bg-primary text-white font-semibold rounded-lg px-5 py-2 hover:bg-primary/90 transition">
+              Voir le cours →
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- 📄 Pagination élégante -->
+    {% if courses.has_other_pages %}
+      <div class="flex justify-center items-center gap-2 mt-12">
+        {% if courses.has_previous %}
+          <a href="?page={{ courses.previous_page_number }}"
+             class="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-md hover:bg-primary hover:text-white transition">
+            ← Précédent
+          </a>
+        {% endif %}
+
+        {% for num in courses.paginator.page_range %}
+          {% if courses.number == num %}
+            <span class="px-4 py-2 bg-primary text-white rounded-md">{{ num }}</span>
+          {% elif num > courses.number|add:'-3' and num < courses.number|add:'3' %}
+            <a href="?page={{ num }}"
+               class="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-md hover:bg-primary hover:text-white transition">
+              {{ num }}
+            </a>
+          {% endif %}
+        {% endfor %}
+
+        {% if courses.has_next %}
+          <a href="?page={{ courses.next_page_number }}"
+             class="px-4 py-2 bg-slate-200 dark:bg-slate-800 rounded-md hover:bg-primary hover:text-white transition">
+            Suivant →
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% else %}
+    <p class="text-center text-slate-500">Aucune formation disponible pour le moment.</p>
+  {% endif %}
+</section>
+
+
+  <!-- 🌟 Section CTA -->
+  <section class="bg-primary/10 dark:bg-primary/20 rounded-3xl mx-6 my-16 py-12 text-center flex flex-col items-center gap-6 max-w-5xl mx-auto">
+    <h2 class="text-3xl font-bold text-slate-900 dark:text-white">
+      Prêt à passer au niveau supérieur ?
+    </h2>
+    <p class="text-gray-700 dark:text-gray-300 max-w-2xl">
+      Rejoignez notre plateforme et profitez de formations exclusives, certifiées et adaptées à vos besoins.  
+      Chaque cours vous guide vers une meilleure productivité et une expertise reconnue.
+    </p>
+    <a href="#courses"
+       class="flex items-center justify-center rounded-xl bg-primary text-white font-semibold px-6 py-3 hover:bg-primary/90 transition">
+      🚀 Découvrir toutes les formations
+    </a>
+  </section>
+
+</main>
+
+<!-- ✨ Animations -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Animation d'apparition des cours
+  const cards = document.querySelectorAll(".course-card");
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = "1";
+        entry.target.style.transform = "translateY(0)";
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  cards.forEach(card => {
+    card.style.opacity = "0";
+    card.style.transform = "translateY(40px)";
+    card.style.transition = "all 0.6s ease-out";
+    observer.observe(card);
+  });
+
+  // Gestion "Afficher plus / moins" pour descriptions
+  const courses = document.querySelectorAll(".course-card");
+  courses.forEach(card => {
+    const desc = card.querySelector(".course-desc");
+    const btn = card.querySelector(".toggle-desc");
+    let expanded = false;
+
+    btn.addEventListener("click", () => {
+      expanded = !expanded;
+      if (expanded) {
+        desc.classList.remove("line-clamp-4");
+        btn.textContent = "Afficher moins";
+      } else {
+        desc.classList.add("line-clamp-4");
+        btn.textContent = "Afficher plus";
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+
+    window.addEventListener("scroll", () => {
+      if (expanded) {
+        const rect = card.getBoundingClientRect();
+        if (rect.bottom < 0 || rect.top > window.innerHeight) {
+          expanded = false;
+          desc.classList.add("line-clamp-4");
+          btn.textContent = "Afficher plus";
+        }
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

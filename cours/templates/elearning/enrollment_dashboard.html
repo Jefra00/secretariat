@@ -1,0 +1,35 @@
+{% extends "base/base1.html" %}
+{% block title %}Mon apprentissage{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto py-10 px-6">
+  <h1 class="text-3xl font-bold mb-6">Mes formations</h1>
+
+  <div class="space-y-4">
+    {% for e in inscriptions %}
+      <div class="bg-white dark:bg-slate-900 p-4 rounded-lg shadow flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-semibold">{{ e.course.titre }}</h2>
+          <p class="text-sm text-slate-500">Statut : <strong>{{ e.get_statut_display }}</strong> — Inscrit le {{ e.date_inscription|date:"d M Y" }}</p>
+          {% if e.session %}
+            <p class="text-sm text-slate-500">Session : {{ e.session.date_debut|date:"d M Y" }}{% if e.session.date_fin %} — {{ e.session.date_fin|date:"d M Y" }}{% endif %}</p>
+          {% endif %}
+        </div>
+
+        <div class="flex items-center gap-3">
+          {% if e.est_terminee %}
+            <a href="{% url 'elearning:telecharger_certificat' e.id %}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Télécharger le certificat</a>
+          {% else %}
+            <a href="{% url 'elearning:course_detail' e.course.id %}" class="text-primary hover:underline">Voir le cours</a>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow text-center">
+        <p class="text-slate-500">Vous n'êtes inscrit à aucun cours pour le moment.</p>
+        <a href="{% url 'elearning:course_list' %}" class="mt-4 inline-block bg-primary text-white px-4 py-2 rounded">Découvrir les cours</a>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

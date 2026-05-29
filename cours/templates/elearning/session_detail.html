@@ -1,0 +1,42 @@
+{% extends "base/base1.html" %}
+{% block title %}Session — {{ session.course.titre }}{% endblock %}
+
+{% block content %}
+<section class="max-w-3xl mx-auto py-10 px-6">
+  <div class="bg-white dark:bg-slate-900 rounded-lg p-6 shadow">
+    <h1 class="text-2xl font-bold mb-2">{{ session.course.titre }}</h1>
+    <p class="text-sm text-slate-500 mb-4">Session du {{ session.date_debut|date:"d M Y" }}{% if session.date_fin %} au {{ session.date_fin|date:"d M Y" }}{% endif %}</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <h3 class="font-semibold">Formateur</h3>
+        <p class="text-slate-700">{{ session.formateur.get_full_name|default:session.formateur.username }}</p>
+
+        <h3 class="font-semibold mt-4">Lieu</h3>
+        <p class="text-slate-700">{{ session.lieu|default:"En ligne" }}</p>
+
+        <h3 class="font-semibold mt-4">Capacité</h3>
+        <p class="text-slate-700">{{ session.inscrits }} / {{ session.capacite_max }} ({{ session.taux_occupation }}%)</p>
+      </div>
+
+      <div>
+        <h3 class="font-semibold">Statut</h3>
+        <p class="text-slate-700">{{ session.get_statut_display }}</p>
+
+        <h3 class="font-semibold mt-4">Durée</h3>
+        <p class="text-slate-700">{{ session.duree_jours }} jour(s)</p>
+
+        <div class="mt-6">
+          <a href="{% url 'elearning:inscrire_course' session.course.id %}?session={{ session.id }}" class="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90">
+            ✅ S'inscrire à cette session
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 text-sm text-slate-500">
+      <p>Dernière mise à jour : {{ session.course.date_modification|date:"d M Y" }}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

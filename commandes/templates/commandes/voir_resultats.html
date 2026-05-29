@@ -1,0 +1,159 @@
+{% extends "base/base1.html" %}
+{% load fichier_filters %}
+{% block title %}Résultats - {{ commande.service.nom }}{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto py-16 px-8">
+
+  <!-- 🎯 En-tête principale -->
+  <div class="text-center mb-14">
+    <h1 class="text-5xl font-extrabold text-slate-900 dark:text-white mb-3 animate-fade-in">
+      ✨ Résultats de votre commande
+    </h1>
+    <p class="text-lg text-slate-600 dark:text-slate-400">
+      Commande <span class="font-semibold">{{ commande.code_commande }}</span> 
+      • passée le {{ commande.date_commande|date:"d M Y" }}
+    </p>
+  </div>
+
+  <!-- 📁 FICHIERS LIVRÉS -->
+  <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 p-10 mb-12">
+    <h2 class="text-3xl font-semibold text-primary mb-6 flex items-center gap-2">
+      <span class="material-symbols-outlined text-4xl">folder_special</span> 
+      Vos fichiers livrés
+    </h2>
+
+    {% if resultats %}
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {% for r in resultats %}
+      <div class="relative group bg-slate-50 dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg hover:scale-[1.02] transition duration-300">
+
+        <!-- Type de fichier -->
+        <div class="flex flex-col items-center justify-center">
+          {% if r.fichier.url|lower|endswith:".pdf" %}
+            <span class="material-symbols-outlined text-6xl text-red-500">picture_as_pdf</span>
+          {% elif r.fichier.url|lower|endswith:".doc" or r.fichier.url|lower|endswith:".docx" %}
+            <span class="material-symbols-outlined text-6xl text-blue-500">description</span>
+          {% elif r.fichier.url|lower|endswith:".png" or r.fichier.url|lower|endswith:".jpg" or r.fichier.url|lower|endswith:".jpeg" %}
+            <img src="{{ r.fichier.url }}" alt="{{ r.nom }}" class="w-32 h-32 object-cover rounded-md shadow mb-3">
+          {% else %}
+            <span class="material-symbols-outlined text-6xl text-slate-500">insert_drive_file</span>
+          {% endif %}
+        </div>
+
+        <!-- Nom et date -->
+        <div class="mt-3 text-center">
+          <p class="font-semibold text-slate-800 dark:text-slate-200 truncate">{{ r.nom|default:"Fichier livré" }}</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Livré le {{ r.date_ajout|date:"d M Y à H:i" }}</p>
+        </div>
+
+        <!-- Boutons d’action -->
+        <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-2xl">
+          <div class="flex gap-3">
+            <a href="{{ r.fichier.url }}" download 
+               class="px-3 py-1.5 bg-primary text-white text-sm rounded-md hover:bg-primary/90 transition">
+              Télécharger
+            </a>
+            {% if r.fichier.url|lower|endswith:".pdf" or r.fichier.url|lower|endswith:".jpg" or r.fichier.url|lower|endswith:".png" %}
+            <a href="{{ r.fichier.url }}" target="_blank" 
+               class="px-3 py-1.5 bg-slate-700 text-white text-sm rounded-md hover:bg-slate-600 transition">
+              Visualiser
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="text-center py-10 text-slate-500 dark:text-slate-400">
+      <span class="material-symbols-outlined text-6xl mb-3 text-slate-400 animate-pulse">folder_off</span>
+      <p>Aucun fichier livré pour cette commande pour le moment.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- 🧠 EXPLICATIONS -->
+  <div class="bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-md p-10 mb-12">
+    <h3 class="text-3xl font-semibold text-primary mb-6 flex items-center gap-2">
+      <span class="material-symbols-outlined text-4xl">psychology</span> 
+      Explication du travail effectué
+    </h3>
+
+    {% if resultats %}
+      {% for r in resultats %}
+      {% if r.commentaire %}
+      <div class="mb-6 p-5 rounded-lg bg-slate-100 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700">
+        <p class="text-slate-700 dark:text-slate-300 leading-relaxed">{{ r.commentaire }}</p>
+        <p class="text-xs text-slate-500 mt-2">— ajouté le {{ r.date_ajout|date:"d M Y à H:i" }}</p>
+      </div>
+      {% endif %}
+      {% endfor %}
+    {% else %}
+      <p class="text-slate-600 dark:text-slate-400">Aucune explication disponible pour le moment.</p>
+    {% endif %}
+  </div>
+
+  <!-- 🛠 Section d'assistance -->
+  <div class="bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-2xl p-8 text-center shadow-md mb-12">
+    <h4 class="text-2xl font-semibold text-rose-600 dark:text-rose-400 mb-2">Un problème avec le travail livré ?</h4>
+    <p class="text-slate-600 dark:text-slate-400 mb-4">Si vous remarquez une erreur ou souhaitez une révision, signalez-le ci-dessous :</p>
+    <button onclick="openFeedbackModal()" 
+            class="px-6 py-2 bg-rose-600 text-white font-medium rounded-md hover:bg-rose-700 transition">
+      🛠 Signaler un problème
+    </button>
+  </div>
+
+  <!-- 🔙 Retour -->
+  <div class="text-center">
+    <a href="{% url 'commandes:mes_commandes' %}" 
+       class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+      <span class="material-symbols-outlined text-base">arrow_back</span>
+      Retour à mes commandes
+    </a>
+  </div>
+</section>
+
+<!-- 🪟 Modale de feedback -->
+<div id="feedbackModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-lg relative shadow-xl animate-fade-in">
+    <button onclick="closeFeedbackModal()" 
+            class="absolute top-3 right-3 text-slate-400 hover:text-slate-800 dark:hover:text-white">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <h3 class="text-xl font-semibold text-rose-600 mb-3">🛠 Signaler une erreur</h3>
+    <p class="text-slate-600 dark:text-slate-400 mb-4">Décrivez le problème rencontré sur le travail livré :</p>
+    <textarea id="feedbackText" rows="5" class="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-3 text-sm bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-rose-500 outline-none"></textarea>
+    <div class="mt-4 text-right">
+      <button onclick="submitFeedback()" 
+              class="px-5 py-2 bg-rose-600 text-white rounded-md hover:bg-rose-700 transition">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🎬 Animations & scripts -->
+<script>
+function openFeedbackModal() {
+  document.getElementById('feedbackModal').classList.remove('hidden');
+}
+function closeFeedbackModal() {
+  document.getElementById('feedbackModal').classList.add('hidden');
+}
+function submitFeedback() {
+  const text = document.getElementById('feedbackText').value.trim();
+  if (!text) return alert("Veuillez décrire le problème avant d'envoyer.");
+  alert("✅ Merci pour votre retour. Nous allons examiner votre remarque !");
+  closeFeedbackModal();
+}
+</script>
+
+<style>
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fade-in 0.6s ease-out; }
+</style>
+
+{% endblock %}
