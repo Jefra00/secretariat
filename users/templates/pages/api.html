@@ -1,128 +1,298 @@
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{% extends "base/base.html" %}
+{% block title %}Documentation API — Secrétariat Pro{% endblock %}
 
-<style>
-#bv-about { position:relative; width:100vw; left:50%; margin-left:-50vw; max-width:100vw; overflow-x:hidden; font-family:'Raleway',sans-serif; }
-*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-:root { --navy:#1B2A4A; --navy-dark:#12203A; --gold:#C8A951; --gold-light:#DFC278; --cream:#F8F5EE; --white:#FFFFFF; }
+{% block content %}
 
-.ab-section { background:var(--cream); padding:6rem 2rem; }
-.ab-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:center; }
+<!-- Dark developer hero -->
+<div class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+  <div class="max-w-6xl mx-auto px-6 py-12">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-xs text-slate-500 mb-8">
+      <a href="{% url 'accueil' %}" class="hover:text-slate-300 transition">Accueil</a>
+      <span class="material-symbols-outlined text-sm">chevron_right</span>
+      <span class="text-slate-300 font-medium">API</span>
+    </nav>
 
-/* TEXTE GAUCHE */
-.ab-eyebrow { font-size:0.6rem; letter-spacing:0.45em; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.8rem; }
-.ab-eyebrow::before { content:''; display:inline-block; width:30px; height:1px; background:var(--gold); }
-.ab-title { font-family:'Playfair Display',serif; font-size:clamp(2rem,3.5vw,3rem); font-weight:400; color:var(--navy); line-height:1.2; margin-bottom:1.5rem; }
-.ab-title em { font-style:italic; color:var(--gold); }
-.ab-divider { width:50px; height:2px; background:linear-gradient(90deg,var(--gold),transparent); margin-bottom:1.8rem; }
-.ab-text { font-size:0.88rem; font-weight:300; line-height:2; color:#4A5568; margin-bottom:1rem; }
-.ab-text strong { color:var(--navy); font-weight:600; }
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+      <div>
+        <div class="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+          <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+          REST API v1
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-bold text-white mb-3">Documentation API</h1>
+        <p class="text-slate-400 text-sm max-w-2xl leading-relaxed">
+          Intégrez les services Secrétariat Pro directement dans vos applications. Notre API REST renvoie des réponses JSON, supporte l'authentification par token et est disponible en HTTPS.
+        </p>
+      </div>
 
-/* POINTS FORTS */
-.ab-points { display:flex; flex-direction:column; gap:0.8rem; margin:1.8rem 0 2.2rem; }
-.ab-point { display:flex; align-items:flex-start; gap:1rem; }
-.ab-point-icon { width:32px; height:32px; background:rgba(200,169,81,0.12); border:1px solid rgba(200,169,81,0.3); display:flex; align-items:center; justify-content:center; font-size:0.85rem; flex-shrink:0; margin-top:0.1rem; }
-.ab-point-text { font-size:0.82rem; font-weight:400; color:#4A5568; line-height:1.6; }
-.ab-point-text strong { color:var(--navy); font-weight:600; display:block; margin-bottom:0.1rem; }
-
-/* BOUTONS */
-.ab-btns { display:flex; gap:1rem; flex-wrap:wrap; }
-.ab-btn-gold { padding:0.9rem 2rem; background:var(--gold); color:var(--navy-dark); font-family:'Raleway',sans-serif; font-size:0.68rem; font-weight:700; letter-spacing:0.25em; text-transform:uppercase; text-decoration:none; display:inline-block; transition:background 0.3s; border:none; cursor:pointer; }
-.ab-btn-gold:hover { background:var(--gold-light); }
-.ab-btn-outline { padding:0.9rem 2rem; background:transparent; color:var(--navy); border:1px solid rgba(27,42,74,0.3); font-family:'Raleway',sans-serif; font-size:0.68rem; font-weight:500; letter-spacing:0.2em; text-transform:uppercase; text-decoration:none; display:inline-block; transition:all 0.3s; }
-.ab-btn-outline:hover { border-color:var(--gold); color:var(--gold); }
-
-/* PHOTO DROITE */
-.ab-media { position:relative; }
-.ab-img-wrap { position:relative; }
-.ab-img-wrap::before { content:''; position:absolute; top:-18px; right:-18px; width:100%; height:100%; border:2px solid rgba(200,169,81,0.3); z-index:0; }
-.ab-img { width:100%; height:480px; object-fit:cover; position:relative; z-index:1; display:block; }
-
-/* SI PAS D'IMAGE — remplacer par background-image */
-.ab-img-placeholder { width:100%; height:480px; position:relative; z-index:1; background-image:url('COLLER-ICI-LE-LIEN-DE-VOTRE-PHOTO-HUBLOT'); background-size:cover; background-position:center; }
-
-/* BADGE FLOTTANT */
-.ab-badge { position:absolute; bottom:-1.5rem; left:-1.5rem; z-index:2; background:var(--navy); padding:1.3rem 1.8rem; border-left:3px solid var(--gold); }
-.ab-badge-num { font-family:'Playfair Display',serif; font-size:2rem; font-weight:600; color:var(--gold); line-height:1; }
-.ab-badge-text { font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:rgba(255,255,255,0.6); margin-top:0.2rem; }
-
-/* RESPONSIVE */
-@media (max-width:900px) {
-.ab-inner { grid-template-columns:1fr; gap:3rem; }
-.ab-media { order:-1; }
-.ab-img, .ab-img-placeholder { height:320px; }
-.ab-img-wrap::before { display:none; }
-.ab-badge { bottom:1rem; left:1rem; }
-}
-@media (max-width:600px) {
-.ab-section { padding:4rem 1.5rem; }
-.ab-btns { flex-direction:column; }
-}
-</style>
-
-<div id="bv-about">
-<section class="ab-section">
-<div class="ab-inner">
-
-<!-- TEXTE GAUCHE -->
-<div class="ab-text-col">
-<p class="ab-eyebrow">Qui sommes-nous</p>
-<h2 class="ab-title">Votre agence de<br><em>réservation de voyages</em></h2>
-<div class="ab-divider"></div>
-
-<p class="ab-text"><strong>Breanhy Voyages</strong> est une agence de voyages en ligne spécialisée dans la vente de billets d'avion et la réservation d'hôtels à travers le monde.</p>
-<p class="ab-text">Nous accompagnons nos clients avec une approche <strong>humaine, rigoureuse et haute gamme</strong> — pour que chaque voyage soit une expérience sans stress, de la réservation jusqu'au retour.</p>
-
-<div class="ab-points">
-<div class="ab-point">
-<div class="ab-point-icon">✈</div>
-<div class="ab-point-text">
-<strong>Billets d'avion dans le monde entier</strong>
-Économique, Affaires ou Première Classe — nous trouvons les meilleures options pour votre budget.
-</div>
-</div>
-<div class="ab-point">
-<div class="ab-point-icon">🏨</div>
-<div class="ab-point-text">
-<strong>Hôtels & hébergements sélectionnés</strong>
-Des adresses vérifiées pour les familles, les entreprises et les voyageurs haute gamme.
-</div>
-</div>
-<div class="ab-point">
-<div class="ab-point-icon">💼</div>
-<div class="ab-point-text">
-<strong>Voyages d'affaires & séminaires</strong>
-Gestion complète de vos déplacements professionnels et groupes corporate.
-</div>
-</div>
+      <div class="flex-shrink-0 flex items-center gap-3">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-center">
+          <p class="text-2xl font-bold text-white">REST</p>
+          <p class="text-slate-500 text-xs mt-0.5">Architecture</p>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-center">
+          <p class="text-2xl font-bold text-green-400">JSON</p>
+          <p class="text-slate-500 text-xs mt-0.5">Format</p>
+        </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-center">
+          <p class="text-2xl font-bold text-blue-400">HTTPS</p>
+          <p class="text-slate-500 text-xs mt-0.5">Sécurisé</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="ab-btns">
-<a href="/billet-davion" class="ab-btn-gold">✈ Rechercher un vol</a>
-<a href="/contact" class="ab-btn-outline">Nous contacter</a>
-</div>
+<div class="max-w-6xl mx-auto px-6 py-12 space-y-10">
+
+  <!-- Authentication section -->
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+      <div class="w-9 h-9 bg-amber-50 dark:bg-amber-900/20 rounded-xl flex items-center justify-center">
+        <span class="material-symbols-outlined text-base text-amber-500">key</span>
+      </div>
+      <div>
+        <h2 class="text-base font-bold text-slate-900 dark:text-white">Authentification</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Toutes les requêtes nécessitent un token Bearer</p>
+      </div>
+    </div>
+    <div class="p-6">
+      <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">
+        Incluez votre token API dans l'en-tête <code class="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-xs font-mono text-blue-600 dark:text-blue-400">Authorization</code> de chaque requête :
+      </p>
+      <div class="bg-slate-900 dark:bg-black rounded-xl p-4 font-mono text-xs overflow-x-auto">
+        <p class="text-slate-500 mb-1"># En-tête HTTP requis</p>
+        <p><span class="text-blue-400">Authorization</span><span class="text-slate-400">: </span><span class="text-green-400">Bearer YOUR_API_TOKEN</span></p>
+        <p class="mt-2 text-slate-500"># Exemple avec curl</p>
+        <p><span class="text-yellow-400">curl</span> <span class="text-slate-300">-H "Authorization: Bearer YOUR_API_TOKEN" \</span></p>
+        <p class="pl-6"><span class="text-slate-300">https://api.secretariat-pro.com/v1/services/</span></p>
+      </div>
+      <div class="mt-4 flex items-start gap-2 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl px-4 py-3">
+        <span class="material-symbols-outlined text-sm text-amber-500 flex-shrink-0 mt-0.5">warning</span>
+        <p class="text-xs text-amber-700 dark:text-amber-300">
+          Ne partagez jamais votre token API. Gardez-le secret et régénérez-le si vous pensez qu'il est compromis.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Endpoints section -->
+  <div>
+    <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-5">Endpoints disponibles</h2>
+
+    <div class="space-y-4">
+
+      <!-- Services endpoints -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+          <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+            <span class="material-symbols-outlined text-base text-blue-500">category</span>
+            Services
+          </h3>
+        </div>
+
+        <div class="divide-y divide-slate-100 dark:divide-slate-800">
+
+          <!-- GET /services/ -->
+          <div class="px-6 py-5 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+            <div class="flex items-start gap-4 flex-wrap">
+              <div class="flex items-center gap-2.5 flex-shrink-0">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 font-mono">GET</span>
+                <code class="text-sm font-mono text-slate-800 dark:text-slate-200">/api/v1/services/</code>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400 flex-1">Récupère la liste de tous les services disponibles.</p>
+            </div>
+            <div class="mt-3">
+              <div class="bg-slate-900 dark:bg-black rounded-xl p-3 font-mono text-xs overflow-x-auto">
+                <p class="text-slate-500 mb-1">// Réponse exemple</p>
+                <p class="text-slate-300">{</p>
+                <p class="pl-4"><span class="text-blue-400">"count"</span><span class="text-slate-400">: </span><span class="text-orange-400">12</span><span class="text-slate-400">,</span></p>
+                <p class="pl-4"><span class="text-blue-400">"results"</span><span class="text-slate-400">: [</span></p>
+                <p class="pl-8"><span class="text-slate-400">{ </span><span class="text-blue-400">"id"</span><span class="text-slate-400">: </span><span class="text-orange-400">1</span><span class="text-slate-400">, </span><span class="text-blue-400">"nom"</span><span class="text-slate-400">: </span><span class="text-green-400">"Traduction"</span><span class="text-slate-400">, ... }</span></p>
+                <p class="pl-4"><span class="text-slate-400">]</span></p>
+                <p class="text-slate-300">}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- GET /services/{id}/ -->
+          <div class="px-6 py-5 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+            <div class="flex items-start gap-4 flex-wrap">
+              <div class="flex items-center gap-2.5 flex-shrink-0">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 font-mono">GET</span>
+                <code class="text-sm font-mono text-slate-800 dark:text-slate-200">/api/v1/services/<span class="text-blue-500">{id}</span>/</code>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400 flex-1">Récupère les détails d'un service par son identifiant.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Commandes endpoints -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+          <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+            <span class="material-symbols-outlined text-base text-purple-500">shopping_bag</span>
+            Commandes
+          </h3>
+        </div>
+
+        <div class="divide-y divide-slate-100 dark:divide-slate-800">
+
+          <!-- GET /commandes/ -->
+          <div class="px-6 py-5 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+            <div class="flex items-start gap-4 flex-wrap">
+              <div class="flex items-center gap-2.5 flex-shrink-0">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 font-mono">GET</span>
+                <code class="text-sm font-mono text-slate-800 dark:text-slate-200">/api/v1/commandes/</code>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400 flex-1">Récupère la liste des commandes de l'utilisateur authentifié.</p>
+            </div>
+          </div>
+
+          <!-- POST /commandes/ -->
+          <div class="px-6 py-5 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+            <div class="flex items-start gap-4 flex-wrap">
+              <div class="flex items-center gap-2.5 flex-shrink-0">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-mono">POST</span>
+                <code class="text-sm font-mono text-slate-800 dark:text-slate-200">/api/v1/commandes/</code>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400 flex-1">Crée une nouvelle commande. Corps JSON requis.</p>
+            </div>
+            <div class="mt-3">
+              <div class="bg-slate-900 dark:bg-black rounded-xl p-3 font-mono text-xs overflow-x-auto">
+                <p class="text-slate-500 mb-1">// Corps de la requête (JSON)</p>
+                <p class="text-slate-300">{</p>
+                <p class="pl-4"><span class="text-blue-400">"service_id"</span><span class="text-slate-400">: </span><span class="text-orange-400">3</span><span class="text-slate-400">,</span></p>
+                <p class="pl-4"><span class="text-blue-400">"description"</span><span class="text-slate-400">: </span><span class="text-green-400">"Traduction de 5 pages FR → EN"</span><span class="text-slate-400">,</span></p>
+                <p class="pl-4"><span class="text-blue-400">"fichier"</span><span class="text-slate-400">: </span><span class="text-green-400">"base64_encoded_file"</span></p>
+                <p class="text-slate-300">}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- GET /commandes/{id}/ -->
+          <div class="px-6 py-5 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+            <div class="flex items-start gap-4 flex-wrap">
+              <div class="flex items-center gap-2.5 flex-shrink-0">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 font-mono">GET</span>
+                <code class="text-sm font-mono text-slate-800 dark:text-slate-200">/api/v1/commandes/<span class="text-blue-500">{id}</span>/</code>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400 flex-1">Récupère les détails d'une commande spécifique.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Support endpoints -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+          <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+            <span class="material-symbols-outlined text-base text-blue-500">support_agent</span>
+            Support / Tickets
+          </h3>
+        </div>
+
+        <div class="divide-y divide-slate-100 dark:divide-slate-800">
+
+          <!-- GET /tickets/ -->
+          <div class="px-6 py-5 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+            <div class="flex items-start gap-4 flex-wrap">
+              <div class="flex items-center gap-2.5 flex-shrink-0">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 font-mono">GET</span>
+                <code class="text-sm font-mono text-slate-800 dark:text-slate-200">/api/v1/tickets/</code>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400 flex-1">Récupère la liste de vos tickets de support.</p>
+            </div>
+          </div>
+
+          <!-- POST /tickets/ -->
+          <div class="px-6 py-5 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+            <div class="flex items-start gap-4 flex-wrap">
+              <div class="flex items-center gap-2.5 flex-shrink-0">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-mono">POST</span>
+                <code class="text-sm font-mono text-slate-800 dark:text-slate-200">/api/v1/tickets/</code>
+              </div>
+              <p class="text-sm text-slate-500 dark:text-slate-400 flex-1">Ouvre un nouveau ticket d'assistance.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- HTTP Status codes -->
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+      <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+        <span class="material-symbols-outlined text-base text-slate-500">info</span>
+        Codes de statut HTTP
+      </h2>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30 rounded-xl">
+          <span class="text-lg font-bold text-green-600 dark:text-green-400 font-mono">200</span>
+          <div>
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">OK</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Requête traitée avec succès.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl">
+          <span class="text-lg font-bold text-blue-600 dark:text-blue-400 font-mono">201</span>
+          <div>
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Created</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Ressource créée avec succès.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl">
+          <span class="text-lg font-bold text-amber-600 dark:text-amber-400 font-mono">400</span>
+          <div>
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Bad Request</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Données invalides ou manquantes.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-xl">
+          <span class="text-lg font-bold text-red-600 dark:text-red-400 font-mono">401</span>
+          <div>
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Unauthorized</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Token manquant ou invalide.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-xl">
+          <span class="text-lg font-bold text-red-600 dark:text-red-400 font-mono">404</span>
+          <div>
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Not Found</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">La ressource demandée n'existe pas.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-xl">
+          <span class="text-lg font-bold text-red-600 dark:text-red-400 font-mono">500</span>
+          <div>
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Server Error</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Erreur interne du serveur.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="flex items-center justify-between flex-wrap gap-4 py-4">
+    <p class="text-sm text-slate-500 dark:text-slate-400">
+      Besoin d'aide pour intégrer notre API ?
+    </p>
+    <a href="{% url 'accueil' %}"
+       class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-xl transition text-sm">
+      <span class="material-symbols-outlined text-base">home</span>
+      Retour à l'accueil
+    </a>
+  </div>
+
 </div>
 
-<!-- PHOTO DROITE -->
-<div class="ab-media">
-<div class="ab-img-wrap">
-<!--
-INSTRUCTIONS PHOTO :
-Option 1 — Uploadez votre photo hublot sur Squarespace,
-copiez le lien et remplacez COLLER-ICI-LE-LIEN-DE-VOTRE-PHOTO-HUBLOT
-dans le CSS ci-dessus (ligne ab-img-placeholder).
-
-Option 2 — Si Squarespace vous donne une balise <img>,
-remplacez le div.ab-img-placeholder par :
-<img class="ab-img" src="VOTRE-LIEN" alt="Breanhy Voyages">
--->
-<div class="ab-img-placeholder"></div>
-<div class="ab-badge">
-<div class="ab-badge-num">100%</div>
-<div class="ab-badge-text">Service personnalisé</div>
-</div>
-</div>
-</div>
-
-</div>
-</section>
-</div>
+{% endblock %}

@@ -25,7 +25,7 @@ def send_order_status_sms(phone_number, order_id, new_status):
     try:
         client.messages.create(
             body=message_body,
-            from_=settings.TWILIO_PHONE_NUMBER,
+            from_=settings.TWILIO_WHATSAPP_NUMBER,
             to=phone_number,
         )
     except Exception as e:

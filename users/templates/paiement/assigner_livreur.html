@@ -1,0 +1,552 @@
+{% extends 'base/base.html' %}
+{% block title %}Assigner un livreur — Commande #{{ paiement.pk }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  #map { height: 420px; }
+  .livreur-row { transition: background .15s, border-color .15s; }
+  .livreur-row.selected { background:#fff7ed; border-color:#f97316; }
+  .livreur-row:hover:not(.selected) { background:#f8fafc; }
+  @keyframes bounce-pin {
+    0%,100% { transform:translateY(0); }
+    40%     { transform:translateY(-8px); }
+  }
+  .bounce { animation:bounce-pin .6s ease; }
+  .pulse-green { animation:pulse-g 2s infinite; }
+  @keyframes pulse-g {
+    0%,100% { box-shadow:0 0 0 0 rgba(16,185,129,.5); }
+    50%     { box-shadow:0 0 0 5px rgba(16,185,129,0); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-20">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
+      <a href="{% if request.user.role == 'admin' %}{% url 'admin_panel_commandes' %}{% else %}{% url 'vendeur_paiement_detail' paiement.pk %}{% endif %}"
+         class="p-2 rounded-xl hover:bg-gray-100 transition">
+        <span class="material-symbols-outlined text-gray-500">arrow_back</span>
+      </a>
+      <div class="flex-1">
+        <h1 class="font-extrabold text-gray-900">Assigner un livreur</h1>
+        <p class="text-xs text-gray-400">
+          Commande #{{ paiement.pk }} &middot; {{ paiement.quartier_livraison|default:"Brazzaville" }}
+          &middot; <strong>{{ paiement.montant_total|floatformat:0 }} FCFA</strong>
+        </p>
+      </div>
+      <!-- Compteur livreurs + indicateur temps réel -->
+      <div id="stats-badge" class="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-green inline-block" id="live-dot"></span>
+        <span id="stats-txt">—</span>
+      </div>
+      <!-- Indicateur MAJ -->
+      <span id="last-update" class="hidden text-xs text-gray-400 font-normal"></span>
+      <!-- Rafraîchir -->
+      <button onclick="charger()" title="Actualiser"
+              class="p-2 rounded-xl hover:bg-gray-100 transition text-gray-400 hover:text-orange-500">
+        <span class="material-symbols-outlined" id="refresh-icon">refresh</span>
+      </button>
+      <!-- Bouton notifier (header) -->
+      <button id="btn-notifier-header" onclick="soumettreSelection()"
+              disabled
+              class="hidden sm:flex items-center gap-2 bg-orange-600 hover:bg-orange-700 disabled:opacity-40 disabled:cursor-not-allowed
+                     text-white font-bold text-sm px-5 py-2.5 rounded-xl transition-all shadow shadow-orange-200">
+        <span class="material-symbols-outlined text-base">notifications_active</span>
+        Notifier
+        <span id="nb-selected-header" class="bg-white/30 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 py-5 flex flex-col lg:flex-row gap-5">
+
+    <!-- ═══ COLONNE GAUCHE : carte ═══════════════════════════════════════════ -->
+    <div class="lg:flex-1 space-y-4">
+
+      <!-- Infos commande -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-emerald-600">home_pin</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs text-gray-400">Adresse de livraison</p>
+          <p class="font-bold text-gray-800 truncate">
+            {{ paiement.adresse_livraison|default:"Adresse non précisée" }}
+          </p>
+          <p class="text-xs text-gray-500">{{ paiement.quartier_livraison|default:"—" }}</p>
+        </div>
+        {% if paiement.gps_lat and paiement.gps_lng %}
+        <div class="flex-shrink-0 text-right">
+          <p class="text-xs text-gray-400">GPS</p>
+          <p class="text-xs font-mono text-gray-600">{{ paiement.gps_lat|floatformat:4 }}, {{ paiement.gps_lng|floatformat:4 }}</p>
+        </div>
+        {% else %}
+        <div class="flex-shrink-0 text-right">
+          <span class="text-xs bg-amber-50 text-amber-600 border border-amber-200 px-2 py-1 rounded-lg font-medium">
+            GPS absent
+          </span>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Carte -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="px-4 pt-4 pb-2 flex items-center justify-between">
+          <h2 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+            <span class="material-symbols-outlined text-orange-400 text-base">map</span>
+            Carte des livreurs
+          </h2>
+          <div class="flex items-center gap-3 text-xs text-gray-400">
+            <span class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>Client
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-full bg-orange-500 inline-block"></span>GPS actif
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-full bg-slate-400 inline-block"></span>GPS absent
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span>Sélectionné
+            </span>
+          </div>
+        </div>
+        <div id="map" class="hidden"></div>
+        <div id="map-loading" class="flex items-center justify-center py-12 text-gray-400 text-sm gap-2">
+          <span class="material-symbols-outlined animate-spin text-base">progress_activity</span>
+          Chargement de la carte…
+        </div>
+        <div id="map-no-gps" class="hidden px-4 pb-4">
+          <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-700 flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">info</span>
+            Certains livreurs n'ont pas partagé leur position GPS récemment.
+            La carte n'affiche que ceux avec GPS actif.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ COLONNE DROITE : liste livreurs ══════════════════════════════════ -->
+    <div class="lg:w-96 space-y-4">
+
+      <!-- Filtre / onglets -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-1.5 flex gap-1">
+        <button id="tab-tous" onclick="setTab('tous')"
+                class="flex-1 text-xs font-semibold py-2 rounded-xl bg-orange-600 text-white transition">
+          Tous <span id="tab-tous-count" class="opacity-70 ml-0.5"></span>
+        </button>
+        <button id="tab-ligne" onclick="setTab('ligne')"
+                class="flex-1 text-xs font-semibold py-2 rounded-xl text-gray-500 hover:bg-gray-50 transition">
+          🟢 En ligne <span id="tab-ligne-count" class="opacity-70 ml-0.5"></span>
+        </button>
+        <button id="tab-mission" onclick="setTab('mission')"
+                class="flex-1 text-xs font-semibold py-2 rounded-xl text-gray-500 hover:bg-gray-50 transition">
+          🚴 Mission <span id="tab-mission-count" class="opacity-70 ml-0.5"></span>
+        </button>
+        <button id="tab-hors" onclick="setTab('hors')"
+                class="flex-1 text-xs font-semibold py-2 rounded-xl text-gray-500 hover:bg-gray-50 transition">
+          ⚫ Hors ligne <span id="tab-hors-count" class="opacity-70 ml-0.5"></span>
+        </button>
+      </div>
+
+      <!-- Compteur sélection -->
+      <div id="selection-banner" class="hidden bg-orange-50 border border-orange-200 rounded-2xl px-4 py-3 flex items-center gap-3">
+        <span class="material-symbols-outlined text-orange-500">check_circle</span>
+        <p class="text-sm font-semibold text-orange-700 flex-1">
+          <span id="nb-selected-txt">0</span> livreur(s) sélectionné(s)
+        </p>
+        <button onclick="toutDeselectionner()" class="text-xs text-orange-500 hover:text-orange-700 font-medium">Tout effacer</button>
+      </div>
+
+      <!-- Liste livreurs (remplie par JS) -->
+      <div id="livreurs-list" class="space-y-3">
+        <div class="bg-white rounded-2xl border border-dashed border-gray-200 p-8 text-center text-gray-400">
+          <span class="material-symbols-outlined text-4xl text-gray-200 block mb-2">search</span>
+          <p class="text-sm">Chargement des livreurs…</p>
+        </div>
+      </div>
+
+      <!-- Bouton notifier -->
+      <form method="post" id="form-assignation">
+        {% csrf_token %}
+        <div id="hidden-ids"></div>
+        <button type="submit" id="btn-notifier" disabled
+                class="w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700
+                       disabled:opacity-40 disabled:cursor-not-allowed
+                       text-white font-extrabold py-4 rounded-2xl text-sm transition-all shadow-lg shadow-orange-100">
+          <span class="material-symbols-outlined">notifications_active</span>
+          Notifier les livreurs sélectionnés
+          <span id="nb-selected-btn" class="bg-white/30 text-white text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+        </button>
+        <p class="text-xs text-center text-gray-400 mt-2">Le premier à accepter récupérera la mission</p>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const API_URL = "{% url 'api_livreurs_proches' paiement.pk %}";
+const CSRF    = "{{ csrf_token }}";
+
+let map, selectedIds = new Set();
+let livreurMarkers = {};
+let clientMarker;
+let allLivreurs = [];
+let currentTab = 'tous';
+let mapInited = false;
+
+// ── Icônes ──────────────────────────────────────────────────────────────────
+function mkLivreurIcon(avatar, selected, enLigne) {
+  const border = selected ? '#3b82f6' : (enLigne ? '#f97316' : '#94a3b8');
+  const shadow = selected ? 'rgba(59,130,246,.3)' : (enLigne ? 'rgba(249,115,22,.25)' : 'rgba(148,163,184,.2)');
+  const badge  = enLigne
+    ? `<div style="position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;
+                   border-radius:50%;background:#10b981;border:2px solid #fff"></div>`
+    : `<div style="position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;
+                   border-radius:50%;background:#94a3b8;border:2px solid #fff"></div>`;
+  return L.divIcon({
+    html: `<div style="position:relative;width:42px;height:42px">
+             <div style="width:42px;height:42px;border-radius:50%;border:3px solid ${border};
+                         background:#fff;overflow:hidden;box-shadow:0 0 0 4px ${shadow}">
+               <img src="${avatar}" style="width:100%;height:100%;object-fit:cover"
+                    onerror="this.src='/static/images/default-avatar.png'">
+             </div>${badge}
+           </div>`,
+    className:'', iconSize:[42,42], iconAnchor:[21,21],
+  });
+}
+
+const iconClient = L.divIcon({
+  html: `<div style="width:38px;height:38px;border-radius:50%;background:#10b981;
+                     border:3px solid #fff;box-shadow:0 2px 12px rgba(16,185,129,.4);
+                     display:flex;align-items:center;justify-content:center;font-size:18px">🏠</div>`,
+  className:'', iconSize:[38,38], iconAnchor:[19,19],
+});
+
+// ── Init carte ───────────────────────────────────────────────────────────────
+function initMap(clientLat, clientLng) {
+  if (mapInited) return;
+  mapInited = true;
+  document.getElementById('map-loading').classList.add('hidden');
+  document.getElementById('map').classList.remove('hidden');
+  const center = (clientLat && clientLng) ? [clientLat, clientLng] : [-4.2634, 15.2832];
+  map = L.map('map', {zoomControl:false, attributionControl:false}).setView(center, 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
+  L.control.zoom({position:'bottomright'}).addTo(map);
+  if (clientLat && clientLng) {
+    clientMarker = L.marker([clientLat, clientLng], {icon: iconClient, zIndexOffset:1000})
+      .addTo(map)
+      .bindPopup('<strong>📍 Adresse client</strong><br>{{ paiement.adresse_livraison|default:paiement.quartier_livraison|default:"Destination" }}');
+  }
+}
+
+function refreshMapMarkers(livreurs) {
+  if (!map) return;
+  // Supprimer anciens marqueurs
+  Object.values(livreurMarkers).forEach(m => map.removeLayer(m));
+  livreurMarkers = {};
+
+  const bounds = [];
+  if (clientMarker) bounds.push(clientMarker.getLatLng());
+
+  livreurs.forEach(lv => {
+    if (!lv.lat || !lv.lng) return;
+    const selected = selectedIds.has(lv.id);
+    const marker = L.marker([lv.lat, lv.lng], {icon: mkLivreurIcon(lv.avatar, selected, lv.en_ligne)})
+      .addTo(map);
+    const ageLabel = lv.gps_age_min !== null
+      ? (lv.gps_age_min === 0 ? 'il y a moins d\'1 min' : `il y a ${lv.gps_age_min} min`)
+      : 'inconnu';
+    marker.bindPopup(`
+      <strong>${lv.prenom} ${lv.nom}</strong><br>
+      ${lv.matricule ? `Matricule : ${lv.matricule}<br>` : ''}
+      ${lv.telephone ? `Tél : ${lv.telephone}<br>` : ''}
+      ${lv.dist_km !== null ? `Distance : <strong>${lv.dist_km} km</strong><br>` : ''}
+      GPS mis à jour : ${ageLabel}
+    `);
+    marker.on('click', () => toggleLivreur(lv.id, lv.avatar, lv.en_ligne));
+    livreurMarkers[lv.id] = marker;
+    bounds.push([lv.lat, lv.lng]);
+  });
+
+  if (bounds.length > 1) map.fitBounds(bounds, {padding:[40,40]});
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+function setTab(tab) {
+  currentTab = tab;
+  ['tous','ligne','mission','hors'].forEach(t => {
+    const btn = document.getElementById(`tab-${t}`);
+    if (!btn) return;
+    if (t === tab) {
+      btn.className = 'flex-1 text-xs font-semibold py-2 rounded-xl bg-orange-600 text-white transition';
+    } else {
+      btn.className = 'flex-1 text-xs font-semibold py-2 rounded-xl text-gray-500 hover:bg-gray-50 transition';
+    }
+  });
+  renderLivreurs(filteredLivreurs());
+}
+
+function filteredLivreurs() {
+  if (currentTab === 'ligne')   return allLivreurs.filter(l => l.en_ligne && !l.en_mission);
+  if (currentTab === 'mission') return allLivreurs.filter(l => l.en_mission);
+  if (currentTab === 'hors')    return allLivreurs.filter(l => !l.en_ligne && !l.en_mission);
+  return allLivreurs;
+}
+
+// ── Rendu liste ──────────────────────────────────────────────────────────────
+function renderLivreurs(livreurs) {
+  const list = document.getElementById('livreurs-list');
+  if (!livreurs.length) {
+    const msgs = {
+      ligne:   'Aucun livreur connecté en ce moment',
+      mission: 'Aucun livreur en mission',
+      hors:    'Aucun livreur hors ligne',
+    };
+    list.innerHTML = `<div class="bg-white rounded-2xl border border-dashed border-gray-200 p-10 text-center text-gray-400">
+      <span class="material-symbols-outlined text-5xl text-gray-200 block mb-2">directions_bike</span>
+      <p class="font-semibold text-gray-500">${msgs[currentTab] || 'Aucun livreur disponible'}</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = livreurs.map(lv => {
+    const isSelected = selectedIds.has(lv.id);
+    const ageLabel = lv.gps_age_min !== null
+      ? (lv.gps_age_min === 0 ? 'maintenant' : `${lv.gps_age_min} min`)
+      : null;
+
+    // Badge statut
+    let statusBadge;
+    if (lv.en_mission) {
+      statusBadge = `<span class="text-[10px] bg-blue-100 text-blue-700 font-bold px-1.5 py-0.5 rounded-full">🚴 EN MISSION</span>`;
+    } else if (lv.en_ligne) {
+      statusBadge = `<span class="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-1.5 py-0.5 rounded-full">🟢 EN LIGNE</span>`;
+    } else {
+      statusBadge = `<span class="text-[10px] bg-slate-100 text-slate-500 font-semibold px-1.5 py-0.5 rounded-full">⚫ HORS LIGNE</span>`;
+    }
+
+    // Couleur du point GPS
+    const dotColor = lv.en_mission ? 'bg-blue-400' : lv.en_ligne ? 'bg-emerald-400' : 'bg-slate-300';
+
+    return `
+  <div class="livreur-row bg-white rounded-2xl border-2 border-gray-100 p-4 cursor-pointer${isSelected ? ' selected' : ''}"
+       id="row-${lv.id}" onclick="toggleLivreur(${lv.id}, '${lv.avatar}', ${lv.en_ligne})">
+    <div class="flex items-center gap-3">
+
+      <!-- Avatar + indicateur statut -->
+      <div class="relative flex-shrink-0">
+        <img src="${lv.avatar}" alt=""
+             class="w-12 h-12 rounded-xl object-cover border-2 ${isSelected ? 'border-orange-300' : 'border-gray-100'}"
+             onerror="this.src='/static/images/default-avatar.png'">
+        <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${dotColor}"></div>
+      </div>
+
+      <!-- Infos -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-1.5 flex-wrap mb-0.5">
+          <p class="font-bold text-gray-900 leading-tight">${lv.prenom} ${lv.nom}</p>
+          ${statusBadge}
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          ${lv.matricule ? `<span class="text-xs text-gray-400">${lv.matricule}</span>` : ''}
+          ${lv.telephone
+            ? `<a href="tel:${lv.telephone}" onclick="event.stopPropagation()"
+                  class="text-xs text-blue-600 font-medium hover:underline">${lv.telephone}</a>`
+            : ''}
+          ${ageLabel && lv.gps_ok
+            ? `<span class="text-xs text-gray-400 flex items-center gap-0.5">
+                <span class="material-symbols-outlined text-xs">schedule</span>${ageLabel} ago
+               </span>`
+            : (!lv.gps_ok
+              ? `<span class="text-xs text-amber-500 flex items-center gap-0.5">
+                  <span class="material-symbols-outlined text-xs">location_off</span>GPS inconnu
+                 </span>`
+              : '')}
+        </div>
+      </div>
+
+      <!-- Distance + checkbox -->
+      <div class="flex-shrink-0 text-right flex flex-col items-end gap-2">
+        ${lv.dist_km !== null
+          ? `<div>
+               <p class="text-sm font-extrabold ${lv.dist_km <= 2 ? 'text-emerald-600' : 'text-orange-600'}">${lv.dist_km} km</p>
+               <p class="text-[10px] text-gray-400">de distance</p>
+             </div>`
+          : `<p class="text-xs text-gray-400 leading-tight">distance<br>inconnue</p>`}
+        <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
+             id="cb-${lv.id}"
+             style="${isSelected ? 'border-color:#f97316;background:#f97316' : 'border-color:#d1d5db'}">
+          <span class="material-symbols-outlined text-white text-sm"
+                id="check-${lv.id}"
+                style="opacity:${isSelected ? '1' : '0'}">check</span>
+        </div>
+      </div>
+    </div>
+
+    ${lv.dist_km !== null && lv.dist_km <= 2 && !lv.en_mission
+      ? `<div class="mt-2.5 px-2 py-1 bg-emerald-50 rounded-lg text-xs text-emerald-600 font-semibold flex items-center gap-1">
+           <span class="material-symbols-outlined text-xs">star</span>Plus proche — recommandé
+         </div>`
+      : ''}
+    ${lv.en_mission
+      ? `<div class="mt-2.5 px-2 py-1 bg-blue-50 rounded-lg text-xs text-blue-600 flex items-center gap-1">
+           <span class="material-symbols-outlined text-xs">info</span>En mission — peut accepter une 2ème livraison
+         </div>`
+      : ''}
+  </div>`;
+  }).join('');
+}
+
+// ── Toggle sélection ─────────────────────────────────────────────────────────
+function toggleLivreur(id, avatar, enLigne) {
+  const row    = document.getElementById(`row-${id}`);
+  const cbRing = document.getElementById(`cb-${id}`);
+  const check  = document.getElementById(`check-${id}`);
+  if (!row) return;
+
+  if (selectedIds.has(id)) {
+    selectedIds.delete(id);
+    row.classList.remove('selected');
+    cbRing.style.borderColor = ''; cbRing.style.background = '';
+    check.style.opacity = '0';
+    if (livreurMarkers[id]) livreurMarkers[id].setIcon(mkLivreurIcon(avatar, false, enLigne));
+  } else {
+    selectedIds.add(id);
+    row.classList.add('selected');
+    cbRing.style.borderColor = '#f97316'; cbRing.style.background = '#f97316';
+    check.style.opacity = '1';
+    if (livreurMarkers[id]) {
+      livreurMarkers[id].setIcon(mkLivreurIcon(avatar, true, enLigne));
+      livreurMarkers[id].getElement()?.classList.add('bounce');
+    }
+  }
+  majCompteur();
+}
+
+function toutDeselectionner() {
+  selectedIds.clear();
+  allLivreurs.forEach(lv => {
+    const row  = document.getElementById(`row-${lv.id}`);
+    const cb   = document.getElementById(`cb-${lv.id}`);
+    const chk  = document.getElementById(`check-${lv.id}`);
+    if (row) row.classList.remove('selected');
+    if (cb)  { cb.style.borderColor = ''; cb.style.background = ''; }
+    if (chk) chk.style.opacity = '0';
+    if (livreurMarkers[lv.id]) livreurMarkers[lv.id].setIcon(mkLivreurIcon(lv.avatar, false, lv.en_ligne));
+  });
+  majCompteur();
+}
+
+function majCompteur() {
+  const nb = selectedIds.size;
+  document.getElementById('nb-selected-header').textContent = nb;
+  document.getElementById('nb-selected-btn').textContent    = nb;
+  document.getElementById('nb-selected-txt').textContent    = nb;
+  document.getElementById('btn-notifier').disabled        = nb === 0;
+  document.getElementById('btn-notifier-header').disabled = nb === 0;
+  document.getElementById('selection-banner').classList.toggle('hidden', nb === 0);
+}
+
+// ── Soumettre ─────────────────────────────────────────────────────────────────
+function soumettreSelection() {
+  document.getElementById('form-assignation').requestSubmit();
+}
+
+document.getElementById('form-assignation').addEventListener('submit', function() {
+  if (pollTimer) clearInterval(pollTimer); // stop le polling pendant la soumission
+  const container = document.getElementById('hidden-ids');
+  container.innerHTML = '';
+  selectedIds.forEach(id => {
+    const inp = document.createElement('input');
+    inp.type = 'hidden'; inp.name = 'livreur_ids'; inp.value = id;
+    container.appendChild(inp);
+  });
+  document.getElementById('btn-notifier').disabled = true;
+  document.getElementById('btn-notifier').innerHTML =
+    '<span class="material-symbols-outlined animate-spin text-base">progress_activity</span> Envoi en cours…';
+});
+
+// ── Chargement ────────────────────────────────────────────────────────────────
+let pollTimer = null;
+
+async function charger() {
+  const icon = document.getElementById('refresh-icon');
+  if (icon) icon.classList.add('animate-spin');
+  const dot = document.getElementById('live-dot');
+  if (dot) dot.style.background = '#f59e0b'; // orange = en cours
+
+  try {
+    const r    = await fetch(API_URL, {headers: {'X-CSRFToken': CSRF}});
+    const data = await r.json();
+
+    allLivreurs = data.livreurs;
+    const cl    = data.client;
+
+    // Stats badge
+    const statsBadge = document.getElementById('stats-badge');
+    const statsTxt   = document.getElementById('stats-txt');
+    statsBadge.classList.remove('hidden');
+    statsTxt.textContent = `${data.en_ligne} en ligne · ${data.disponibles} disponibles · ${data.total} total`;
+
+    // Indicateur dernière mise à jour
+    const lastUpd = document.getElementById('last-update');
+    if (lastUpd) {
+      const now = new Date();
+      lastUpd.textContent = `Mis à jour ${now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit', second:'2-digit'})}`;
+      lastUpd.classList.remove('hidden');
+    }
+
+    // Dot redevient vert = ok
+    if (dot) dot.style.background = '#10b981';
+
+    // Onglets counts
+    const nbLigne   = allLivreurs.filter(l => l.en_ligne && !l.en_mission).length;
+    const nbMission = allLivreurs.filter(l => l.en_mission).length;
+    const nbHors    = allLivreurs.filter(l => !l.en_ligne && !l.en_mission).length;
+    document.getElementById('tab-tous-count').textContent    = `(${data.total})`;
+    document.getElementById('tab-ligne-count').textContent   = `(${nbLigne})`;
+    document.getElementById('tab-mission-count').textContent = `(${nbMission})`;
+    document.getElementById('tab-hors-count').textContent    = `(${nbHors})`;
+
+    // Carte : init ou refresh
+    if (!mapInited) {
+      initMap(cl.lat, cl.lng);
+    } else {
+      document.getElementById('map-loading').classList.add('hidden');
+      document.getElementById('map').classList.remove('hidden');
+    }
+    if (map) refreshMapMarkers(allLivreurs);
+
+    // Avertissement si certains sans GPS
+    const someNoGps = allLivreurs.some(l => !l.gps_ok);
+    document.getElementById('map-no-gps').classList.toggle('hidden', !someNoGps);
+
+    renderLivreurs(filteredLivreurs());
+
+  } catch(e) {
+    console.error(e);
+    if (dot) dot.style.background = '#ef4444'; // rouge = erreur
+    document.getElementById('map-loading').innerHTML =
+      '<p class="text-red-400 text-sm py-4 text-center">Erreur de chargement. Actualisez la page.</p>';
+    document.getElementById('map-loading').classList.remove('hidden');
+  } finally {
+    if (icon) icon.classList.remove('animate-spin');
+  }
+}
+
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(charger, 10000); // 10 secondes
+}
+
+charger();
+startPolling();
+</script>
+{% endblock %}

@@ -1,0 +1,296 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Panier — Quincaillerie{% endblock %}
+{% block navbar %}{% include 'base/navbar_quicaillerie.html' %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Titre -->
+  <div class="flex items-center gap-3 mb-8">
+    <div class="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-sm"
+         style="background:linear-gradient(135deg,#c2410c,#ea580c);">
+      <span class="material-symbols-outlined text-xl">shopping_cart</span>
+    </div>
+    <div>
+      <h1 class="text-2xl font-extrabold text-gray-900">Mon panier</h1>
+      <p class="text-sm text-gray-500">Quincaillerie · <span id="cartCount">0</span> article(s)</p>
+    </div>
+    <button onclick="clearAll()"
+            class="ml-auto text-xs font-semibold text-red-400 hover:text-red-600 transition hidden" id="clearBtn">
+      Vider le panier
+    </button>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-6">
+
+    <!-- ═══ Liste des articles ═══════════════════════════════════════════ -->
+    <div class="flex-1 space-y-3" id="cartItems">
+      <!-- Rempli par JS -->
+    </div>
+
+    <!-- ═══ Résumé & commande ═══════════════════════════════════════════ -->
+    <aside class="w-full lg:w-72 flex-shrink-0">
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sticky top-20">
+        <h2 class="font-bold text-gray-900 mb-4">Résumé</h2>
+
+        <div class="space-y-2 mb-4" id="summaryLines">
+          <!-- Rempli par JS -->
+        </div>
+
+        <div class="border-t border-gray-100 pt-3 mb-5">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-gray-900">Total</span>
+            <span id="totalPrice" class="font-black text-xl" style="color:#c2410c;">0 FCFA</span>
+          </div>
+        </div>
+
+        <!-- Passer à la caisse -->
+        <form id="checkout-form-quic" method="post" action="{% url 'paiement_checkout' %}">
+          {% csrf_token %}
+          <input type="hidden" name="cart_json" id="checkout-cart-json-quic" value="">
+          <input type="hidden" name="section" value="quicaillerie">
+          <input type="hidden" name="montant" id="checkout-montant-quic" value="0">
+          <button type="button" onclick="prepareCheckoutQuic(event)"
+                  class="w-full flex items-center justify-center gap-2 font-bold py-3.5 rounded-xl transition text-white shadow-sm text-sm mb-2"
+                  style="background:#ea580c;">
+            <span class="material-symbols-outlined text-xl">payment</span>
+            Passer à la caisse
+          </button>
+        </form>
+
+        <button onclick="commanderWhatsApp()"
+                id="orderBtn"
+                class="w-full flex items-center justify-center gap-2 font-semibold py-3 rounded-xl transition text-gray-600 bg-white border border-gray-200 text-sm">
+          <svg class="w-4 h-4 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.552 4.126 1.521 5.865L0 24l6.266-1.491A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.816 9.816 0 01-5.011-1.371l-.358-.214-3.72.885.916-3.598-.235-.37A9.808 9.808 0 012.182 12C2.182 6.569 6.569 2.182 12 2.182c5.43 0 9.818 4.387 9.818 9.818 0 5.43-4.388 9.818-9.818 9.818z"/>
+          </svg>
+          Contacter via WhatsApp
+        </button>
+
+        <a href="{% url 'quicaillerie:accueil' %}"
+           class="mt-3 w-full flex items-center justify-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-700 transition py-2">
+          ← Continuer mes achats
+        </a>
+      </div>
+    </aside>
+  </div>
+
+  <!-- État vide -->
+  <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-center">
+    <div class="w-20 h-20 rounded-full flex items-center justify-center mb-4 text-4xl" style="background:#ffedd5;">🛒</div>
+    <h3 class="font-bold text-gray-900 mb-2">Votre panier est vide</h3>
+    <p class="text-sm text-gray-500 max-w-xs mb-6">Ajoutez des produits depuis la boutique quincaillerie.</p>
+    <a href="{% url 'quicaillerie:accueil' %}"
+       class="text-white font-bold px-6 py-3 rounded-xl transition hover:opacity-90"
+       style="background:#ea580c;">
+      Voir les produits
+    </a>
+  </div>
+
+</div>
+</div>
+
+<!-- Modal quantité -->
+<div id="sqmOverlay" class="fixed inset-0 z-50 bg-black/50 hidden flex items-center justify-center p-4"
+     onclick="if(event.target===this)sqmClose()">
+  <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-xs">
+    <h3 class="font-bold text-gray-900 mb-1" id="sqmTitle">Modifier la quantité</h3>
+    <p class="text-xs text-gray-400 mb-4" id="sqmSub"></p>
+    <div class="flex items-center gap-3 mb-5">
+      <button onclick="sqmChoose(-1)" class="w-10 h-10 rounded-xl flex items-center justify-center border-2 border-gray-200 text-xl font-bold hover:border-orange-400 transition">−</button>
+      <input id="sqmInput" type="number" min="1" value="1"
+             class="flex-1 text-center text-xl font-black border-2 border-orange-300 rounded-xl py-2 focus:outline-none focus:border-orange-500">
+      <button onclick="sqmChoose(1)" class="w-10 h-10 rounded-xl flex items-center justify-center border-2 border-gray-200 text-xl font-bold hover:border-orange-400 transition">+</button>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="sqmClose()" class="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition">Annuler</button>
+      <button onclick="sqmApply()"
+              class="flex-1 py-2.5 rounded-xl text-white text-sm font-bold transition"
+              style="background:#ea580c;">Valider</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+const CART_KEY = 'mi_cart_v1';
+function cartGet(){ try{ return JSON.parse(localStorage.getItem(CART_KEY)||'[]'); }catch(e){ return []; } }
+function cartSave(a){ localStorage.setItem(CART_KEY, JSON.stringify(a)); }
+
+function fmt(n){ return Math.round(n).toLocaleString('fr-FR'); }
+
+function render(){
+  const cart = cartGet().filter(i => !i.url || i.url.includes('quicaillerie') || true);
+  // Show all cart items (shared cart)
+  const all = cartGet();
+  const items = document.getElementById('cartItems');
+  const empty = document.getElementById('emptyState');
+  const clearBtn = document.getElementById('clearBtn');
+  const countEl = document.getElementById('cartCount');
+  const totalEl = document.getElementById('totalPrice');
+  const summaryEl = document.getElementById('summaryLines');
+  const orderBtn = document.getElementById('orderBtn');
+
+  if(!all.length){
+    items.classList.add('hidden');
+    empty.classList.remove('hidden');
+    clearBtn.classList.add('hidden');
+    orderBtn.disabled = true;
+    orderBtn.style.opacity = '.5';
+    countEl.textContent = '0';
+    totalEl.textContent = '0 FCFA';
+    summaryEl.innerHTML = '';
+    return;
+  }
+
+  items.classList.remove('hidden');
+  empty.classList.add('hidden');
+  clearBtn.classList.remove('hidden');
+  orderBtn.disabled = false;
+  orderBtn.style.opacity = '1';
+
+  const total = all.reduce((s,i)=>s+i.prix*(i.quantite||1),0);
+  const nbItems = all.reduce((s,i)=>s+(i.quantite||1),0);
+  countEl.textContent = nbItems;
+  totalEl.textContent = fmt(total)+' FCFA';
+
+  summaryEl.innerHTML = all.map(i=>`
+    <div class="flex justify-between text-xs text-gray-600">
+      <span class="truncate max-w-[150px] font-medium">${i.nom}</span>
+      <span class="font-bold flex-shrink-0 ml-2">${fmt(i.prix*(i.quantite||1))} FCFA</span>
+    </div>
+  `).join('');
+
+  items.innerHTML = all.map(i=>`
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex gap-4 items-start">
+      <div class="w-16 h-16 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0">
+        ${i.image
+          ? `<img src="${i.image}" alt="${i.nom}" class="w-full h-full object-cover">`
+          : `<div class="w-full h-full flex items-center justify-center text-2xl" style="background:#ffedd5;">🔧</div>`}
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-bold text-gray-900 text-sm truncate">${i.nom}</p>
+        ${i.vendeur ? `<p class="text-xs text-gray-400 mt-0.5">${i.vendeur}</p>` : ''}
+        <div class="flex items-center justify-between mt-2">
+          <button onclick="sqmOpen('${i._key}')" class="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-200 hover:border-orange-400 transition">
+            <span class="material-symbols-outlined text-sm" style="color:#ea580c;">edit</span>
+            ${i.quantite||1} ${i.unite||'Pièce'}
+          </button>
+          <div class="text-right">
+            <p class="font-black text-sm" style="color:#c2410c;">${fmt(i.prix*(i.quantite||1))} FCFA</p>
+            <p class="text-[10px] text-gray-400">${fmt(i.prix)} / ${i.unite||'Pièce'}</p>
+          </div>
+        </div>
+      </div>
+      <button onclick="removeItem('${i._key}')"
+              class="flex-shrink-0 text-gray-300 hover:text-red-400 transition p-1">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+  `).join('');
+}
+
+window.removeItem = function(key){
+  const c = cartGet().filter(i=>i._key!==key);
+  cartSave(c); render();
+};
+
+window.clearAll = function(){
+  if(!confirm('Vider tout le panier ?')) return;
+  cartSave([]); render();
+};
+
+// ── Modale quantité ──────────────────────────────────────────────────────
+let _sqmKey = null;
+window.sqmOpen = function(key){
+  const item = cartGet().find(i=>i._key===key);
+  if(!item) return;
+  _sqmKey = key;
+  document.getElementById('sqmTitle').textContent = item.nom;
+  document.getElementById('sqmSub').textContent = `${fmt(item.prix)} FCFA / ${item.unite||'Pièce'}`;
+  document.getElementById('sqmInput').value = item.quantite||1;
+  document.getElementById('sqmOverlay').classList.remove('hidden');
+};
+window.sqmClose = function(){ document.getElementById('sqmOverlay').classList.add('hidden'); _sqmKey=null; };
+window.sqmChoose = function(d){
+  const el = document.getElementById('sqmInput');
+  el.value = Math.max(1, parseInt(el.value||1)+d);
+};
+window.sqmApply = function(){
+  if(!_sqmKey) return;
+  const qty = Math.max(1, parseInt(document.getElementById('sqmInput').value)||1);
+  const c = cartGet();
+  const idx = c.findIndex(i=>i._key===_sqmKey);
+  if(idx>=0){ c[idx].quantite = qty; cartSave(c); }
+  sqmClose(); render();
+};
+
+// ── Commander WhatsApp ───────────────────────────────────────────────────
+window.commanderWhatsApp = function(){
+  const cart = cartGet();
+  if(!cart.length) return;
+  const total = cart.reduce((s,i)=>s+i.prix*(i.quantite||1),0);
+  const lines = cart.map(i=>`• ${i.nom} × ${i.quantite||1} ${i.unite||''} = ${fmt(i.prix*(i.quantite||1))} FCFA`).join('\n');
+  const msg = `🔨 *Commande Quincaillerie*\n\n${lines}\n\n*Total : ${fmt(total)} FCFA*\n\nMerci de confirmer ma commande.`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg));
+};
+
+render();
+window.addEventListener('storage', e=>{ if(e.key===CART_KEY) render(); });
+})();
+
+const USER_IS_AUTHENTICATED_QUIC = {% if user.is_authenticated %}true{% else %}false{% endif %};
+
+window.prepareCheckoutQuic = function(e) {
+  let cart = [];
+  try { cart = JSON.parse(localStorage.getItem('mi_cart_v1') || '[]'); } catch(_) {}
+  if (!cart.length) { alert('Votre panier est vide.'); return; }
+  if (!USER_IS_AUTHENTICATED_QUIC) {
+    document.getElementById('login-required-modal-quic').style.display = 'flex';
+    return;
+  }
+  const total = cart.reduce((s, i) => s + (i.prix || 0) * (i.quantite || 1), 0);
+  document.getElementById('checkout-cart-json-quic').value = JSON.stringify(cart);
+  document.getElementById('checkout-montant-quic').value = total;
+  document.getElementById('checkout-form-quic').submit();
+};
+</script>
+
+<!-- ══ Modal : Connexion requise ══ -->
+<div id="login-required-modal-quic"
+     style="display:none;"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+     onclick="if(event.target===this)this.style.display='none'">
+  <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center">
+    <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style="background:#ffedd5;">
+      <span class="material-symbols-outlined text-3xl" style="color:#ea580c;">lock</span>
+    </div>
+    <h2 class="text-xl font-extrabold text-gray-900 mb-2">Connexion requise</h2>
+    <p class="text-gray-500 text-sm mb-6 leading-relaxed">
+      Pour passer une commande, vous devez être connecté à votre compte.
+    </p>
+    <div class="space-y-3">
+      <a href="{% url 'connexion_client' %}?next=/paiement/"
+         class="flex items-center justify-center gap-2 w-full text-white font-bold py-3.5 rounded-2xl transition"
+         style="background:#ea580c;">
+        <span class="material-symbols-outlined text-base">login</span>
+        Se connecter
+      </a>
+      <a href="{% url 'inscription_client' %}"
+         class="flex items-center justify-center gap-2 w-full bg-white hover:bg-gray-50
+                text-gray-700 font-bold py-3.5 rounded-2xl border border-gray-200 transition text-sm">
+        <span class="material-symbols-outlined text-base">person_add</span>
+        Créer un compte
+      </a>
+      <button onclick="document.getElementById('login-required-modal-quic').style.display='none'"
+              class="text-xs text-gray-400 hover:text-gray-600 mt-2 transition">
+        Continuer sans compte
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}

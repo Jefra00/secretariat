@@ -1,0 +1,59 @@
+{% if user.is_authenticated %}
+<script>
+(function () {
+  'use strict';
+
+  const API_URL         = '/api/update-location/';
+  const POLL_INTERVAL   = 10000;  // vérifier la position toutes les 10 s
+  const HEARTBEAT_EVERY = 60000;  // forcer l'envoi toutes les 60 s même sans mouvement
+  let lastLat   = null;
+  let lastLng   = null;
+  let lastSentAt = 0;
+
+  function getCsrf() {
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+  }
+
+  function sendPosition(lat, lng) {
+    const now       = Date.now();
+    const forceSend = (now - lastSentAt) >= HEARTBEAT_EVERY;
+
+    // Ne pas envoyer si position inchangée ET heartbeat pas encore dû
+    if (!forceSend && lastLat !== null && lastLng !== null) {
+      const dlat = Math.abs(lat - lastLat);
+      const dlng = Math.abs(lng - lastLng);
+      if (dlat < 0.00005 && dlng < 0.00005) return;
+    }
+
+    lastLat    = lat;
+    lastLng    = lng;
+    lastSentAt = now;
+
+    fetch(API_URL, {
+      method:  'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken':  getCsrf(),
+      },
+      body: JSON.stringify({ lat, lng }),
+    }).catch(function () { /* silencieux */ });
+  }
+
+  function requestPosition() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      function (pos) { sendPosition(pos.coords.latitude, pos.coords.longitude); },
+      function () { /* permission refusée ou indisponible */ },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 5000 }
+    );
+  }
+
+  // Première prise de position immédiate au chargement
+  requestPosition();
+
+  // Vérification toutes les 10 s (envoie si déplacé OU heartbeat 60 s)
+  setInterval(requestPosition, POLL_INTERVAL);
+})();
+</script>
+{% endif %}

@@ -1,0 +1,299 @@
+{% extends 'client/base_client.html' %}
+{% load static %}
+{% block title %}Mon profil{% endblock %}
+{% block page_title %}Mon profil{% endblock %}
+{% block page_subtitle %}Gérez vos informations personnelles{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+
+  <!-- Hero -->
+  <div class="bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 pt-10 pb-24 px-4 relative overflow-hidden">
+    <!-- Background decoration -->
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute -top-10 -right-10 w-64 h-64 rounded-full bg-white"></div>
+      <div class="absolute bottom-0 -left-16 w-80 h-80 rounded-full bg-white"></div>
+    </div>
+    <div class="max-w-4xl mx-auto relative">
+      <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+        <!-- Avatar -->
+        <div class="relative">
+          <label for="avatar-input" class="cursor-pointer group">
+            {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt="Avatar"
+                 class="w-24 h-24 rounded-3xl object-cover border-4 border-white/30 shadow-2xl
+                        group-hover:opacity-80 transition">
+            {% else %}
+            <div class="w-24 h-24 rounded-3xl bg-white/20 border-4 border-white/30 flex items-center
+                        justify-center shadow-2xl group-hover:bg-white/30 transition">
+              <span class="material-symbols-outlined text-5xl text-white/80">account_circle</span>
+            </div>
+            {% endif %}
+            <div class="absolute -bottom-1 -right-1 w-8 h-8 rounded-xl bg-white flex items-center justify-center
+                        shadow-md group-hover:bg-gray-100 transition">
+              <span class="material-symbols-outlined text-blue-600 text-sm">photo_camera</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Infos -->
+        <div class="text-center sm:text-left">
+          <p class="text-blue-200 text-sm mb-1">Bonjour 👋</p>
+          <h1 class="text-3xl font-extrabold text-white">
+            {{ user.first_name|default:user.username }}{% if user.last_name %} {{ user.last_name }}{% endif %}
+          </h1>
+          <p class="text-blue-200 mt-1">{{ user.email }}</p>
+          {% if user.telephone %}
+          <p class="text-blue-200 text-sm mt-0.5 flex items-center gap-1 justify-center sm:justify-start">
+            <span class="material-symbols-outlined text-sm">phone</span>
+            {{ user.telephone }}
+          </p>
+          {% endif %}
+          <div class="flex items-center gap-2 mt-3 justify-center sm:justify-start">
+            <span class="bg-white/10 text-white text-xs font-medium px-3 py-1 rounded-full border border-white/20">
+              Client depuis {{ user.date_inscription|date:"F Y" }}
+            </span>
+            <span class="bg-emerald-400/30 text-emerald-100 text-xs font-bold px-3 py-1 rounded-full">
+              ✓ Compte actif
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats cards (chevauchent le hero) -->
+  <div class="max-w-4xl mx-auto px-4 -mt-12 relative z-10">
+    <div class="grid grid-cols-3 gap-4">
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5 text-center">
+        <p class="text-2xl font-extrabold text-gray-900">{{ total_commandes }}</p>
+        <p class="text-xs text-gray-400 mt-0.5 font-medium uppercase tracking-wide">Commandes</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5 text-center">
+        <p class="text-2xl font-extrabold text-emerald-600">
+          {% if total_depenses >= 1000 %}
+            {{ total_depenses|floatformat:0|slice:":3" }}k
+          {% else %}
+            {{ total_depenses|floatformat:0 }}
+          {% endif %}
+        </p>
+        <p class="text-xs text-gray-400 mt-0.5 font-medium uppercase tracking-wide">FCFA dépensés</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5 text-center">
+        <p class="text-2xl font-extrabold text-amber-500">{{ en_cours }}</p>
+        <p class="text-xs text-gray-400 mt-0.5 font-medium uppercase tracking-wide">En cours</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
+
+    <!-- Messages -->
+    {% for msg in messages %}
+    <div class="rounded-2xl px-5 py-4 text-sm font-medium
+      {% if msg.tags == 'success' %}bg-emerald-50 border border-emerald-200 text-emerald-800
+      {% else %}bg-red-50 border border-red-200 text-red-800{% endif %}
+      flex items-center gap-2">
+      <span class="material-symbols-outlined text-base">
+        {% if msg.tags == 'success' %}check_circle{% else %}error{% endif %}
+      </span>
+      {{ msg }}
+    </div>
+    {% endfor %}
+
+    <div class="grid lg:grid-cols-3 gap-6">
+
+      <!-- ══ Formulaire profil ══ -->
+      <div class="lg:col-span-2 space-y-6">
+
+        <form method="post" enctype="multipart/form-data" id="profile-form">
+          {% csrf_token %}
+          <!-- Avatar hidden input -->
+          <input type="file" id="avatar-input" name="avatar" accept="image/*" class="hidden"
+                 onchange="previewAvatar(this)">
+
+          <!-- Informations personnelles -->
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-50 flex items-center gap-2">
+              <span class="material-symbols-outlined text-gray-400">person</span>
+              <h2 class="font-bold text-gray-900">Informations personnelles</h2>
+            </div>
+            <div class="p-6 grid sm:grid-cols-2 gap-5">
+
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Prénom</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.first_name.errors.0 }}</p>
+                {% endif %}
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Nom de famille</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.last_name.errors.0 }}</p>
+                {% endif %}
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Adresse e-mail</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>
+                {% endif %}
+              </div>
+
+              {% if form.telephone %}
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Téléphone</label>
+                {{ form.telephone }}
+                {% if form.telephone.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.telephone.errors.0 }}</p>
+                {% endif %}
+              </div>
+              {% endif %}
+
+            </div>
+          </div>
+
+          <!-- Adresse -->
+          {% if form.adresse %}
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-50 flex items-center gap-2">
+              <span class="material-symbols-outlined text-gray-400">location_on</span>
+              <h2 class="font-bold text-gray-900">Adresse de livraison</h2>
+            </div>
+            <div class="p-6">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Adresse</label>
+              {{ form.adresse }}
+              {% if form.adresse.errors %}
+              <p class="text-red-500 text-xs mt-1">{{ form.adresse.errors.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Bouton sauvegarde -->
+          <div class="flex justify-end">
+            <button type="submit"
+                    class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold
+                           px-8 py-3 rounded-2xl shadow-lg transition text-sm">
+              <span class="material-symbols-outlined text-base">save</span>
+              Enregistrer les modifications
+            </button>
+          </div>
+        </form>
+
+      </div>
+
+      <!-- ══ Colonne droite ══ -->
+      <div class="space-y-5">
+
+        <!-- Commandes récentes -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+            <h3 class="font-bold text-gray-900 text-sm">Commandes récentes</h3>
+            <a href="{% url 'client_commandes' %}"
+               class="text-xs text-blue-600 font-semibold hover:underline">Tout voir</a>
+          </div>
+          <div class="divide-y divide-gray-50">
+            {% for p in recentes %}
+            <a href="{% url 'client_commande_detail' p.pk %}"
+               class="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition">
+              <div class="w-8 h-8 rounded-xl
+                {% if p.statut == 'valide' %}bg-emerald-100{% elif p.statut == 'en_attente' %}bg-yellow-100{% elif p.statut == 'echoue' %}bg-red-100{% else %}bg-gray-100{% endif %}
+                flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-sm
+                  {% if p.statut == 'valide' %}text-emerald-600{% elif p.statut == 'en_attente' %}text-yellow-600{% elif p.statut == 'echoue' %}text-red-600{% else %}text-gray-500{% endif %}">
+                  {% if p.statut == 'valide' %}check_circle{% elif p.statut == 'en_attente' %}schedule{% elif p.statut == 'echoue' %}cancel{% else %}inventory{% endif %}
+                </span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-800 truncate">{{ p.get_section_display }}</p>
+                <p class="text-xs text-gray-400">{{ p.montant_total|floatformat:0 }} FCFA · {{ p.cree_le|date:"d/m/Y" }}</p>
+              </div>
+              <span class="material-symbols-outlined text-gray-300 text-base">chevron_right</span>
+            </a>
+            {% empty %}
+            <div class="px-5 py-8 text-center text-gray-400 text-xs">
+              <span class="material-symbols-outlined text-3xl text-gray-200 block mb-2">receipt_long</span>
+              Aucune commande
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Liens rapides -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-gray-50">
+            <h3 class="font-bold text-gray-900 text-sm">Accès rapide</h3>
+          </div>
+          <div class="p-4 space-y-2">
+            <a href="{% url 'client_commandes' %}"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition text-sm font-medium text-gray-700">
+              <span class="material-symbols-outlined text-blue-500 text-base">receipt_long</span>
+              Mes commandes
+            </a>
+            <a href="{% url 'accueil' %}"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition text-sm font-medium text-gray-700">
+              <span class="material-symbols-outlined text-emerald-500 text-base">storefront</span>
+              Faire des achats
+            </a>
+            <a href="{% url 'deconnexion_client' %}"
+               class="flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 transition text-sm font-medium text-red-500">
+              <span class="material-symbols-outlined text-base">logout</span>
+              Se déconnecter
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+/* Style all form inputs uniformly */
+#profile-form input[type=text],
+#profile-form input[type=email],
+#profile-form input[type=tel],
+#profile-form textarea,
+#profile-form select {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  background: #f9fafb;
+  transition: border-color .2s, box-shadow .2s;
+  outline: none;
+}
+#profile-form input:focus,
+#profile-form textarea:focus,
+#profile-form select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+  background: #fff;
+}
+</style>
+
+<script>
+function previewAvatar(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.querySelector('.rounded-3xl');
+      if (img && img.tagName === 'IMG') {
+        img.src = e.target.result;
+      }
+    };
+    reader.readAsDataURL(input.files[0]);
+    // Auto-submit the form after selecting avatar
+    document.getElementById('profile-form').submit();
+  }
+}
+</script>
+{% endblock %}

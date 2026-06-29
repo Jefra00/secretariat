@@ -1,0 +1,328 @@
+{% extends 'livreur/base_livreur.html' %}
+{% block title %}Mon profil{% endblock %}
+{% block page_title %}Mon profil{% endblock %}
+{% block page_subtitle %}Gérez vos informations personnelles{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-5 pb-10">
+
+  {% if messages %}
+  {% for msg in messages %}
+  <div class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold
+    {% if msg.tags == 'success' %}bg-emerald-50 border border-emerald-200 text-emerald-700
+    {% else %}bg-red-50 border border-red-200 text-red-700{% endif %}">
+    <span class="material-symbols-outlined text-base">
+      {% if msg.tags == 'success' %}check_circle{% else %}error{% endif %}
+    </span>
+    {{ msg }}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- ── Stats rapides ── -->
+  <div class="grid grid-cols-3 gap-3">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 text-center">
+      <p class="text-2xl font-extrabold text-slate-800">{{ total_missions }}</p>
+      <p class="text-xs text-slate-400 mt-0.5">Total missions</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 text-center">
+      <p class="text-2xl font-extrabold text-emerald-600">{{ missions_livrees }}</p>
+      <p class="text-xs text-slate-400 mt-0.5">Livrées</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 text-center">
+      <p class="text-2xl font-extrabold text-orange-500">{{ missions_actives }}</p>
+      <p class="text-xs text-slate-400 mt-0.5">En cours</p>
+    </div>
+  </div>
+
+  <!-- ── Photo de profil ── -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+    <h2 class="font-bold text-slate-800 mb-5 flex items-center gap-2">
+      <span class="material-symbols-outlined text-emerald-500 text-base">photo_camera</span>
+      Photo de profil
+    </h2>
+
+    <div class="flex items-center gap-5 mb-5">
+      <!-- Avatar actuel -->
+      <div class="relative flex-shrink-0">
+        {% if request.user.avatar %}
+          <img src="{{ request.user.avatar.url }}" alt=""
+               id="avatar-preview"
+               class="w-20 h-20 rounded-2xl object-cover border-2 border-emerald-200 shadow-sm">
+        {% elif lp.photo_url %}
+          <img src="{{ lp.photo_url }}" alt=""
+               id="avatar-preview"
+               class="w-20 h-20 rounded-2xl object-cover border-2 border-emerald-200 shadow-sm"
+               onerror="this.style.display='none';document.getElementById('avatar-initials').classList.remove('hidden')">
+          <div id="avatar-initials" class="hidden w-20 h-20 rounded-2xl bg-emerald-600/20 border-2 border-emerald-200
+                    flex items-center justify-center text-2xl font-extrabold text-emerald-600">
+            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+          </div>
+        {% else %}
+          <div id="avatar-preview" class="w-20 h-20 rounded-2xl bg-emerald-600/20 border-2 border-emerald-200
+                    flex items-center justify-center text-2xl font-extrabold text-emerald-600">
+            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+          </div>
+        {% endif %}
+      </div>
+      <div class="flex-1">
+        <p class="text-sm font-bold text-slate-700">{{ request.user.get_full_name }}</p>
+        <p class="text-xs text-slate-400 mt-0.5">{{ request.user.telephone }}</p>
+        {% if lp.disponible %}
+          <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full mt-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Disponible
+          </span>
+        {% else %}
+          <span class="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-full mt-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block"></span>Indisponible
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Upload fichier -->
+    <form method="post" enctype="multipart/form-data" class="space-y-3">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="photo">
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1.5">Uploader une photo</label>
+        <div class="flex gap-2">
+          <input type="file" name="avatar" accept="image/*" id="avatar-file-input"
+                 onchange="previewFile(this)"
+                 class="flex-1 text-sm text-slate-600 border border-slate-200 rounded-xl px-3 py-2
+                        file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0
+                        file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700
+                        hover:file:bg-emerald-100 cursor-pointer">
+          <button type="submit"
+                  class="flex-shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white font-bold
+                         text-xs px-4 py-2 rounded-xl transition-colors">
+            Enregistrer
+          </button>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">JPG, PNG, WebP — max 5 Mo</p>
+      </div>
+    </form>
+
+    <!-- Séparateur -->
+    <div class="flex items-center gap-3 my-4">
+      <div class="flex-1 h-px bg-slate-100"></div>
+      <span class="text-xs text-slate-400 font-medium">ou par lien URL</span>
+      <div class="flex-1 h-px bg-slate-100"></div>
+    </div>
+
+    <!-- URL de photo (dans le formulaire profil ci-dessous) -->
+    <p class="text-xs text-slate-400">
+      Vous pouvez aussi coller un lien vers votre photo dans la section "Informations" ci-dessous.
+    </p>
+  </div>
+
+  <!-- ── Informations personnelles ── -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+    <h2 class="font-bold text-slate-800 mb-5 flex items-center gap-2">
+      <span class="material-symbols-outlined text-blue-500 text-base">person</span>
+      Informations personnelles
+    </h2>
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="profil">
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">Prénom *</label>
+          <input type="text" name="prenom" value="{{ request.user.first_name }}" required
+                 class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm
+                        focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400
+                        transition-colors">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">Nom *</label>
+          <input type="text" name="nom" value="{{ request.user.last_name }}" required
+                 class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm
+                        focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400
+                        transition-colors">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1.5">Téléphone</label>
+        <input type="tel" name="telephone" value="{{ request.user.telephone|default:'' }}"
+               class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm
+                      focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400
+                      transition-colors">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1.5">Immatriculation du véhicule</label>
+        <input type="text" name="matricule" value="{{ lp.matricule_moto }}"
+               placeholder="Ex : BZV-1234-A"
+               class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-mono uppercase
+                      focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400
+                      transition-colors"
+               oninput="this.value=this.value.toUpperCase()">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1.5">URL de photo (optionnel)</label>
+        <input type="url" name="photo_url" value="{{ lp.photo_url }}"
+               placeholder="https://... lien vers votre photo"
+               maxlength="2000"
+               class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm
+                      focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400
+                      transition-colors">
+        <p class="text-[10px] text-slate-400 mt-1">Utilisé si aucune photo n'est uploadée directement</p>
+      </div>
+
+      <!-- Disponibilité -->
+      <div class="bg-slate-50 rounded-xl p-4">
+        <label class="flex items-center gap-3 cursor-pointer">
+          <div class="relative">
+            <input type="checkbox" name="disponible" value="1" id="toggle-dispo"
+                   {% if lp.disponible %}checked{% endif %}
+                   class="sr-only peer">
+            <div class="w-11 h-6 rounded-full bg-slate-300 peer-checked:bg-emerald-500 transition-colors"></div>
+            <div class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow
+                        transition-transform peer-checked:translate-x-5"></div>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-700">Je suis disponible</p>
+            <p class="text-xs text-slate-400">Désactivez si vous ne souhaitez pas recevoir de missions</p>
+          </div>
+        </label>
+        <!-- Hidden champ pour transmettre la valeur correcte -->
+        <script>
+          document.getElementById('toggle-dispo').addEventListener('change', function() {
+            // Handled by name="disponible" value="1" with checkbox
+          });
+        </script>
+      </div>
+
+      <!-- Rayon d'action -->
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1.5">
+          Rayon d'action : <span id="rayon-label">{{ lp.zone_radius|floatformat:0 }} m</span>
+        </label>
+        <input type="range" name="zone_radius"
+               min="500" max="30000" step="500"
+               value="{{ lp.zone_radius }}"
+               id="rayon-slider"
+               oninput="document.getElementById('rayon-label').textContent = (this.value >= 1000 ? (this.value/1000).toFixed(1)+' km' : this.value+' m')"
+               class="w-full h-2 rounded-full bg-slate-200 appearance-none cursor-pointer
+                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5
+                      [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full
+                      [&::-webkit-slider-thumb]:bg-emerald-500 [&::-webkit-slider-thumb]:shadow">
+        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+          <span>500 m</span>
+          <span>15 km</span>
+          <span>30 km</span>
+        </div>
+      </div>
+
+      <button type="submit"
+              class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold
+                     py-3.5 rounded-2xl text-sm transition-colors shadow shadow-emerald-200">
+        Enregistrer les modifications
+      </button>
+    </form>
+  </div>
+
+  <!-- ── Changer le mot de passe ── -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+    <h2 class="font-bold text-slate-800 mb-5 flex items-center gap-2">
+      <span class="material-symbols-outlined text-orange-500 text-base">lock</span>
+      Changer le mot de passe
+    </h2>
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="password">
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1.5">Mot de passe actuel</label>
+        <div class="relative">
+          <input type="password" name="old_password" id="old_pw" required
+                 class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm pr-10
+                        focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400
+                        transition-colors">
+          <button type="button" onclick="togglePw('old_pw', this)"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <span class="material-symbols-outlined text-base">visibility</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1.5">Nouveau mot de passe</label>
+        <div class="relative">
+          <input type="password" name="new_password" id="new_pw" required minlength="6"
+                 class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm pr-10
+                        focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400
+                        transition-colors">
+          <button type="button" onclick="togglePw('new_pw', this)"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <span class="material-symbols-outlined text-base">visibility</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1.5">Confirmer le nouveau mot de passe</label>
+        <input type="password" name="new_password2" required minlength="6"
+               class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm
+                      focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400
+                      transition-colors">
+      </div>
+
+      <button type="submit"
+              class="w-full bg-orange-600 hover:bg-orange-700 text-white font-extrabold
+                     py-3.5 rounded-2xl text-sm transition-colors shadow shadow-orange-100">
+        Changer le mot de passe
+      </button>
+    </form>
+  </div>
+
+  <!-- ── Déconnexion ── -->
+  <div class="bg-white rounded-2xl border border-red-100 shadow-sm p-5 flex items-center justify-between">
+    <div>
+      <p class="text-sm font-bold text-slate-700">Se déconnecter</p>
+      <p class="text-xs text-slate-400 mt-0.5">Vous serez redirigé vers la page de connexion</p>
+    </div>
+    <a href="{% url 'deconnexion_client' %}"
+       class="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 font-semibold
+              text-sm px-4 py-2.5 rounded-xl border border-red-200 transition-colors">
+      <span class="material-symbols-outlined text-base">logout</span>
+      Déconnexion
+    </a>
+  </div>
+
+</div>
+
+<script>
+function previewFile(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById('avatar-preview');
+    if (prev && prev.tagName === 'IMG') {
+      prev.src = e.target.result;
+    } else if (prev) {
+      // Replace div with img
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.id = 'avatar-preview';
+      img.className = 'w-20 h-20 rounded-2xl object-cover border-2 border-emerald-200 shadow-sm';
+      prev.replaceWith(img);
+    }
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  if (!inp) return;
+  const isHidden = inp.type === 'password';
+  inp.type = isHidden ? 'text' : 'password';
+  btn.querySelector('.material-symbols-outlined').textContent = isHidden ? 'visibility_off' : 'visibility';
+}
+</script>
+{% endblock %}

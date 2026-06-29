@@ -1,0 +1,599 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}{{ product.name }} — Perruques & Beauté{% endblock %}
+{% block navbar %}{% include 'base/navbar_perruque.html' %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+<style>
+#main-img-box{position:relative;width:100%;aspect-ratio:1/1;border-radius:1.5rem;overflow:hidden;background:#faf5ff;border:1px solid #ede9fe;box-shadow:0 4px 24px rgba(0,0,0,.08);}
+#main-img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .2s;}
+.thumb-btn{aspect-ratio:1/1;border-radius:.75rem;overflow:hidden;border:2.5px solid transparent;cursor:pointer;background:#f9fafb;transition:.18s;display:block;width:100%;}
+.thumb-btn:hover{border-color:#c4b5fd;}
+.thumb-btn.active{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.2);}
+.thumb-btn img{width:100%;height:100%;object-fit:cover;display:block;}
+.qty-row{display:inline-flex;align-items:center;border:1.5px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff;}
+.qb{width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:800;cursor:pointer;background:#f9fafb;color:#374151;border:none;outline:none;transition:.15s;user-select:none;}
+.qb:hover:not([disabled]){background:#faf5ff;color:#7c3aed;}
+.qb[disabled]{opacity:.35;cursor:default;}
+.qv{width:48px;text-align:center;font-size:1.05rem;font-weight:800;color:#111;background:#fff;pointer-events:none;}
+.csw{width:34px;height:34px;border-radius:50%;cursor:pointer;border:3px solid transparent;position:relative;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:transform .15s;outline:none;}
+.csw:hover{transform:scale(1.12);}
+.csw.sel{border-color:#111;box-shadow:0 0 0 2px #fff,0 0 0 4px #111;}
+.csw-ck{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7);opacity:0;transition:.15s;}
+.csw.sel .csw-ck{opacity:1;}
+.tsw{min-width:42px;padding:0 10px;height:38px;border-radius:8px;border:2px solid #e5e7eb;cursor:pointer;font-size:.8rem;font-weight:700;color:#374151;background:#f9fafb;transition:.15s;display:flex;align-items:center;justify-content:center;}
+.tsw:hover{border-color:#c4b5fd;color:#7c3aed;}
+.tsw.sel{border-color:#7c3aed;background:#faf5ff;color:#7c3aed;}
+#btn-cart{transition:background .2s,transform .1s;}
+#btn-cart.ok{background:#059669 !important;}
+#btn-cart:active{transform:scale(.98);}
+@keyframes fly{from{transform:translate(0,0) scale(1);opacity:1;}to{transform:translate(var(--fx),var(--fy)) scale(.2);opacity:0;}}
+.fly-el{position:fixed;z-index:9998;pointer-events:none;font-size:22px;color:#7c3aed;animation:fly .6s cubic-bezier(.2,.5,.5,.9) forwards;}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;display:none;align-items:center;justify-content:center;}
+#lb.open{display:flex;}
+#lb img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:10px;}
+#lb-close{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;background:rgba(255,255,255,.15);color:#fff;display:flex;align-items:center;justify-content:center;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Lightbox -->
+<div id="lb" onclick="document.getElementById('lb').classList.remove('open')">
+  <img id="lb-img" alt="{{ product.name }}" onclick="event.stopPropagation()">
+  <button id="lb-close" onclick="document.getElementById('lb').classList.remove('open')">
+    <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+  </button>
+</div>
+
+<div style="min-height:100vh;background:#fafaf9;">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-1.5 text-xs text-gray-400 mb-7 flex-wrap font-medium">
+    <a href="{% url 'accueil' %}" class="hover:text-purple-700 transition">Accueil</a>
+    <span>›</span>
+    <a href="{% url 'perruque:perruque_accueil' %}" class="hover:text-purple-700 transition">Perruques</a>
+    {% if product.category %}
+    <span>›</span>
+    <a href="{% url 'perruque:perruque_accueil' %}?cat={{ product.category.pk }}" class="hover:text-purple-700 transition">
+      {{ product.category.icon }} {{ product.category.name }}
+    </a>
+    {% endif %}
+    <span>›</span>
+    <span class="text-gray-700 font-semibold truncate max-w-xs">{{ product.name }}</span>
+  </nav>
+
+  <div class="flex flex-col lg:flex-row gap-10 lg:gap-14 items-start">
+
+    <!-- ── Galerie ── -->
+    <div class="w-full lg:w-[44%] flex-shrink-0 lg:sticky lg:top-20">
+
+      <div id="main-img-box">
+        {% if main_image %}
+          <img id="main-img" src="{{ main_image.url }}" alt="{{ product.name }}"
+               onclick="openLb(this.src)"
+               onerror="this.style.display='none';document.getElementById('main-img-fallback').style.display='flex';">
+        {% endif %}
+        <div id="main-img-fallback"
+             class="w-full h-full flex items-center justify-center"
+             style="{% if main_image %}display:none;{% endif %}background:linear-gradient(135deg,#faf5ff,#ede9fe);font-size:6rem;">
+          💇
+        </div>
+
+        <!-- Badges stock / statut -->
+        {% if product.status == 'out_of_stock' %}
+        <div class="absolute inset-0 flex items-center justify-center" style="background:rgba(0,0,0,.45);">
+          <span class="text-white font-extrabold text-xl px-7 py-2.5 rounded-2xl uppercase tracking-widest" style="background:#ef4444;">Épuisé</span>
+        </div>
+        {% elif product.status == 'preorder' %}
+        <div class="absolute top-3 left-3">
+          <span class="text-white font-bold text-xs px-3 py-1.5 rounded-full shadow-md" style="background:#7c3aed;">Précommande</span>
+        </div>
+        {% elif product.stock <= 3 %}
+        <div class="absolute top-3 left-3">
+          <span class="text-white font-bold text-xs px-3 py-1.5 rounded-full shadow-md" style="background:#f97316;">⚡ {{ product.stock }} restant{{ product.stock|pluralize }}</span>
+        </div>
+        {% endif %}
+
+        {% if product.is_en_promo %}
+        <div class="absolute top-3 right-3">
+          <span class="text-white font-extrabold text-sm px-3 py-1.5 rounded-full shadow-md" style="background:#dc2626;">-{{ product.remise_pct }}%</span>
+        </div>
+        {% endif %}
+
+        {% if main_image %}
+        <button onclick="openLb(document.getElementById('main-img').src)"
+                class="absolute bottom-3 right-3 flex items-center gap-1 text-white font-medium text-xs px-2 py-1 rounded-lg"
+                style="background:rgba(0,0,0,.4);backdrop-filter:blur(4px);">
+          <span class="material-symbols-outlined" style="font-size:14px;">zoom_in</span>
+        </button>
+        {% endif %}
+      </div>
+
+      <!-- Miniatures -->
+      {% if gallery|length > 1 %}
+      <div class="grid grid-cols-5 gap-2 mt-3">
+        {% for img in gallery %}
+        <button type="button" class="thumb-btn {% if img.url == main_image.url %}active{% endif %}"
+                onclick="setMain('{{ img.url }}', this)">
+          <img src="{{ img.url }}" alt="{{ img.description|default:product.name }}" loading="lazy"
+               onerror="this.parentElement.style.display='none';">
+        </button>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Vidéo -->
+      {% if product.video %}
+      <div class="mt-4 rounded-2xl overflow-hidden border border-gray-100" style="background:#000;">
+        <video src="{{ product.video.url }}" controls class="w-full max-h-64 object-contain"
+               poster="{{ main_image.url|default:'' }}"></video>
+        <p class="text-center text-xs text-gray-400 py-1.5">Vidéo de présentation</p>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- ── Infos droite ── -->
+    <div class="flex-1 min-w-0 pb-10">
+
+      <!-- Badges -->
+      <div class="flex items-center gap-2 flex-wrap mb-4">
+        {% if product.category %}
+        <a href="{% url 'perruque:perruque_accueil' %}?cat={{ product.category.pk }}"
+           class="inline-flex items-center gap-1.5 text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1 rounded-full hover:bg-purple-100 transition">
+          {{ product.category.icon }} {{ product.category.name }}
+        </a>
+        {% endif %}
+        {% if product.texture %}
+        <span class="inline-flex text-xs font-bold text-violet-700 bg-violet-50 border border-violet-200 px-3 py-1 rounded-full">
+          {{ product.get_texture_display }}
+        </span>
+        {% endif %}
+        {% if product.material %}
+        <span class="inline-flex text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full">
+          {{ product.get_material_display }}
+        </span>
+        {% endif %}
+        {% if product.delivery_available %}
+        <span class="inline-flex items-center gap-1 text-xs font-bold text-green-700 bg-green-50 border border-green-200 px-3 py-1 rounded-full">
+          <span class="material-symbols-outlined" style="font-size:12px;">local_shipping</span> Livraison dispo
+        </span>
+        {% endif %}
+        {% if product.average_rating > 0 %}
+        <span class="inline-flex items-center gap-1 text-xs font-bold text-yellow-700 bg-yellow-50 border border-yellow-200 px-3 py-1 rounded-full">
+          ⭐ {{ product.average_rating }} ({{ product.reviews_count }} avis)
+        </span>
+        {% endif %}
+      </div>
+
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight mb-1 tracking-tight">
+        {{ product.name }}
+      </h1>
+      <div class="flex items-center gap-3 flex-wrap mb-6">
+        <p class="text-sm text-gray-400">par <span class="font-semibold text-gray-800">{{ product.shop.name }}</span></p>
+        {% if product.city or product.location %}
+        <span class="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-full">
+          <span class="material-symbols-outlined" style="font-size:13px;color:#7c3aed;">location_on</span>
+          {% if product.location %}{{ product.location }}{% if product.city %}, {% endif %}{% endif %}{{ product.city }}
+        </span>
+        {% endif %}
+      </div>
+
+      <!-- Prix -->
+      {% if product.is_en_promo %}
+      <div class="flex items-end gap-3 mb-3 pb-6 border-b border-gray-100 flex-wrap">
+        <span class="font-black text-red-600 leading-none" style="font-size:3rem;letter-spacing:-2px;">{{ product.prix_actuel|floatformat:0 }}</span>
+        <div class="pb-1 leading-tight">
+          <p class="font-bold text-gray-400 text-base">FCFA</p>
+          <p class="line-through text-gray-400 text-sm">{{ product.price|floatformat:0 }} FCFA</p>
+        </div>
+        <span class="font-extrabold text-sm text-white px-4 py-2 rounded-2xl mb-1" style="background:#dc2626;">-{{ product.remise_pct }}%</span>
+      </div>
+      {% if product.promo_debut or product.promo_fin %}
+      <p class="text-xs font-semibold mb-6 -mt-4" style="color:#dc2626;">
+        ⏰ Promotion {% if product.promo_debut %}du {{ product.promo_debut|date:"d/m/Y" }}{% endif %}{% if product.promo_fin %} au {{ product.promo_fin|date:"d/m/Y" }}{% endif %}
+      </p>
+      {% endif %}
+      {% else %}
+      <div class="flex items-end gap-2 mb-7 pb-6 border-b border-gray-100">
+        <span class="font-black text-purple-700 leading-none" style="font-size:3rem;letter-spacing:-2px;">{{ product.price|floatformat:0 }}</span>
+        <div class="pb-1 leading-tight"><p class="font-bold text-gray-400 text-base">FCFA</p></div>
+      </div>
+      {% endif %}
+
+      <!-- Caractéristiques -->
+      <div class="grid grid-cols-2 gap-3 mb-7">
+        {% if product.color %}
+        <div class="bg-purple-50 border border-purple-100 rounded-xl p-3">
+          <p class="text-[10px] font-bold text-purple-500 uppercase tracking-wider mb-0.5">Couleur</p>
+          <p class="font-bold text-gray-800 text-sm">{{ product.color }}</p>
+        </div>
+        {% endif %}
+        {% if product.length %}
+        <div class="bg-purple-50 border border-purple-100 rounded-xl p-3">
+          <p class="text-[10px] font-bold text-purple-500 uppercase tracking-wider mb-0.5">Longueur</p>
+          <p class="font-bold text-gray-800 text-sm">{{ product.length }}</p>
+        </div>
+        {% endif %}
+        {% if product.texture %}
+        <div class="bg-violet-50 border border-violet-100 rounded-xl p-3">
+          <p class="text-[10px] font-bold text-violet-500 uppercase tracking-wider mb-0.5">Texture</p>
+          <p class="font-bold text-gray-800 text-sm">{{ product.get_texture_display }}</p>
+        </div>
+        {% endif %}
+        {% if product.material %}
+        <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3">
+          <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-0.5">Matière</p>
+          <p class="font-bold text-gray-800 text-sm">{{ product.get_material_display }}</p>
+        </div>
+        {% endif %}
+        <div class="bg-gray-50 border border-gray-100 rounded-xl p-3">
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Localisation</p>
+          <p class="font-bold text-gray-800 text-sm">{{ product.city }}</p>
+        </div>
+        <div class="bg-gray-50 border border-gray-100 rounded-xl p-3">
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Livraison</p>
+          <p class="font-bold text-sm {% if product.delivery_available %}text-green-700{% else %}text-red-600{% endif %}">
+            {% if product.delivery_available %}Disponible{% else %}Non disponible{% endif %}
+          </p>
+        </div>
+      </div>
+
+      <!-- Couleurs (images) -->
+      {% if couleurs %}
+      <div class="mb-7">
+        <p class="text-sm font-bold text-gray-800 mb-3">Couleur image : <span id="sel-cn" class="text-purple-700 ml-1">Sans préférence</span></p>
+        <div class="flex gap-3 flex-wrap items-center">
+          <button type="button" class="csw sel" id="csw-any"
+                  style="background:linear-gradient(135deg,#f3f4f6,#e5e7eb);"
+                  onclick="pickColor(null, null, null, this)">
+            <span class="csw-ck" style="color:#9ca3af;font-size:12px;">—</span>
+          </button>
+          {% for c in couleurs %}
+          <button type="button" class="csw" style="background:{{ c.code_hex|default:'#e5e7eb' }};" title="{{ c.nom }}"
+                  onclick="pickColor('{{ c.pk }}', '{{ c.nom|escapejs }}', '{{ c.code_hex }}', this)">
+            <span class="csw-ck">✓</span>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Tailles -->
+      {% if tailles %}
+      <div class="mb-7">
+        <p class="text-sm font-bold text-gray-800 mb-3">Taille : <span id="sel-tn" class="text-purple-700 ml-1">Non sélectionnée</span></p>
+        <div class="flex gap-2 flex-wrap items-center">
+          {% for t in tailles %}
+          <button type="button" class="tsw" data-nom="{{ t.nom }}" onclick="pickTaille('{{ t.nom|escapejs }}', this)">{{ t.nom }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Stock bar -->
+      {% if product.stock > 0 %}
+      <div class="mb-7">
+        <div class="flex justify-between items-center mb-1.5">
+          <span class="text-xs font-semibold text-gray-500">Stock</span>
+          <span class="text-xs font-bold {% if product.stock <= 3 %}text-orange-600{% else %}text-purple-600{% endif %}">
+            {{ product.stock }} unité{{ product.stock|pluralize }}
+          </span>
+        </div>
+        <div class="h-1.5 rounded-full overflow-hidden" style="background:#f3f4f6;">
+          <div class="h-full rounded-full"
+               style="background:{% if product.stock <= 3 %}#fb923c{% else %}#a855f7{% endif %};
+                      width:{% if product.stock >= 50 %}100{% elif product.stock >= 20 %}70{% elif product.stock >= 10 %}45{% elif product.stock >= 5 %}25{% else %}12{% endif %}%;"></div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Quantité + Panier -->
+      {% if product.stock > 0 %}
+      <div class="space-y-3 mb-7">
+        <div class="flex items-center gap-4">
+          <span class="text-sm font-bold text-gray-700">Quantité</span>
+          <div class="qty-row">
+            <button class="qb" id="q-minus" type="button">−</button>
+            <span class="qv" id="q-val">1</span>
+            <button class="qb" id="q-plus" type="button">+</button>
+          </div>
+          <span class="text-xs text-gray-400">max {{ product.stock }}</span>
+        </div>
+
+        <button id="btn-cart" type="button"
+                class="w-full flex items-center justify-center gap-3 text-white font-extrabold py-4 rounded-2xl text-base"
+                style="background:#7c3aed;box-shadow:0 6px 20px rgba(124,58,237,.3);">
+          <span class="material-symbols-outlined text-xl" id="c-ico">add_shopping_cart</span>
+          <span id="c-lbl">Ajouter au panier</span>
+        </button>
+
+        {% if product.shop.contact_telephone %}
+        <a href="https://wa.me/{{ product.shop.contact_telephone }}?text={{ product.name|urlencode }}"
+           target="_blank" rel="noopener"
+           class="w-full flex items-center justify-center gap-2 font-bold py-3.5 rounded-2xl text-sm transition"
+           style="border:2px solid #25D366;color:#128C7E;">
+          <svg width="20" height="20" fill="#25D366" viewBox="0 0 24 24" class="flex-shrink-0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Commander via WhatsApp
+        </a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- Description -->
+      {% if product.description %}
+      <div class="rounded-2xl border border-gray-100 p-5 mb-6" style="background:#fff;">
+        <p class="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+          <span class="material-symbols-outlined text-base" style="color:#7c3aed;">article</span>Description
+        </p>
+        <div class="text-sm text-gray-600 leading-relaxed">{{ product.description|linebreaksbr }}</div>
+      </div>
+      {% endif %}
+
+      <!-- Boutique -->
+      <div class="relative overflow-hidden rounded-3xl"
+           style="background:linear-gradient(140deg,#faf5ff,#ede9fe 60%,#ddd6fe);border:1.5px solid #c4b5fd;">
+        <div class="pointer-events-none absolute" style="top:-2rem;right:-2rem;width:6rem;height:6rem;border-radius:50%;background:#c4b5fd;opacity:.25;"></div>
+        <div class="relative p-5">
+          <p class="font-extrabold uppercase tracking-widest mb-4" style="font-size:.65rem;color:#7c3aed;">Boutique</p>
+          <div class="flex items-center gap-4 mb-4">
+            {% if product.shop.logo %}
+              <img src="{{ product.shop.logo.url }}" alt="{{ product.shop.name }}"
+                   class="object-cover flex-shrink-0"
+                   style="width:3.25rem;height:3.25rem;border-radius:.75rem;border:2px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.1);">
+            {% else %}
+              <div class="flex items-center justify-center font-extrabold text-white flex-shrink-0"
+                   style="width:3.25rem;height:3.25rem;border-radius:.75rem;font-size:1.4rem;
+                          background:linear-gradient(135deg,#7c3aed,#a855f7);border:2px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.1);">
+                {{ product.shop.name|first|upper }}
+              </div>
+            {% endif %}
+            <div class="flex-1 min-w-0">
+              <p class="font-extrabold text-gray-900 text-base leading-tight">{{ product.shop.name }}</p>
+              {% if product.location or product.city %}
+              <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:12px;color:#a78bfa;">location_on</span>
+                {% if product.location %}{{ product.location }}{% if product.city %}, {% endif %}{% endif %}{{ product.city }}
+              </p>
+              {% endif %}
+              {% if product.shop.address or product.shop.quartier or product.shop.commune or product.shop.ville %}
+              <p class="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:12px;">storefront</span>
+                {% if product.shop.address %}{{ product.shop.address }}, {% endif %}
+                {% if product.shop.quartier %}{{ product.shop.quartier.nom }}, {% endif %}
+                {% if product.shop.commune %}{{ product.shop.commune.nom }}{% endif %}
+              </p>
+              {% endif %}
+              <p class="text-xs font-semibold mt-1" style="color:#7c3aed;">{{ product.shop.products.count }} article{{ product.shop.products.count|pluralize }} en vente</p>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <a href="{% url 'perruque:perruque_accueil' %}"
+               class="flex-1 flex items-center justify-center gap-1.5 font-bold text-xs py-2.5 rounded-xl transition"
+               style="background:#fff;border:2px solid #c4b5fd;color:#7c3aed;">
+              <span class="material-symbols-outlined" style="font-size:13px;">storefront</span> Boutique
+            </a>
+            {% if product.shop.contact_telephone %}
+            <a href="https://wa.me/{{ product.shop.contact_telephone }}" target="_blank" rel="noopener"
+               class="flex-1 flex items-center justify-center gap-1.5 font-bold text-xs py-2.5 rounded-xl text-white"
+               style="background:#25D366;">
+              <span class="material-symbols-outlined" style="font-size:13px;">chat</span> WhatsApp
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Produits similaires ── -->
+  {% if autres %}
+  <section class="mt-14 pt-8" style="border-top:1px solid #efefef;">
+    <div class="flex items-end justify-between mb-6">
+      <div>
+        {% if product.category %}
+        <p class="font-extrabold uppercase tracking-widest mb-1" style="font-size:.65rem;color:#7c3aed;">{{ product.category.icon }} {{ product.category.name }}</p>
+        {% endif %}
+        <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900">Dans la même catégorie</h2>
+      </div>
+      <a href="{% url 'perruque:perruque_accueil' %}"
+         class="hidden sm:flex items-center gap-1 text-sm font-semibold transition" style="color:#7c3aed;">
+        Tout voir <span class="material-symbols-outlined text-base">arrow_forward</span>
+      </a>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      {% for p in autres %}
+      {% with pi=p.images.first %}
+      <div class="group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col">
+        <a href="{% url 'perruque:detail_perruque' p.pk %}" class="block overflow-hidden flex-shrink-0"
+           style="aspect-ratio:1/1;background:linear-gradient(135deg,#faf5ff,#ede9fe);">
+          {% if pi %}
+            <img src="{{ pi.image.url }}" alt="{{ p.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          {% else %}
+            <div class="w-full h-full flex items-center justify-center text-3xl">💇</div>
+          {% endif %}
+          {% if p.is_en_promo %}
+          <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">-{{ p.remise_pct }}%</span>
+          {% endif %}
+        </a>
+        <div class="p-3 flex flex-col flex-1">
+          <a href="{% url 'perruque:detail_perruque' p.pk %}"
+             class="font-bold text-gray-900 text-sm line-clamp-2 mb-1 hover:text-purple-700 transition leading-tight">{{ p.name }}</a>
+          <p class="text-xs text-gray-400 mb-2 truncate">{{ p.shop.name }}</p>
+          <div class="flex items-baseline gap-1 mb-3 mt-auto">
+            {% if p.is_en_promo %}
+              <span class="font-extrabold text-base text-red-600">{{ p.prix_actuel|floatformat:0 }}</span>
+              <span class="text-gray-400 text-xs line-through">{{ p.price|floatformat:0 }}</span>
+              <span class="text-[10px] text-gray-400">FCFA</span>
+            {% else %}
+              <span class="font-extrabold text-base text-purple-700">{{ p.price|floatformat:0 }}</span>
+              <span class="text-xs text-gray-400">FCFA</span>
+            {% endif %}
+          </div>
+          <div class="flex gap-1.5">
+            <a href="{% url 'perruque:detail_perruque' p.pk %}"
+               class="flex-1 flex items-center justify-center gap-1 text-xs font-bold py-2 rounded-xl transition"
+               style="background:#faf5ff;color:#7c3aed;border:1.5px solid #c4b5fd;">
+              <span class="material-symbols-outlined" style="font-size:13px;">visibility</span> Détail
+            </a>
+            {% if p.stock > 0 %}
+            <button type="button" onclick="quickAddToCart(this); event.stopPropagation();"
+                    data-id="{{ p.pk }}" data-nom="{{ p.name|escapejs }}"
+                    data-prix="{{ p.prix_actuel }}" data-devise="FCFA" data-unite="pièce"
+                    data-vendeur="{{ p.shop.name|escapejs }}"
+                    data-image="{% if pi %}{{ pi.image.url }}{% endif %}"
+                    data-url="{% url 'perruque:detail_perruque' p.pk %}"
+                    class="flex-1 flex items-center justify-center gap-1 text-xs font-bold py-2 rounded-xl text-white transition"
+                    style="background:#7c3aed;">
+              <span class="material-symbols-outlined cart-ico" style="font-size:13px;">add_shopping_cart</span>
+              Panier
+            </button>
+            {% else %}
+            <span class="flex-1 flex items-center justify-center text-xs font-bold py-2 rounded-xl text-gray-400" style="background:#f3f4f6;">Épuisé</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endwith %}
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</div></div>
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-white py-8 mt-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xl"
+           style="background:linear-gradient(135deg,#7c3aed,#a855f7);">💇</div>
+      <div>
+        <p class="font-extrabold text-white text-sm">Perruques & Beauté</p>
+        <p class="text-xs" style="color:#c4b5fd;">by Secrétariat Pro</p>
+      </div>
+    </div>
+    <nav class="flex gap-5 text-sm text-gray-400">
+      <a href="{% url 'accueil' %}" class="hover:text-white transition">Accueil</a>
+      <a href="{% url 'perruque:perruque_accueil' %}" class="hover:text-white transition">Perruques</a>
+      <a href="{% url 'marche:panier' %}" class="hover:text-purple-400 transition">Panier</a>
+    </nav>
+    <p class="text-gray-600 text-xs">© 2025 Perruques & Beauté</p>
+  </div>
+</footer>
+
+<script>
+var IMAGES   = {{ images_data|safe }};
+var MAX_QTY  = parseInt("{{ product.stock }}", 10) || 0;
+var PRODUCT  = {
+  id:      "{{ product.pk }}",
+  nom:     "{{ product.name|escapejs }}",
+  prix:    parseFloat("{{ product.prix_actuel }}"),
+  devise:  "FCFA",
+  unite:   "pièce",
+  vendeur: "{{ product.shop.name|escapejs }}",
+  url:     window.location.href
+};
+
+var currentImgUrl = {% if main_image %}"{{ main_image.url }}"{% else %}""{% endif %};
+var selColor  = { nom: null, hex: null };
+var selTaille = { nom: null };
+var qty = 1;
+
+function setMain(url, thumbEl) {
+  var img = document.getElementById('main-img');
+  if (img) {
+    img.style.opacity = '0';
+    setTimeout(function(){ img.src = url; img.style.opacity = '1'; }, 180);
+  }
+  currentImgUrl = url;
+  document.querySelectorAll('.thumb-btn').forEach(function(t){ t.classList.remove('active'); });
+  if (thumbEl) thumbEl.classList.add('active');
+}
+
+function openLb(url) {
+  var lb = document.getElementById('lb');
+  var lbImg = document.getElementById('lb-img');
+  if (!lb || !lbImg || !url) return;
+  lbImg.src = url;
+  lb.classList.add('open');
+}
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') document.getElementById('lb').classList.remove('open'); });
+
+function pickColor(id, nom, hex, btn) {
+  selColor = { nom: nom, hex: hex };
+  document.querySelectorAll('.csw').forEach(function(s){ s.classList.remove('sel'); });
+  btn.classList.add('sel');
+  document.getElementById('sel-cn').textContent = nom || 'Sans préférence';
+}
+
+function pickTaille(nom, btn) {
+  selTaille = { nom: nom };
+  document.querySelectorAll('.tsw').forEach(function(s){ s.classList.remove('sel'); });
+  btn.classList.add('sel');
+  document.getElementById('sel-tn').textContent = nom || 'Non sélectionnée';
+  PRODUCT.unite = nom || 'pièce';
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  var disp  = document.getElementById('q-val');
+  var minus = document.getElementById('q-minus');
+  var plus  = document.getElementById('q-plus');
+  if (!disp) return;
+
+  function refresh(){ disp.textContent = qty; minus.disabled = qty <= 1; plus.disabled = MAX_QTY > 0 && qty >= MAX_QTY; }
+  minus.addEventListener('click', function(){ if(qty>1){ qty--; refresh(); } });
+  plus.addEventListener('click',  function(){ if(!MAX_QTY||qty<MAX_QTY){ qty++; refresh(); } });
+  refresh();
+
+  var btnCart = document.getElementById('btn-cart');
+  if (btnCart) {
+    btnCart.addEventListener('click', function(){
+      if (typeof cartAdd !== 'function') return;
+      cartAdd({
+        id: PRODUCT.id, nom: PRODUCT.nom, prix: PRODUCT.prix,
+        devise: PRODUCT.devise, unite: selTaille.nom || 'pièce',
+        taille: selTaille.nom || '',
+        vendeur: PRODUCT.vendeur, image: currentImgUrl, url: PRODUCT.url,
+        section: 'perruque'
+      }, selColor.nom, selColor.hex);
+
+      if (qty > 1 && typeof cartSetQty === 'function') {
+        var key = PRODUCT.id + '|' + (selColor.nom || '') + '|' + (selTaille.nom || '');
+        cartSetQty(key, qty);
+      }
+
+      var badge = document.getElementById('cart-badge');
+      var btn   = btnCart;
+      var bRect = btn.getBoundingClientRect();
+      if (badge) {
+        var dRect = badge.getBoundingClientRect();
+        var el = document.createElement('span');
+        el.className = 'fly-el material-symbols-outlined';
+        el.textContent = 'shopping_bag';
+        el.style.left = (bRect.left + bRect.width/2 - 11) + 'px';
+        el.style.top  = (bRect.top  + bRect.height/2 - 11) + 'px';
+        el.style.setProperty('--fx', (dRect.left - bRect.left + dRect.width/2 - bRect.width/2) + 'px');
+        el.style.setProperty('--fy', (dRect.top  - bRect.top  + dRect.height/2 - bRect.height/2) + 'px');
+        document.body.appendChild(el);
+        setTimeout(function(){ el.remove(); }, 700);
+      }
+
+      btn.disabled = true; btn.classList.add('ok');
+      document.getElementById('c-ico').textContent = 'check_circle';
+      document.getElementById('c-lbl').textContent = (qty > 1 ? qty + '× ' : '') + 'Ajouté !';
+      setTimeout(function(){
+        btn.disabled = false; btn.classList.remove('ok');
+        document.getElementById('c-ico').textContent = 'add_shopping_cart';
+        document.getElementById('c-lbl').textContent = 'Ajouter au panier';
+      }, 2200);
+    });
+  }
+});
+</script>
+
+{% endblock %}

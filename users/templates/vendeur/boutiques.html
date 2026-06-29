@@ -1,0 +1,136 @@
+{% extends "vendeur/base_vendeur.html" %}
+{% block title %}Mes boutiques{% endblock %}
+{% block page_title %}Mes boutiques{% endblock %}
+{% block page_subtitle %}Gérez vos points de vente{% endblock %}
+
+{% block content %}
+
+<div class="grid lg:grid-cols-3 gap-6">
+
+  <!-- Liste boutiques -->
+  <div class="lg:col-span-2 space-y-4">
+    {% if type == 'shop' %}
+      {% for shop in shops %}
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+        <div class="flex items-start gap-4">
+          {% if shop.logo %}
+            <img src="{{ shop.logo.url }}" class="w-14 h-14 rounded-xl object-cover border border-slate-100">
+          {% else %}
+            <div class="w-14 h-14 rounded-xl bg-orange-50 flex items-center justify-center text-2xl border border-orange-100">
+              {{ vp.section_icon }}
+            </div>
+          {% endif %}
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-slate-800 text-base">{{ shop.name }}</h3>
+            <p class="text-slate-500 text-sm mt-0.5 line-clamp-2">{{ shop.description|default:"—" }}</p>
+            {% if shop.address %}
+            <p class="text-xs text-slate-400 mt-1.5 flex items-center gap-1">
+              📍 {{ shop.address }}
+            </p>
+            {% endif %}
+          </div>
+          <span class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold
+            {% if shop.active %}bg-green-100 text-green-700{% else %}bg-slate-100 text-slate-500{% endif %}">
+            {% if shop.active %}● Actif{% else %}● Inactif{% endif %}
+          </span>
+        </div>
+
+        <!-- Stats boutique -->
+        <div class="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-50">
+          <div class="text-center">
+            <p class="text-lg font-extrabold text-slate-700">
+              {% if vp.section == 'shopping' %}{{ shop.products.count }}
+              {% elif vp.section == 'perruque' %}{{ shop.wig_products.count }}
+              {% elif vp.section == 'voiture' %}{{ shop.cars.count }}
+              {% elif vp.section == 'immobilier' %}{{ shop.biens.count }}
+              {% elif vp.section == 'quicaillerie' %}{{ shop.produits_quicaillerie.count }}
+              {% else %}—{% endif %}
+            </p>
+            <p class="text-xs text-slate-400">Produits</p>
+          </div>
+          <div class="text-center">
+            <p class="text-lg font-extrabold text-slate-700">
+              {{ shop.created_at|date:"d/m/Y" }}
+            </p>
+            <p class="text-xs text-slate-400">Créée le</p>
+          </div>
+          <div class="text-center">
+            <p class="text-lg font-extrabold text-slate-700">
+              {% if shop.ville %}{{ shop.ville.nom }}{% else %}—{% endif %}
+            </p>
+            <p class="text-xs text-slate-400">Ville</p>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="bg-white rounded-2xl border border-dashed border-slate-200 p-12 text-center text-slate-400">
+        <span style="font-size:48px;" class="block mb-3">🏪</span>
+        <p class="font-semibold text-slate-500">Aucune boutique</p>
+        <p class="text-sm mt-1">Créez votre première boutique ci-contre</p>
+      </div>
+      {% endfor %}
+
+    {% else %}{# marche #}
+      {% for boutique in boutiques %}
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+        <div class="flex items-start gap-4">
+          {% if boutique.logo %}
+            <img src="{{ boutique.logo.url }}" class="w-14 h-14 rounded-xl object-cover border border-slate-100">
+          {% else %}
+            <div class="w-14 h-14 rounded-xl bg-green-50 flex items-center justify-center text-2xl border border-green-100">
+              🛒
+            </div>
+          {% endif %}
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-slate-800 text-base">{{ boutique.nom_boutique }}</h3>
+            <p class="text-xs text-slate-400 mt-0.5">{{ boutique.get_type_commerce_display }}</p>
+            {% if boutique.stand %}<p class="text-xs text-slate-500 mt-1">Stand : {{ boutique.stand }}</p>{% endif %}
+            {% if boutique.marche %}<p class="text-xs text-slate-400 mt-0.5">📍 {{ boutique.marche }}</p>{% endif %}
+          </div>
+          <span class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold
+            {% if boutique.actif %}bg-green-100 text-green-700{% else %}bg-slate-100 text-slate-500{% endif %}">
+            {% if boutique.actif %}● Actif{% else %}● Inactif{% endif %}
+          </span>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between text-sm">
+          <span class="text-slate-500">{{ boutique.nombre_produits }} produit{{ boutique.nombre_produits|pluralize }}</span>
+          <span class="text-xs text-slate-400">Inscrit {{ boutique.date_inscription|date:"d/m/Y" }}</span>
+        </div>
+      </div>
+      {% empty %}
+      <div class="bg-white rounded-2xl border border-dashed border-slate-200 p-12 text-center text-slate-400">
+        <span style="font-size:48px;" class="block mb-3">🛒</span>
+        <p class="font-semibold text-slate-500">Aucune boutique marché</p>
+        <p class="text-sm mt-1">Créez votre stand sur le marché</p>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Formulaire ajout (shop uniquement) -->
+  {% if type == 'shop' %}
+  <div class="lg:col-span-1">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 sticky top-24">
+      <h3 class="font-bold text-slate-800 mb-4">+ Nouvelle boutique</h3>
+      <form method="post" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+        {% for field in form %}
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1.5">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit"
+                class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
+          Créer la boutique
+        </button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

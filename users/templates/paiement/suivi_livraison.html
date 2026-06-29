@@ -1,0 +1,348 @@
+{% extends 'base/base.html' %}
+{% block title %}Suivi en temps réel — Commande #{{ paiement.pk }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  #map { height: 340px; }
+  @keyframes pulse-ring {
+    0%   { transform:scale(.95); box-shadow:0 0 0 0 rgba(249,115,22,.5); }
+    70%  { transform:scale(1);   box-shadow:0 0 0 10px rgba(249,115,22,0); }
+    100% { transform:scale(.95); box-shadow:0 0 0 0 rgba(249,115,22,0); }
+  }
+  .pulse { animation: pulse-ring 1.8s infinite; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 pb-10">
+
+  <!-- Header compact -->
+  <div class="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3 sticky top-0 z-10 shadow-sm">
+    <a href="{% url 'client_commandes' %}" class="p-2 rounded-xl hover:bg-gray-100 transition">
+      <span class="material-symbols-outlined text-gray-500">arrow_back</span>
+    </a>
+    <div class="flex-1 min-w-0">
+      <h1 class="font-extrabold text-gray-900 truncate">Suivi commande #{{ paiement.pk }}</h1>
+      <p class="text-xs text-gray-400" id="last-update">Mise à jour en temps réel</p>
+    </div>
+    <div id="statut-badge" class="text-xs font-bold px-3 py-1.5 rounded-full bg-orange-100 text-orange-700 flex-shrink-0">
+      {% if livraison %}{{ livraison.get_statut_display }}{% else %}En attente{% endif %}
+    </div>
+  </div>
+
+  <div class="max-w-lg mx-auto px-4 pt-5 space-y-4">
+
+    {% if livraison %}
+
+    <!-- ═══ CARTE ═══════════════════════════════════════════════════════════ -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div id="map"></div>
+      <div id="no-gps-msg" class="hidden px-5 py-4 text-center text-sm text-gray-400">
+        <span class="material-symbols-outlined text-3xl text-gray-200 block mb-1">location_off</span>
+        Position du livreur non disponible pour le moment
+      </div>
+    </div>
+
+    <!-- ═══ LIVREUR INFO ════════════════════════════════════════════════════ -->
+    <div id="livreur-card" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      {% if livraison.livreur %}
+      <div class="flex items-center gap-4">
+        <div class="relative flex-shrink-0">
+          <img id="livreur-avatar"
+               src="{{ livraison.livreur.avatar_url }}"
+               alt="Photo livreur"
+               class="w-16 h-16 rounded-2xl object-cover border-2 border-orange-200">
+          <div id="livreur-online-dot"
+               class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-gray-300 border-2 border-white"></div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs text-gray-400 font-medium">Votre livreur</p>
+          <p id="livreur-nom" class="font-extrabold text-gray-900 text-base">
+            {{ livraison.livreur.first_name }} {{ livraison.livreur.last_name }}
+          </p>
+          {% if livraison.livreur.matricule %}
+          <p id="livreur-matricule" class="text-xs text-gray-400 mt-0.5">
+            <span class="material-symbols-outlined text-xs align-middle">badge</span>
+            Matricule : <span class="font-semibold text-gray-600">{{ livraison.livreur.matricule }}</span>
+          </p>
+          {% endif %}
+        </div>
+        <div class="flex flex-col gap-2 flex-shrink-0">
+          {% if livraison.livreur.telephone %}
+          <a href="tel:{{ livraison.livreur.telephone }}"
+             class="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
+            <span class="material-symbols-outlined text-sm">call</span>
+            Appeler
+          </a>
+          {% endif %}
+          <a href="sms:{{ livraison.livreur.telephone }}"
+             class="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
+            <span class="material-symbols-outlined text-sm">chat</span>
+            SMS
+          </a>
+        </div>
+      </div>
+
+      <!-- Statut déplacement -->
+      <div id="livreur-status-line" class="mt-4 pt-4 border-t border-gray-50 flex items-center gap-2 text-sm">
+        <span class="material-symbols-outlined text-orange-400 text-base pulse">local_shipping</span>
+        <span id="livreur-status-text" class="text-gray-600 font-medium">
+          {{ livraison.get_statut_display }}
+        </span>
+        <span id="livreur-dist" class="ml-auto text-xs text-gray-400"></span>
+      </div>
+      {% else %}
+      <div class="text-center py-4 text-sm text-gray-400">
+        <span class="material-symbols-outlined text-3xl text-gray-200 block mb-1">search</span>
+        Recherche d'un livreur disponible…
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ═══ CODE OTP ════════════════════════════════════════════════════════ -->
+    <div id="otp-block" class="{% if livraison.statut != 'en_route' or livraison.otp_valide %}hidden{% endif %}
+         bg-orange-50 border-2 border-orange-300 rounded-2xl p-6 text-center">
+      <span class="material-symbols-outlined text-orange-400 text-3xl">pin</span>
+      <p class="text-sm font-bold text-orange-700 mt-2 mb-3">Code de confirmation</p>
+      <p class="text-5xl font-black tracking-[0.4em] text-orange-600">{{ livraison.otp_code }}</p>
+      <p class="text-xs text-orange-500 mt-3">Communiquez ce code au livreur pour valider la remise</p>
+    </div>
+
+    <!-- ═══ LIVRAISON EFFECTUÉE ══════════════════════════════════════════════ -->
+    <div id="done-block" class="{% if livraison.statut != 'livree' %}hidden{% endif %}
+         bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center">
+      <span class="text-5xl">🎉</span>
+      <p class="font-extrabold text-emerald-700 mt-3 text-lg">Commande livrée !</p>
+      {% if livraison.delivered_at %}
+      <p class="text-xs text-emerald-500 mt-1">{{ livraison.delivered_at|date:"d/m/Y à H\h i" }}</p>
+      {% endif %}
+    </div>
+
+    <!-- ═══ TIMELINE ════════════════════════════════════════════════════════ -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <h2 class="text-sm font-bold text-gray-700 mb-5">Étapes</h2>
+      <div class="space-y-0" id="steps-list">
+        {% with s=livraison.statut %}
+        {% for step, label, icon in steps %}
+        <div class="flex items-start gap-4" id="step-{{ step }}">
+          <div class="flex flex-col items-center">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0
+              {% if step == s %}bg-orange-500 text-white shadow-lg shadow-orange-200
+              {% elif step in done_steps %}bg-emerald-100 text-emerald-600
+              {% else %}bg-gray-100 text-gray-400{% endif %}">
+              <span class="material-symbols-outlined text-base">{{ icon }}</span>
+            </div>
+            {% if not forloop.last %}
+            <div class="w-0.5 h-8 {% if step in done_steps %}bg-emerald-200{% else %}bg-gray-100{% endif %}"></div>
+            {% endif %}
+          </div>
+          <div class="pt-1.5 pb-6">
+            <p class="text-sm font-semibold
+              {% if step == s %}text-orange-600
+              {% elif step in done_steps %}text-gray-700
+              {% else %}text-gray-400{% endif %}">{{ label }}</p>
+            {% if step == s %}<p class="text-xs text-orange-400 font-medium mt-0.5">En cours…</p>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+        {% endwith %}
+      </div>
+    </div>
+
+    {% else %}
+    <!-- Pas de livraison (retrait en boutique) -->
+    <div class="bg-white rounded-2xl border border-dashed border-gray-200 p-12 text-center text-gray-400">
+      <span class="material-symbols-outlined text-5xl text-gray-200">storefront</span>
+      <p class="font-bold text-gray-600 mt-3">Retrait en boutique</p>
+      <p class="text-sm mt-1">Récupérez votre commande directement en magasin.</p>
+    </div>
+    {% endif %}
+
+    <!-- Récap commande -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h3 class="text-sm font-bold text-gray-700 mb-3">Récapitulatif</h3>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-gray-500">Sous-total</span><span class="font-semibold">{{ paiement.montant|floatformat:0 }} FCFA</span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Livraison</span><span class="font-semibold">{{ paiement.frais_livraison|floatformat:0 }} FCFA</span></div>
+        <div class="flex justify-between border-t border-gray-50 pt-2">
+          <span class="font-extrabold">Total</span>
+          <span class="font-extrabold text-emerald-600">{{ paiement.montant_total|floatformat:0 }} FCFA</span>
+        </div>
+      </div>
+      {% if paiement.adresse_livraison %}
+      <div class="mt-3 pt-3 border-t border-gray-50 flex items-start gap-2 text-xs text-gray-500">
+        <span class="material-symbols-outlined text-gray-300 text-sm mt-0.5">location_on</span>
+        {{ paiement.quartier_livraison }}{% if paiement.quartier_livraison %} — {% endif %}{{ paiement.adresse_livraison }}
+      </div>
+      {% endif %}
+    </div>
+
+  </div><!-- /max-w -->
+</div>
+
+{% if livraison %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const API_URL  = "{% url 'suivi_position_api' paiement.pk %}";
+const DEST_LAT = {{ paiement.gps_lat|default:"null" }};
+const DEST_LNG = {{ paiement.gps_lng|default:"null" }};
+const IS_DONE  = "{{ livraison.statut }}" === "livree";
+
+// ── Icônes Leaflet ────────────────────────────────────────────────────────────
+const iconLivreur = L.divIcon({
+  html: `<div style="width:44px;height:44px;border-radius:50%;border:3px solid #f97316;
+                     background:#fff;overflow:hidden;box-shadow:0 0 0 4px rgba(249,115,22,.2)">
+           <img id="map-avatar" src="{{ livraison.livreur.avatar_url|default:'' }}"
+                style="width:100%;height:100%;object-fit:cover"
+                onerror="this.src='/static/images/default-avatar.png'">
+         </div>`,
+  className: '', iconSize: [44,44], iconAnchor: [22,22],
+});
+
+const iconDest = L.divIcon({
+  html: `<div style="width:34px;height:34px;border-radius:50%;background:#10b981;
+                     border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.2);
+                     display:flex;align-items:center;justify-content:center">
+           <span style="font-size:18px">🏠</span></div>`,
+  className: '', iconSize: [34,34], iconAnchor: [17,17],
+});
+
+// ── Init carte ─────────────────────────────────────────────────────────────────
+let map, livreurMarker, destMarker, routeLine;
+
+function initMap(lat, lng) {
+  const center = (lat && lng) ? [lat, lng] : [-4.2634, 15.2832];
+  map = L.map('map', {zoomControl: false, attributionControl: false}).setView(center, 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19}).addTo(map);
+  L.control.zoom({position:'bottomright'}).addTo(map);
+  setTimeout(() => map.invalidateSize(), 150);
+
+  // Marqueur destination
+  if (DEST_LAT && DEST_LNG) {
+    destMarker = L.marker([DEST_LAT, DEST_LNG], {icon: iconDest})
+      .addTo(map)
+      .bindPopup('📍 Adresse de livraison');
+  }
+
+  // Marqueur livreur
+  if (lat && lng) {
+    livreurMarker = L.marker([lat, lng], {icon: iconLivreur}).addTo(map);
+    tracerLigne(lat, lng);
+  } else {
+    document.getElementById('no-gps-msg').classList.remove('hidden');
+  }
+}
+
+function tracerLigne(lat, lng) {
+  if (!DEST_LAT || !DEST_LNG) return;
+  if (routeLine) map.removeLayer(routeLine);
+  routeLine = L.polyline([[lat, lng], [DEST_LAT, DEST_LNG]], {
+    color: '#f97316', weight: 3, dashArray: '6 8', opacity: .7
+  }).addTo(map);
+}
+
+function distanceKm(lat1, lng1, lat2, lng2) {
+  const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(1);
+}
+
+// ── Statuts en français ───────────────────────────────────────────────────────
+const STATUTS = {
+  attente_livreur: 'En attente d\'un livreur…',
+  assigne:         'Livreur assigné — en attente d\'acceptation',
+  accepte:         'Le livreur se dirige vers le vendeur',
+  en_recuperation: 'Le livreur récupère votre colis',
+  en_route:        'En route vers vous 🛵',
+  livree:          'Commande livrée ✅',
+  echouee:         'Livraison échouée',
+};
+
+const BADGE_COLOR = {
+  attente_livreur: 'bg-slate-100 text-slate-500',
+  assigne:         'bg-blue-100 text-blue-700',
+  accepte:         'bg-blue-100 text-blue-700',
+  en_recuperation: 'bg-orange-100 text-orange-700',
+  en_route:        'bg-orange-100 text-orange-700',
+  livree:          'bg-emerald-100 text-emerald-700',
+  echouee:         'bg-red-100 text-red-600',
+};
+
+// ── Polling ───────────────────────────────────────────────────────────────────
+let lastStatut = "{{ livraison.statut }}";
+let mapInited  = false;
+
+async function rafraichir() {
+  try {
+    const r    = await fetch(API_URL);
+    const data = await r.json();
+
+    // Mise à jour badge statut
+    if (data.statut && data.statut !== lastStatut) {
+      if (window.playNotifSound) playNotifSound();
+      lastStatut = data.statut;
+      const badge = document.getElementById('statut-badge');
+      badge.textContent = STATUTS[data.statut] || data.statut;
+      badge.className   = `text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0 ${BADGE_COLOR[data.statut] || 'bg-slate-100 text-slate-500'}`;
+
+      document.getElementById('livreur-status-text').textContent = STATUTS[data.statut] || data.statut;
+
+      // OTP + done blocks
+      document.getElementById('otp-block').classList.toggle('hidden', data.statut !== 'en_route' || !data.otp_code);
+      document.getElementById('done-block').classList.toggle('hidden', data.statut !== 'livree');
+
+      if (data.statut === 'livree') {
+        document.getElementById('livreur-status-line').querySelector('.pulse').classList.remove('pulse');
+        clearInterval(pollingInterval);
+      }
+    }
+
+    // Heure de mise à jour
+    const now = new Date();
+    document.getElementById('last-update').textContent =
+      `Mis à jour à ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+
+    // Carte + position livreur
+    if (data.livreur && data.livreur.lat && data.livreur.lng) {
+      const lat = data.livreur.lat, lng = data.livreur.lng;
+      document.getElementById('no-gps-msg').classList.add('hidden');
+
+      // Dot "en ligne"
+      document.getElementById('livreur-online-dot').style.background = '#10b981';
+
+      if (!mapInited) { initMap(lat, lng); mapInited = true; }
+      else {
+        livreurMarker.setLatLng([lat, lng]);
+        tracerLigne(lat, lng);
+      }
+
+      // Distance
+      if (DEST_LAT && DEST_LNG) {
+        const km = distanceKm(lat, lng, DEST_LAT, DEST_LNG);
+        document.getElementById('livreur-dist').textContent = `~${km} km`;
+      }
+    } else if (!mapInited) {
+      initMap(null, null);
+      mapInited = true;
+    }
+
+  } catch(e) { console.warn('Polling error', e); }
+}
+
+// Démarrer
+if (!IS_DONE) {
+  rafraichir();
+  const pollingInterval = setInterval(rafraichir, 8000);
+} else {
+  initMap(
+    {% if livraison.livreur and livraison.livreur.last_lat %}{{ livraison.livreur.last_lat }}{% else %}null{% endif %},
+    {% if livraison.livreur and livraison.livreur.last_lng %}{{ livraison.livreur.last_lng }}{% else %}null{% endif %}
+  );
+}
+</script>
+
+<!-- Script côté LIVREUR : envoie position toutes les 15s quand la page mission est ouverte -->
+<!-- Ce bloc est injecté ici pour référence, mais n'est actif que dans mission_detail.html -->
+{% endif %}
+{% endblock %}

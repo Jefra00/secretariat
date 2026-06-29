@@ -1,530 +1,505 @@
 {% extends 'base/base.html' %}
-{% load static %}  <!-- ✅ Ajoute ceci si ce n'est pas déjà dans `base.html` -->
+{% load static %}
 
-{% block title %}Tableau de Bord{% endblock %}
+{% block title %}Marché Intelligent — Secrétariat Pro{% endblock %}
+
+{% block navbar %}{% include 'base/navbar_marche.html' %}{% endblock %}
+{% block footer %}{% endblock %}
 
 
 {% block content %}
 
-<section class="relative w-full h-[70vh] overflow-hidden rounded-b-[3rem]">
-    <div
-      class="absolute inset-0 bg-cover bg-center"
-      style="background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80'); filter: brightness(0.5); background-attachment: fixed;">
-    </div>
-
-    <div class="relative z-10 flex flex-col justify-center items-center text-center h-full text-white px-6 md:px-12">
-      <h1 class="text-6xl font-extrabold drop-shadow-xl mb-6">
-        <span class="text-primary">Secrétariat Pro</span> Blog
-      </h1>
-      <p class="max-w-2xl text-lg text-gray-100 leading-relaxed">
-        Rejoignez notre communauté et explorez des histoires inspirantes, des astuces pratiques et des retours d’expérience réels.
-      </p>
-    </div>
-  </section>
-
-
-            <main class="px-4 md:px-8 lg:px-16 xl:px-24">
-              <!-- HeroSection -->
-              <section class="py-16 sm:py-24 @container" id="accueil">
-                <div
-                  class="flex flex-col-reverse gap-10 @[864px]:flex-row @[864px]:items-center"
-                >
-                  <div
-                    class="flex flex-col gap-6 text-center @[864px]:text-left @[864px]:w-1/2"
-                  >
-                    <div class="flex flex-col gap-4">
-                      <h1
-                        class="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-tight @[480px]:text-5xl @[480px]:leading-tight"
-                      >
-                        Votre Partenaire Administratif et Numérique
-                      </h1>
-                      <p
-                        class="text-text-muted-light dark:text-text-muted-dark text-base font-normal leading-normal @[480px]:text-lg"
-                      >
-                        Simplifiez votre gestion, accélérez votre croissance.
-                        Nous offrons des services administratifs et numériques
-                        fiables pour vous aider à vous concentrer sur votre cœur
-                        de métier.
-                      </p>
-                    </div>
-                    <div
-                      class="flex-wrap gap-4 flex justify-center @[864px]:justify-start"
-                    >
-                      <a
-                        class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] transition-transform hover:scale-105"
-                        href="{% url 'services:liste' %}"
-                      >
-                        <span class="truncate">Découvrir nos services</span>
-                      </a>
-                      <a
-                        class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-card-light dark:bg-card-dark border border-slate-200 dark:border-slate-700 text-text-light dark:text-text-dark text-base font-bold leading-normal tracking-[0.015em] transition-transform hover:scale-105"
-                        href="contacts.html"
-                      >
-                        <span class="truncate">Nous contacter</span>
-                      </a>
-                    </div>
-                  </div>
-                  <div class="w-full @[864px]:w-1/2 relative">
-                    <div
-                      class="relative w-full overflow-hidden rounded-xl shadow-lg"
-                    >
-                      <!-- Hero Carousel -->
-                      <div
-                        id="hero-carousel"
-                        class="flex transition-transform duration-500 ease-in-out"
-                      >
-                        <!-- Image Slide 1 -->
-                        <div
-                          class="w-full flex-shrink-0 aspect-video bg-cover bg-center"
-                          data-alt="Un espace de travail moderne, propre et organisé avec un ordinateur portable et des plantes"
-                          style="
-                            background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDrOHzhtQzaxE_QebwmIY8QtMcCroGAJg9KIpgJDlxw-1gaJznrVxeNctdVV95pyhCe0sbOAPFDBUQRmgyUGxFdtY_M02ll2fSn7qKZZAwCgBUlTLdHB03jUUy_6Z32b6iFFMPW-L1Eg7X__jazaDk6QO1pXTxZ5CY1uXcNVKHm9Mhx_nzmFXpcdkbxEyi6N7ZrMWulu1Tke93n1VYbUgPS8pglybs6kcISJbh0ZDmaN8d99EFsek9OXiThvNrGXoPduLOL2T40DVE');
-                          "
-                        ></div>
-                        <!-- Image Slide 2 -->
-                        <div
-                          class="w-full flex-shrink-0 aspect-video bg-cover bg-center"
-                          data-alt="Équipe professionnelle collaborant autour d'une table avec ordinateurs et documents"
-                          style="
-                            background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC4OTYzRUUyYho9GHyfVFcyB9bva4P1RDdOpE6KCHFeKKZ8oXort4FwrzoQydxbtr9jjeQto_Vp2KH54NRJVijXzYYkjjGEOSQP9VSAMIY9ETCGRQqvuiv9nRjq4t5plhOaPouX0AqYTmdar05l8ZUZqa58yjEbgZKffRxqVKGiuLTWOHdejt7BD_8RM9W_Cbc5lJ0imWnVz52_MQSYi7t3F_iyZm4ilYID_1aXCSiql00FC80BpQ6H2pIAlrv7p98KM-yqW81CVsg');
-                          "
-                        ></div>
-                        <!-- Image Slide 3 -->
-                        <div
-                          class="w-full flex-shrink-0 aspect-video bg-cover bg-center"
-                          data-alt="Bureau moderne avec ordinateurs, écrans et matériel professionnel"
-                          style="
-                            background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD0HoXsuBk5R06OgHxzlA4tgUC282Xpnp0HPt5Hjx3FPZPxn5RJ_M7Z1TzecZULQ8cPMjE2FEEDpPODgPR3qM7TXkMNx0Pk2giMOU1iQp008a7tNj69uXyf7pv95Y8XqF7MNcH0KQDJxmqo0SRst-2XZcxRBBLByeD3Mr__yQfx1OzQDi2n6WSCnebKSRMUKoOE5PD-VqPVTs5w5wlNU43h2eXg0F2gTK-UTF5W3_8-vyqWazzLFeTMIbFdajke8bjEZmtOAtmQN8E');
-                          "
-                        ></div>
-                      </div>
-                      <!-- Navigation Buttons -->
-                      <button
-                        id="prev-hero"
-                        class="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-card-light/80 dark:bg-card-dark/80 hover:bg-card-light dark:hover:bg-card-dark transition z-10 backdrop-blur-sm"
-                      >
-                        <span
-                          class="material-symbols-outlined text-white drop-shadow-lg"
-                          >arrow_back_ios_new</span
-                        >
-                      </button>
-                      <button
-                        id="next-hero"
-                        class="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-card-light/80 dark:bg-card-dark/80 hover:bg-card-light dark:hover:bg-card-dark transition z-10 backdrop-blur-sm"
-                      >
-                        <span
-                          class="material-symbols-outlined text-white drop-shadow-lg"
-                          >arrow_forward_ios</span
-                        >
-                      </button>
-                      <!-- Dots Indicators -->
-                      <div
-                        class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10"
-                      >
-                        <span class="hero-dot active" data-index="0"></span>
-                        <span class="hero-dot" data-index="1"></span>
-                        <span class="hero-dot" data-index="2"></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-<!-- Key Services Section -->
-<section class="py-12 sm:py-20" id="services">
-  <h2 class="text-text-light dark:text-text-dark text-2xl md:text-3xl font-bold leading-tight tracking-tight text-center pb-10">
-    Nos Services Clés
-  </h2>
-
-  <div class="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-6">
-    {% for service in services_populaires %}
-      <div
-        class="flex flex-col gap-3 text-center items-center bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-sm hover:shadow-md transition-transform hover:-translate-y-1.5 duration-300"
-      >
-        <div class="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary mb-3">
-          {% if service.icon_name %}
-            <span class="material-symbols-outlined text-3xl">{{ service.icon_name }}</span>
-          {% elif service.image %}
-            <img src="{{ service.image.url }}" alt="{{ service.nom }}" class="w-10 h-10 object-cover rounded-full">
-          {% else %}
-            <span class="material-symbols-outlined text-3xl text-gray-400">help</span>
-          {% endif %}
-        </div>
-
-        <p class="text-text-light dark:text-text-dark text-lg font-semibold leading-snug">
-          {{ service.nom }}
-        </p>
-
-        <p class="text-text-muted-light dark:text-text-muted-dark text-sm leading-relaxed">
-          {{ service.description|truncatewords:18 }}
-        </p>
-
-        <a href="{% url 'services:detail' service.slug %}" 
-           class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline mt-2">
-          En savoir plus
-          <span class="material-symbols-outlined text-sm">arrow_forward</span>
-        </a>
-      </div>
-    {% empty %}
-      <p class="text-center text-gray-500 dark:text-gray-400 col-span-3">
-        Aucun service populaire pour le moment.
-      </p>
-    {% endfor %}
+<!-- ══════════════════════════════════════════════════════════════
+     HERO
+══════════════════════════════════════════════════════════════ -->
+<section class="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-green-600 to-teal-700 text-white">
+  <!-- Décoration floue -->
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-yellow-400 rounded-full opacity-10 blur-3xl"></div>
+    <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-300 rounded-full opacity-15 blur-3xl"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white rounded-full opacity-5 blur-2xl"></div>
   </div>
 
-  <!-- Bouton pour voir tous les services -->
-  <div class="text-center mt-12">
-    <a href="{% url 'services:liste' %}"
-       class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white font-semibold text-sm rounded-lg shadow-sm hover:bg-primary/90 transition-colors">
-      Découvrir tous nos services
-      <span class="material-symbols-outlined text-sm">arrow_forward</span>
-    </a>
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+    <div class="text-center max-w-3xl mx-auto">
+
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2 bg-white/15 border border-white/25 backdrop-blur-sm text-white text-xs font-bold px-4 py-2 rounded-full mb-6">
+        <span class="w-2 h-2 rounded-full bg-yellow-300 animate-pulse inline-block"></span>
+        Brazzaville · République du Congo
+      </div>
+
+      <!-- Titre -->
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 tracking-tight">
+        Votre <span class="text-yellow-300">marché intelligent</span><br class="hidden sm:block">
+        au bout des doigts
+      </h1>
+
+      <!-- Sous-titre -->
+      <p class="text-emerald-100 text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl mx-auto">
+        Comparez les prix, commandez vos courses, trouvez un logement, louez une voiture et bien plus — tout en un seul endroit.
+      </p>
+
+      <!-- CTA -->
+      <div class="flex flex-wrap justify-center gap-4">
+        {% if not user.is_authenticated %}
+          <a href="{% url 'inscription_client' %}"
+             class="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-extrabold px-7 py-3.5 rounded-xl shadow-lg shadow-yellow-400/30 transition transform hover:scale-105 text-base">
+            <span class="material-symbols-outlined text-xl">person_add</span>
+            Créer mon compte gratuit
+          </a>
+        {% endif %}
+        <a href="#categories"
+           class="flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/30 backdrop-blur-sm text-white font-bold px-7 py-3.5 rounded-xl transition text-base">
+          <span class="material-symbols-outlined text-xl">explore</span>
+          Explorer les catégories
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-16 max-w-3xl mx-auto">
+      <div class="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 py-5 text-center">
+        <p class="text-3xl font-extrabold text-yellow-300">14</p>
+        <p class="text-emerald-100 text-xs mt-1 font-medium">Catégories</p>
+      </div>
+      <div class="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 py-5 text-center">
+        <p class="text-3xl font-extrabold text-white">100+</p>
+        <p class="text-emerald-100 text-xs mt-1 font-medium">Marchands</p>
+      </div>
+      <div class="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 py-5 text-center">
+        <p class="text-3xl font-extrabold text-white">500+</p>
+        <p class="text-emerald-100 text-xs mt-1 font-medium">Produits</p>
+      </div>
+      <div class="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-4 py-5 text-center">
+        <p class="text-3xl font-extrabold text-white">4.9★</p>
+        <p class="text-emerald-100 text-xs mt-1 font-medium">Satisfaction</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Vague de séparation -->
+  <div class="absolute bottom-0 left-0 right-0">
+    <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" class="w-full h-10 sm:h-14">
+      <path d="M0 60L60 50C120 40 240 20 360 15C480 10 600 20 720 25C840 30 960 30 1080 25C1200 20 1320 10 1380 5L1440 0V60H1380C1320 60 1200 60 1080 60C960 60 840 60 720 60C600 60 480 60 360 60C240 60 120 60 60 60H0Z" fill="white" fill-opacity="0.08"/>
+      <path d="M0 60L48 53.3C96 46.7 192 33.3 288 28.3C384 23.3 480 26.7 576 30C672 33.3 768 36.7 864 35C960 33.3 1056 26.7 1152 25C1248 23.3 1344 26.7 1392 28.3L1440 30V60H0Z" fill="#f9fafb"/>
+    </svg>
   </div>
 </section>
 
 
-              <!-- "Perfect Approach" Section -->
-              <section class="py-16 sm:py-24 @container" id="approche">
-                <div
-                  class="flex flex-col gap-12 @[864px]:flex-row @[864px]:items-center"
-                >
-                  <div class="flex flex-col gap-4 @[864px]:w-1/2">
-                    <h2
-                      class="text-text-light dark:text-text-dark text-3xl font-bold leading-tight tracking-tight @[480px]:text-4xl"
-                    >
-                      Une Approche Parfaite Pour Des Résultats Impeccables
-                    </h2>
-                    <p
-                      class="text-text-muted-light dark:text-text-muted-dark text-base font-normal leading-normal @[480px]:text-lg"
-                    >
-                      Notre méthodologie est conçue pour garantir la plus haute
-                      qualité de service, en alliant technologie de pointe et
-                      expertise humaine pour répondre précisément à vos besoins.
-                    </p>
-                  </div>
-                  <div
-                    class="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-6 @[864px]:w-1/2"
-                  >
-                    <div class="flex flex-col gap-3">
-                      <span
-                        class="material-symbols-outlined text-4xl text-accent"
-                        >verified</span
-                      >
-                      <p
-                        class="text-text-light dark:text-text-dark text-lg font-bold leading-normal"
-                      >
-                        Précision
-                      </p>
-                      <p
-                        class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal"
-                      >
-                        Chaque tâche est exécutée avec une attention méticuleuse
-                        aux détails pour un résultat sans erreur.
-                      </p>
-                    </div>
-                    <div class="flex flex-col gap-3">
-                      <span
-                        class="material-symbols-outlined text-4xl text-accent"
-                        >rocket_launch</span
-                      >
-                      <p
-                        class="text-text-light dark:text-text-dark text-lg font-bold leading-normal"
-                      >
-                        Rapidité
-                      </p>
-                      <p
-                        class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal"
-                      >
-                        Nous nous engageons à respecter les délais les plus
-                        stricts sans compromettre la qualité.
-                      </p>
-                    </div>
-                    <div class="flex flex-col gap-3">
-                      <span
-                        class="material-symbols-outlined text-4xl text-accent"
-                        >shield</span
-                      >
-                      <p
-                        class="text-text-light dark:text-text-dark text-lg font-bold leading-normal"
-                      >
-                        Fiabilité
-                      </p>
-                      <p
-                        class="text-text-muted-light dark:text-text-muted-dark text-sm font-normal leading-normal"
-                      >
-                        Un partenaire de confiance sur lequel vous pouvez
-                        compter pour tous vos besoins administratifs.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-              <!-- Statistics Section -->
-              <section
-                class="py-16 sm:py-24 bg-gradient-to-br from-primary/5 to-accent/5"
-              >
-                <div class="mx-auto px-4 max-w-7xl">
-                  <div class="text-center mb-12">
-                    <h2
-                      class="text-text-light dark:text-text-dark text-3xl font-bold leading-tight tracking-tight mb-4"
-                    >
-                      Des Résultats Concrets
-                    </h2>
-                    <p
-                      class="text-text-muted-light dark:text-text-muted-dark text-base max-w-2xl mx-auto"
-                    >
-                      Notre engagement se reflète dans nos chiffres et la
-                      satisfaction de nos clients
-                    </p>
-                  </div>
-                  <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-                    <div class="stat-card group">
-                      <div
-                        class="bg-card-light dark:bg-card-dark rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
-                      >
-                        <div class="flex items-center justify-center mb-3">
-                          <span
-                            class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform"
-                            >trending_up</span
-                          >
-                        </div>
-                        <div
-                          class="text-4xl md:text-5xl font-black text-primary mb-2"
-                          data-target="500"
-                        >
-                          0
-                        </div>
-                        <div
-                          class="text-text-muted-light dark:text-text-muted-dark text-sm font-medium"
-                        >
-                          Clients Satisfaits
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stat-card group">
-                      <div
-                        class="bg-card-light dark:bg-card-dark rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
-                      >
-                        <div class="flex items-center justify-center mb-3">
-                          <span
-                            class="material-symbols-outlined text-4xl text-accent group-hover:scale-110 transition-transform"
-                            >workspace_premium</span
-                          >
-                        </div>
-                        <div
-                          class="text-4xl md:text-5xl font-black text-accent mb-2"
-                          data-target="15"
-                        >
-                          0
-                        </div>
-                        <div
-                          class="text-text-muted-light dark:text-text-muted-dark text-sm font-medium"
-                        >
-                          Années d'Expérience
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stat-card group">
-                      <div
-                        class="bg-card-light dark:bg-card-dark rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
-                      >
-                        <div class="flex items-center justify-center mb-3">
-                          <span
-                            class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform"
-                            >auto_awesome</span
-                          >
-                        </div>
-                        <div
-                          class="text-4xl md:text-5xl font-black text-primary mb-2"
-                          data-target="98"
-                        >
-                          0
-                        </div>
-                        <div
-                          class="text-text-muted-light dark:text-text-muted-dark text-sm font-medium"
-                        >
-                          % de Satisfaction
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stat-card group">
-                      <div
-                        class="bg-card-light dark:bg-card-dark rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
-                      >
-                        <div class="flex items-center justify-center mb-3">
-                          <span
-                            class="material-symbols-outlined text-4xl text-accent group-hover:scale-110 transition-transform"
-                            >inventory_2</span
-                          >
-                        </div>
-                        <div
-                          class="text-4xl md:text-5xl font-black text-accent mb-2"
-                          data-target="1000"
-                        >
-                          0
-                        </div>
-                        <div
-                          class="text-text-muted-light dark:text-text-muted-dark text-sm font-medium"
-                        >
-                          Projets Réalisés
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-              <!-- Testimonials Carousel -->
-              <section class="py-16 sm:py-24">
-                <div class="flex flex-col items-center gap-12">
-                  <h2
-                    class="text-text-light dark:text-text-dark text-3xl font-bold leading-tight tracking-tight text-center"
-                  >
-                    Ils nous font confiance
-                  </h2>
-                  <div class="relative w-full max-w-2xl overflow-hidden">
-                    <div
-                      id="testimonial-carousel"
-                      class="flex transition-transform duration-500 ease-in-out"
-                    >
-                      <!-- Slide 1 -->
-                      <div class="w-full flex-shrink-0 px-4">
-                        <div
-                          class="flex flex-col items-center gap-6 rounded-xl bg-card-light dark:bg-card-dark p-8 text-center shadow-md"
-                        >
-                          <img
-                            class="size-20 rounded-full object-cover"
-                            data-alt="Photo de Marie Dubois"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAh17F1d6wNGU-pPvBLGo007DV0ZUYnos6qcjtsc22wqz33fgLAc1w9Ub17WYU34e9PRA7u9Ch18EU0k6iT-53-rJ6xhZXK4QTlCYMvo3GB5dVTJH4EEVLbXKMLnKGTDmDhkzZms8HTNWPHCmXPMPevsKuZg1YhbCUXr3QAIjgT5I2tQX0TojZ9m49MtocbEzFI7STb3k00Qc7fmafcK4_b48c_36ub0-0tj_UtWxvfLXmyQRLUJzso8xSPf_9jhNteBM_eCmsz_yE"
-                          />
-                          <blockquote
-                            class="text-text-muted-light dark:text-text-muted-dark text-lg italic"
-                          >
-                            "Le professionnalisme et la réactivité de
-                            Secrétariat Pro ont transformé notre gestion
-                            administrative. Un gain de temps inestimable !"
-                          </blockquote>
-                          <div
-                            class="font-bold text-text-light dark:text-text-dark"
-                          >
-                            <p>Marie Dubois</p>
-                            <p class="text-sm font-medium text-primary">
-                              CEO, Tech Innov
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- Slide 2 -->
-                      <div class="w-full flex-shrink-0 px-4">
-                        <div
-                          class="flex flex-col items-center gap-6 rounded-xl bg-card-light dark:bg-card-dark p-8 text-center shadow-md"
-                        >
-                          <img
-                            class="size-20 rounded-full object-cover"
-                            data-alt="Photo de Thomas Martin"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiux5y_uQduKMBNZTYAmHxxmLHzR-mOe85hzcKo7FpR3nDxU2L9QBlf62yS9pBVjSfq9PwPQH9xF7posulXVmFIycINsVcjUrK1kP8AwE5h4dBu1GyrKoVCaaknHB_ouoSUTqj2qwd8BaMcOH0mo3MvVmkTU7Veq7_YSArSwI1UfSL3BlOr1qO2jbFFyZ8eRG7_R81Jpqv45TNhf_3HqPJao9hJCF3C8JdxVNGd-S3kl82OZV9LMTsZ-QwdlsncdlqyD0vAFTU-Ys"
-                          />
-                          <blockquote
-                            class="text-text-muted-light dark:text-text-muted-dark text-lg italic"
-                          >
-                            "Un service hors pair ! L'équipe répond toujours
-                            dans les délais et avec une qualité impeccable. Je
-                            recommande sans hésitation."
-                          </blockquote>
-                          <div
-                            class="font-bold text-text-light dark:text-text-dark"
-                          >
-                            <p>Thomas Martin</p>
-                            <p class="text-sm font-medium text-primary">
-                              Directeur, Startup Plus
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- Slide 3 -->
-                      <div class="w-full flex-shrink-0 px-4">
-                        <div
-                          class="flex flex-col items-center gap-6 rounded-xl bg-card-light dark:bg-card-dark p-8 text-center shadow-md"
-                        >
-                          <img
-                            class="size-20 rounded-full object-cover"
-                            data-alt="Photo de Sophie Laurent"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxczI4hBUI1tdw4O2YXnC7fXSlZX9QhbdlI0AG7lfQIZrMaOloOQGDJQnw5_mGkRbBgJ0P4Ml_IPSWEqKDpj-cuOjQaIY97yFDBsrEqcw-A57ckAvu3r_MAHBM5KV1VMXeem3wx1zwxmVNjFUhRiixltsonjHy-9DJyThYWqEpjgGXjSomUac3i3bavbEhQ47lmwO8s0SIqqBb1Dg-JJ_3CAGE17gtxjXkeHdXsnzoXCQgW9Qven4aaSqeNvOFO7MV77JgzD7ARJ8"
-                          />
-                          <blockquote
-                            class="text-text-muted-light dark:text-text-muted-dark text-lg italic"
-                          >
-                            "Grâce à Secrétariat Pro, j'ai enfin pu me
-                            concentrer sur ma croissance. Leur expertise est
-                            précieuse et leur approche vraiment
-                            professionnelle."
-                          </blockquote>
-                          <div
-                            class="font-bold text-text-light dark:text-text-dark"
-                          >
-                            <p>Sophie Laurent</p>
-                            <p class="text-sm font-medium text-primary">
-                              Fondatrice, Digital Agency
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="absolute inset-y-0 left-0 flex items-center">
-                      <button
-                        id="prev-testimonial"
-                        class="p-2 rounded-full bg-card-light/50 dark:bg-card-dark/50 hover:bg-card-light dark:hover:bg-card-dark transition z-10"
-                      >
-                        <span class="material-symbols-outlined"
-                          >arrow_back_ios_new</span
-                        >
-                      </button>
-                    </div>
-                    <div class="absolute inset-y-0 right-0 flex items-center">
-                      <button
-                        id="next-testimonial"
-                        class="p-2 rounded-full bg-card-light/50 dark:bg-card-dark/50 hover:bg-card-light dark:hover:bg-card-dark transition z-10"
-                      >
-                        <span class="material-symbols-outlined"
-                          >arrow_forward_ios</span
-                        >
-                      </button>
-                    </div>
-                    <div class="flex justify-center gap-2 mt-6">
-                      <span class="dot active" data-index="0"></span>
-                      <span class="dot" data-index="1"></span>
-                      <span class="dot" data-index="2"></span>
-                    </div>
-                  </div>
-                </div>
-              </section>
-              <!-- Final CTA -->
-              <section class="py-16 sm:py-24" id="cta">
-                <div
-                  class="bg-primary/90 text-white p-12 rounded-xl text-center flex flex-col items-center gap-6 shadow-2xl"
-                >
-                  <h2
-                    class="text-3xl font-bold leading-tight tracking-tight sm:text-4xl"
-                  >
-                    Prêt à optimiser votre administration ?
-                  </h2>
-                  <p class="max-w-2xl text-lg">
-                    Donnons vie à votre projet. Contactez-nous dès aujourd'hui
-                    pour discuter de vos besoins et obtenir une solution sur
-                    mesure.
-                  </p>
-                  <a
-                    class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-14 px-8 bg-white text-primary text-lg font-bold leading-normal tracking-[0.015em] mt-4 transition-transform hover:scale-105"
-                    href="contacts.html"
-                  >
-                    <span class="truncate">Demander un Devis Gratuit</span>
-                  </a>
-                </div>
-              </section>
-            </main>
-            <!-- Footer -->
-            
+<!-- ══════════════════════════════════════════════════════════════
+     GRILLE DES CATÉGORIES
+══════════════════════════════════════════════════════════════ -->
+<section id="categories" class="bg-gray-50 py-16 sm:py-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Titre section -->
+    <div class="text-center mb-12">
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">
+        Que cherchez-vous ?
+      </h2>
+      <p class="text-gray-500 text-base sm:text-lg max-w-xl mx-auto">
+        Explorez toutes nos catégories et trouvez exactement ce dont vous avez besoin.
+      </p>
+    </div>
+
+    <!-- Grille -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
+
+      <!-- 🛒 Faire le marché -->
+      <a href="{% url 'marche:accueil_marche' %}"
+         class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-green-100 hover:border-green-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-green-50 group-hover:bg-green-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+          🛒
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Faire le marché</p>
+          <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Courses du quotidien</p>
+        </div>
+        <span class="text-xs font-semibold text-green-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Explorer <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <!-- 🛍️ Shopping -->
+      <a href="{% url 'shopping:shopping_accueil' %}"
+         class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-pink-100 hover:border-pink-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-pink-50 group-hover:bg-pink-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+          🛍️
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Shopping</p>
+          <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Boutiques & articles</p>
+        </div>
+        <span class="text-xs font-semibold text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Explorer <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <!--
+🥬 Prix du marché
+<a href="#"
+   class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-lime-100 hover:border-lime-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+  <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-lime-50 group-hover:bg-lime-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+    🥬
+  </div>
+  <div class="text-center">
+    <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Prix du marché</p>
+    <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Comparer les tarifs</p>
+  </div>
+  <span class="text-xs font-semibold text-lime-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+    Explorer
+    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/>
+    </svg>
+  </span>
+</a>
+-->
+
+      <!-- 🚗 Location de voitures -->
+      <a href="{% url 'voiture:voiture_accueil' %}"
+         class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-blue-100 hover:border-blue-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+          🚗
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Location de voitures</p>
+          <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Véhicules disponibles</p>
+        </div>
+        <span class="text-xs font-semibold text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Explorer <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <!-- 🏠 Immobilier -->
+      <a href="{% url 'immobilier:accueil' %}"
+         class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-indigo-100 hover:border-indigo-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-indigo-50 group-hover:bg-indigo-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+          🏠
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Immobilier</p>
+          <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Maisons & locations</p>
+        </div>
+        <span class="text-xs font-semibold text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Explorer <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <!-- 🔨 Quincaillerie -->
+      <a href="{% url 'quicaillerie:accueil' %}"
+         class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-orange-100 hover:border-orange-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-orange-50 group-hover:bg-orange-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+          🔨
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Quincaillerie</p>
+          <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Outils & matériaux</p>
+        </div>
+        <span class="text-xs font-semibold text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Explorer <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <!-- 💇 Perruques et beauté -->
+      <a href="{% url 'perruque:perruque_accueil' %}"
+         class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-purple-100 hover:border-purple-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-purple-50 group-hover:bg-purple-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+          💇
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Perruques & beauté</p>
+          <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Soins & coiffure</p>
+        </div>
+        <span class="text-xs font-semibold text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Explorer <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <!-- 
+      <a href="#"
+         class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-rose-100 hover:border-rose-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-rose-50 group-hover:bg-rose-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+          👗
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Mode</p>
+          <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Vêtements & tendances</p>
+        </div>
+        <span class="text-xs font-semibold text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Explorer <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      
+      <a href="#"
+         class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-cyan-100 hover:border-cyan-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-cyan-50 group-hover:bg-cyan-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+          📱
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Électronique</p>
+          <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Téléphones & tech</p>
+        </div>
+        <span class="text-xs font-semibold text-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Explorer <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+ -->
+      <!-- 🍽️ Restaurants -->
+      <a href="{% url 'order_list' %}"
+         class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-amber-100 hover:border-amber-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer relative">
+        <div class="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Live</div>
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-50 group-hover:bg-amber-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+          🍽️
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Restaurants</p>
+          <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Livraison de repas</p>
+        </div>
+        <span class="text-xs font-semibold text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Commander <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <!-- 💊 Pharmacie -->
+      <a href="#"
+         class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-red-100 hover:border-red-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-red-50 group-hover:bg-red-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+          💊
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Pharmacie</p>
+          <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Médicaments & santé</p>
+        </div>
+        <span class="text-xs font-semibold text-red-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Explorer <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <!-- 🐟 Produits frais 
+      <a href="#"
+         class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-teal-100 hover:border-teal-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-teal-50 group-hover:bg-teal-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+          🐟
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Produits frais</p>
+          <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Poisson & mer</p>
+        </div>
+        <span class="text-xs font-semibold text-teal-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Explorer <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+  🐓 Élevage 
+      <a href="#"
+         class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-yellow-100 hover:border-yellow-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-yellow-50 group-hover:bg-yellow-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+          🐓
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Élevage</p>
+          <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Volaille & bétail</p>
+        </div>
+        <span class="text-xs font-semibold text-yellow-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Explorer <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+-->
+      <!-- 📦 Livraison -->
+      <a href="{% url 'livreur_connexion' %}"
+         class="group flex flex-col items-center gap-3 p-5 sm:p-6 bg-white border-2 border-sky-100 hover:border-sky-400 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-sky-50 group-hover:bg-sky-100 flex items-center justify-center text-3xl sm:text-4xl transition-colors duration-300 group-hover:scale-110 transform">
+          📦
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-gray-900 text-sm sm:text-base leading-tight">Livraison</p>
+          <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">Devenir livreur</p>
+        </div>
+        <span class="text-xs font-semibold text-sky-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Rejoindre <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     BANNIÈRE RESTAURANT (mise en avant Urban Eat)
+══════════════════════════════════════════════════════════════ -->
+<section class="bg-white py-14">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 shadow-xl shadow-orange-200">
+      <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute -top-10 -right-10 w-60 h-60 bg-yellow-300 rounded-full opacity-20 blur-3xl"></div>
+        <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-red-400 rounded-full opacity-20 blur-2xl"></div>
+      </div>
+      <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 px-8 py-10 sm:px-12">
+        <div class="text-center md:text-left">
+          <div class="inline-flex items-center gap-2 bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-full mb-4">
+            <span class="w-2 h-2 bg-yellow-300 rounded-full animate-pulse inline-block"></span>
+            Disponible maintenant
           </div>
+          <h3 class="text-2xl sm:text-3xl font-extrabold text-white mb-2">
+            🍽️ Urban Eat — Livraison de repas
+          </h3>
+          <p class="text-orange-100 text-base">
+            Des restaurants locaux livrent directement chez vous. Rapide, chaud et délicieux.
+          </p>
+          <div class="flex flex-wrap gap-4 mt-6 justify-center md:justify-start">
+            <div class="flex items-center gap-2 text-white text-sm font-medium">
+              <svg class="w-4 h-4 text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              4.8 / 5 étoiles
+            </div>
+            <div class="flex items-center gap-2 text-white text-sm font-medium">
+              <svg class="w-4 h-4 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              30 min en moyenne
+            </div>
+            <div class="flex items-center gap-2 text-white text-sm font-medium">
+              <svg class="w-4 h-4 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+              Brazzaville
+            </div>
+          </div>
+        </div>
+        <div class="flex-shrink-0 text-center">
+          <div class="text-8xl mb-4">🛵</div>
+          <a href="{% url 'order_list' %}"
+             class="inline-flex items-center gap-2 bg-white text-orange-600 font-extrabold px-7 py-3.5 rounded-xl hover:bg-orange-50 transition shadow-md text-base">
+            Commander maintenant
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+          </a>
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     COMMENT ÇA MARCHE
+══════════════════════════════════════════════════════════════ -->
+<section class="bg-gray-50 py-16 sm:py-20 border-t border-gray-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">Comment ça marche ?</h2>
+      <p class="text-gray-500 text-base sm:text-lg max-w-xl mx-auto">En 3 étapes simples, accédez à tous les services du marché.</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
+
+      <div class="flex flex-col items-center text-center gap-4">
+        <div class="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center text-3xl shadow-sm">
+          🔍
+        </div>
+        <div class="w-8 h-8 rounded-full bg-emerald-500 text-white font-extrabold text-sm flex items-center justify-center -mt-2">1</div>
+        <div>
+          <h3 class="font-bold text-gray-900 text-lg mb-1">Choisissez une catégorie</h3>
+          <p class="text-gray-500 text-sm">Naviguez parmi les 14 rubriques disponibles et trouvez ce que vous cherchez.</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center text-center gap-4">
+        <div class="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center text-3xl shadow-sm">
+          📋
+        </div>
+        <div class="w-8 h-8 rounded-full bg-blue-500 text-white font-extrabold text-sm flex items-center justify-center -mt-2">2</div>
+        <div>
+          <h3 class="font-bold text-gray-900 text-lg mb-1">Comparez et choisissez</h3>
+          <p class="text-gray-500 text-sm">Consultez les offres, comparez les prix et sélectionnez le meilleur pour vous.</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center text-center gap-4">
+        <div class="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center text-3xl shadow-sm">
+          ✅
+        </div>
+        <div class="w-8 h-8 rounded-full bg-orange-500 text-white font-extrabold text-sm flex items-center justify-center -mt-2">3</div>
+        <div>
+          <h3 class="font-bold text-gray-900 text-lg mb-1">Commandez ou contactez</h3>
+          <p class="text-gray-500 text-sm">Passez votre commande directement ou contactez le vendeur en un clic.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     CTA INSCRIPTION
+══════════════════════════════════════════════════════════════ -->
+{% if not user.is_authenticated %}
+<section class="bg-white py-16">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+    <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-3xl px-8 py-12 shadow-sm">
+      <div class="text-5xl mb-4">🎉</div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3">
+        Rejoignez Marché Intelligent
+      </h2>
+      <p class="text-gray-500 text-base mb-8 max-w-md mx-auto">
+        Créez votre compte gratuit et accédez à tous les services disponibles à Brazzaville.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="{% url 'inscription_client' %}"
+           class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold px-7 py-3.5 rounded-xl shadow-md shadow-emerald-200 transition transform hover:scale-105">
+          <span class="material-symbols-outlined text-xl">person_add</span>
+          Créer mon compte
+        </a>
+        <a href="{% url 'connexion_client' %}"
+           class="flex items-center gap-2 bg-white border-2 border-gray-200 text-gray-700 font-bold px-7 py-3.5 rounded-xl hover:border-emerald-300 hover:text-emerald-600 transition">
+          <span class="material-symbols-outlined text-xl">login</span>
+          Se connecter
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════════════════ -->
+<footer class="bg-gray-900 text-white py-12 mt-0">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+
+      <!-- Logo & tagline -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-xl">
+          🛒
+        </div>
+        <div>
+          <p class="font-extrabold text-white text-base">Marché Intelligent</p>
+          <p class="text-emerald-400 text-xs font-medium">by Secrétariat Pro — Brazzaville</p>
+        </div>
+      </div>
+
+      <!-- Liens -->
+      <nav class="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-400">
+        <a href="{% url 'accueil' %}" class="hover:text-white transition">Accueil</a>
+        <a href="{% url 'apropo' %}" class="hover:text-white transition">À propos</a>
+        <a href="{% url 'order_list' %}" class="hover:text-orange-400 transition">Urban Eat</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'espace_client' %}" class="hover:text-white transition">Mon espace</a>
+          <a href="{% url 'deconnexion_client' %}" class="hover:text-red-400 transition">Déconnexion</a>
+        {% else %}
+          <a href="{% url 'connexion_client' %}" class="hover:text-white transition">Connexion</a>
+          <a href="{% url 'inscription_client' %}" class="hover:text-emerald-400 transition">Inscription</a>
+        {% endif %}
+      </nav>
+
+    </div>
+
+    <div class="border-t border-white/10 mt-8 pt-6 text-center text-gray-500 text-xs">
+      © 2025 <span class="text-emerald-400 font-semibold">Marché Intelligent</span> · Secrétariat Pro · Tous droits réservés.
+    </div>
+  </div>
+</footer>
 
 {% endblock %}

@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db import models
+from django.contrib.gis.db import models
 from django.utils import timezone
 from decimal import Decimal
 import uuid
@@ -58,12 +58,40 @@ class Ingredient(models.Model):
         return self.name
 
 
+class TypeCuisine(models.Model):
+    nom = models.CharField(max_length=100, unique=True)
+    ordre = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['ordre', 'nom']
+        verbose_name = 'Type de cuisine'
+        verbose_name_plural = 'Types de cuisine'
+
+    def __str__(self):
+        return self.nom
+
+
 class Restaurant(models.Model):
 
     nom = models.CharField(max_length=150)
     description = models.TextField(blank=True)
 
+    # Vendeur/propriétaire du restaurant
+    proprietaire = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='restaurants',
+        verbose_name='Propriétaire',
+    )
+
     type_cuisine = models.CharField(max_length=100, blank=True)
+    types_cuisine = models.ManyToManyField(
+        'TypeCuisine',
+        blank=True,
+        related_name='restaurants',
+        verbose_name='Types de cuisine',
+    )
     
 
     adresse = models.CharField(max_length=255)
@@ -73,6 +101,7 @@ class Restaurant(models.Model):
 
     latitude = models.DecimalField(max_digits=10, decimal_places=8, null=True, blank=True)
     longitude = models.DecimalField(max_digits=11, decimal_places=8, null=True, blank=True)
+    location = models.PointField(geography=True, null=True, blank=True)
 
     telephone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True)
@@ -81,8 +110,16 @@ class Restaurant(models.Model):
     # ✅ Photo principale
     photo_principale = models.CharField(max_length=500, blank=True, null=True)
 
+    est_ouvert = models.BooleanField(default=True, verbose_name='Ouvert')
+
     date_creation = models.DateTimeField(auto_now_add=True)
     date_mise_a_jour = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.latitude and self.longitude:
+            from django.contrib.gis.geos import Point
+            self.location = Point(float(self.longitude), float(self.latitude), srid=4326)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nom
@@ -311,6 +348,8 @@ class Order(models.Model):
 
     delivery_address = models.TextField(blank=True)
     phone_number = models.CharField(max_length=20, blank=True)
+    delivery_lat = models.DecimalField(max_digits=10, decimal_places=8, null=True, blank=True)
+    delivery_lng = models.DecimalField(max_digits=11, decimal_places=8, null=True, blank=True)
 
 
     subtotal = models.DecimalField(max_digits=CURRENCY_MAX_DIGITS, decimal_places=CURRENCY_DECIMAL_PLACES, default=Decimal('0.00'))
@@ -322,6 +361,22 @@ class Order(models.Model):
     qr_validated = models.BooleanField(default=False)
     qr_validated_at = models.DateTimeField(null=True, blank=True)
 
+    livreur = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='livraisons'
+    )
+    livreur_reserved_at = models.DateTimeField(null=True, blank=True)
+
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['livreur', 'status']),
+            models.Index(fields=['-created_at']),
+        ]
 
     def __str__(self):
         return f"Order #{self.id} - {self.status}"
@@ -390,6 +445,49 @@ class OrderItemIngredientChoice(models.Model):
 
     def __str__(self):
         return f"{self.choice_type} {self.ingredient.name}"
+
+
+# ---------------------------
+# Notation plat
+# ---------------------------
+class DishRating(models.Model):
+    dish = models.ForeignKey(Dish, on_delete=models.CASCADE, related_name='ratings')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='dish_ratings'
+    )
+    rating = models.PositiveSmallIntegerField()  # 1 à 5
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('dish', 'user')
+
+    def __str__(self):
+        return f"{self.user} → {self.dish.title} : {self.rating}★"
+
+
+# ---------------------------
+# Profil Livreur
+# ---------------------------
+class LivreurProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='livreur_profile'
+    )
+    matricule_moto = models.CharField(max_length=50)
+    photo_url = models.TextField(blank=True)
+    latitude = models.DecimalField(max_digits=10, decimal_places=8, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=11, decimal_places=8, null=True, blank=True)
+    location = models.PointField(geography=True, null=True, blank=True)
+    location_updated_at = models.DateTimeField(null=True, blank=True)
+    zone_radius = models.IntegerField(default=8000)
+    disponible = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Livreur {self.user.get_full_name()} — {self.matricule_moto}"
 
 
 # ---------------------------

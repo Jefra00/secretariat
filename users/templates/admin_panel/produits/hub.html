@@ -1,0 +1,100 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Gestion des produits{% endblock %}
+{% block page_title %}Gestion des produits{% endblock %}
+{% block page_subtitle %}Enregistrez et gérez les produits de chaque section{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+  <a href="{% url 'admin_produits_marche' %}"
+     class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-emerald-200 transition-all">
+    <div class="flex items-start justify-between mb-4">
+      <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+        <span class="material-symbols-outlined text-emerald-600 text-2xl">storefront</span>
+      </div>
+      <span class="text-2xl font-bold text-gray-800">{{ stats.marche }}</span>
+    </div>
+    <h3 class="font-semibold text-gray-800 group-hover:text-emerald-700 transition">Marché</h3>
+    <p class="text-xs text-gray-500 mt-1">Produits alimentaires et du quotidien</p>
+    <div class="mt-4 flex items-center gap-1 text-xs text-emerald-600 font-medium">
+      Gérer <span class="material-symbols-outlined text-sm">arrow_forward</span>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_produits_shopping' %}"
+     class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-pink-200 transition-all">
+    <div class="flex items-start justify-between mb-4">
+      <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center">
+        <span class="material-symbols-outlined text-pink-600 text-2xl">shopping_bag</span>
+      </div>
+      <span class="text-2xl font-bold text-gray-800">{{ stats.shopping }}</span>
+    </div>
+    <h3 class="font-semibold text-gray-800 group-hover:text-pink-700 transition">Shopping</h3>
+    <p class="text-xs text-gray-500 mt-1">Vêtements, accessoires, mode</p>
+    <div class="mt-4 flex items-center gap-1 text-xs text-pink-600 font-medium">
+      Gérer <span class="material-symbols-outlined text-sm">arrow_forward</span>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_produits_perruque' %}"
+     class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-purple-200 transition-all">
+    <div class="flex items-start justify-between mb-4">
+      <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+        <span class="material-symbols-outlined text-purple-600 text-2xl">face</span>
+      </div>
+      <span class="text-2xl font-bold text-gray-800">{{ stats.perruque }}</span>
+    </div>
+    <h3 class="font-semibold text-gray-800 group-hover:text-purple-700 transition">Perruques</h3>
+    <p class="text-xs text-gray-500 mt-1">Perruques, extensions, cheveux</p>
+    <div class="mt-4 flex items-center gap-1 text-xs text-purple-600 font-medium">
+      Gérer <span class="material-symbols-outlined text-sm">arrow_forward</span>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_produits_quicaillerie' %}"
+     class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-orange-200 transition-all">
+    <div class="flex items-start justify-between mb-4">
+      <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+        <span class="material-symbols-outlined text-orange-600 text-2xl">construction</span>
+      </div>
+      <span class="text-2xl font-bold text-gray-800">{{ stats.quicaillerie }}</span>
+    </div>
+    <h3 class="font-semibold text-gray-800 group-hover:text-orange-700 transition">Quincaillerie</h3>
+    <p class="text-xs text-gray-500 mt-1">Outillage, matériaux, bricolage</p>
+    <div class="mt-4 flex items-center gap-1 text-xs text-orange-600 font-medium">
+      Gérer <span class="material-symbols-outlined text-sm">arrow_forward</span>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_produits_voiture' %}"
+     class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-blue-200 transition-all">
+    <div class="flex items-start justify-between mb-4">
+      <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+        <span class="material-symbols-outlined text-blue-600 text-2xl">directions_car</span>
+      </div>
+      <span class="text-2xl font-bold text-gray-800">{{ stats.voiture }}</span>
+    </div>
+    <h3 class="font-semibold text-gray-800 group-hover:text-blue-700 transition">Voitures</h3>
+    <p class="text-xs text-gray-500 mt-1">Location de véhicules</p>
+    <div class="mt-4 flex items-center gap-1 text-xs text-blue-600 font-medium">
+      Gérer <span class="material-symbols-outlined text-sm">arrow_forward</span>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_produits_immobilier' %}"
+     class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-teal-200 transition-all">
+    <div class="flex items-start justify-between mb-4">
+      <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
+        <span class="material-symbols-outlined text-teal-600 text-2xl">apartment</span>
+      </div>
+      <span class="text-2xl font-bold text-gray-800">{{ stats.immobilier }}</span>
+    </div>
+    <h3 class="font-semibold text-gray-800 group-hover:text-teal-700 transition">Immobilier</h3>
+    <p class="text-xs text-gray-500 mt-1">Vente et location de biens</p>
+    <div class="mt-4 flex items-center gap-1 text-xs text-teal-600 font-medium">
+      Gérer <span class="material-symbols-outlined text-sm">arrow_forward</span>
+    </div>
+  </a>
+
+</div>
+{% endblock %}

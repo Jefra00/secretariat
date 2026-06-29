@@ -1,0 +1,173 @@
+{% extends "vendeur/base_vendeur.html" %}
+{% block title %}Paiement #{{ paiement.pk }}{% endblock %}
+{% block page_title %}Paiement #{{ paiement.pk }}{% endblock %}
+{% block page_subtitle %}Détails du paiement{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+  <!-- Statut badge -->
+  <div class="flex items-center justify-between mb-6">
+    <a href="{% url 'vendeur_paiements' %}" class="text-sm text-slate-400 hover:text-slate-600 font-medium">
+      ← Retour
+    </a>
+    <span class="text-sm px-4 py-1.5 rounded-full font-bold
+      {% if paiement.statut == 'valide' %}bg-green-100 text-green-700
+      {% elif paiement.statut == 'echoue' %}bg-red-100 text-red-600
+      {% elif paiement.statut == 'en_attente' %}bg-yellow-100 text-yellow-700
+      {% elif paiement.statut == 'rembourse' %}bg-blue-100 text-blue-700
+      {% else %}bg-slate-100 text-slate-500{% endif %}">
+      {{ paiement.get_statut_display }}
+    </span>
+  </div>
+
+  <!-- Montant principal -->
+  <div class="bg-gradient-to-r from-orange-600 to-amber-500 rounded-2xl p-6 text-white mb-5 shadow-lg shadow-orange-100">
+    <p class="text-orange-100 text-sm">Montant total</p>
+    <p class="text-4xl font-extrabold mt-1">{{ paiement.montant_total|floatformat:0 }} <span class="text-xl">FCFA</span></p>
+    <div class="flex items-center gap-4 mt-3 text-orange-100 text-xs">
+      <span>Sous-total : {{ paiement.montant|floatformat:0 }} FCFA</span>
+      {% if paiement.frais_livraison > 0 %}
+      <span>Livraison : {{ paiement.frais_livraison|floatformat:0 }} FCFA</span>
+      {% endif %}
+      {% if paiement.frais_service > 0 %}
+      <span>Service : {{ paiement.frais_service|floatformat:0 }} FCFA</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Détails -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+    <h3 class="font-bold text-slate-800 border-b border-slate-50 pb-3">Informations</h3>
+
+    {% include "vendeur/paiements/_row.html" with label="Client" value=paiement.client.get_full_name|default:"—" %}
+    {% include "vendeur/paiements/_row.html" with label="Téléphone" value=paiement.client.telephone|default:"—" %}
+    {% include "vendeur/paiements/_row.html" with label="Méthode de paiement" value=paiement.get_methode_display %}
+    {% include "vendeur/paiements/_row.html" with label="Mode de récupération" value=paiement.get_mode_livraison_display %}
+    {% if paiement.quartier_livraison %}
+    {% include "vendeur/paiements/_row.html" with label="Quartier" value=paiement.quartier_livraison %}
+    {% endif %}
+    {% if paiement.adresse_livraison %}
+    {% include "vendeur/paiements/_row.html" with label="Adresse" value=paiement.adresse_livraison %}
+    {% endif %}
+    {% if paiement.reference_externe %}
+    {% include "vendeur/paiements/_row.html" with label="Référence" value=paiement.reference_externe %}
+    {% endif %}
+    {% include "vendeur/paiements/_row.html" with label="Section" value=paiement.get_section_display %}
+    {% include "vendeur/paiements/_row.html" with label="Créé le" value=paiement.cree_le|date:"d/m/Y à H:i" %}
+    {% if paiement.valide_le %}
+    {% include "vendeur/paiements/_row.html" with label="Validé le" value=paiement.valide_le|date:"d/m/Y à H:i" %}
+    {% endif %}
+
+  </div>
+
+  <!-- Articles commandés -->
+  {% if cart_items %}
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 mt-5">
+    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-slate-400 text-base">shopping_bag</span>
+      Articles commandés
+    </h3>
+    <div class="space-y-3">
+      {% for item in cart_items %}
+      <div class="flex items-center gap-3 py-3 border-b border-slate-50 last:border-0">
+        <div class="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 flex items-center justify-center">
+          {% if item.image %}
+          <img src="{{ item.image }}" alt="{{ item.nom }}"
+               class="w-full h-full object-cover"
+               onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')">
+          <span class="hidden material-symbols-outlined text-slate-300">inventory_2</span>
+          {% else %}
+          <span class="material-symbols-outlined text-slate-300">inventory_2</span>
+          {% endif %}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-bold text-slate-800 truncate">{{ item.nom }}</p>
+          <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+            {% if item.taille %}
+            <span class="text-xs bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">{{ item.taille }}</span>
+            {% endif %}
+            {% if item.couleur_nom %}
+            <span class="text-xs bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded flex items-center gap-1">
+              {% if item.couleur_hex %}
+              <span class="w-2.5 h-2.5 rounded-full inline-block border border-slate-200"
+                    style="background:{{ item.couleur_hex }}"></span>
+              {% endif %}
+              {{ item.couleur_nom }}
+            </span>
+            {% endif %}
+            <span class="text-xs text-slate-400">× {{ item.quantite }}</span>
+          </div>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <p class="text-sm font-bold text-slate-800">{{ item.prix|floatformat:0 }} FCFA</p>
+          <p class="text-xs text-slate-400 mt-0.5">× {{ item.quantite }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Statut préparation + action -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 mt-5">
+    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-slate-400 text-base">restaurant</span>
+      Préparation
+    </h3>
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <p class="text-xs text-slate-400 mb-1">Statut actuel</p>
+        <span class="text-sm font-bold px-3 py-1.5 rounded-full
+          {% if paiement.statut_preparation == 'pret' %}bg-emerald-100 text-emerald-700
+          {% elif paiement.statut_preparation == 'en_preparation' %}bg-orange-100 text-orange-700
+          {% else %}bg-slate-100 text-slate-500{% endif %}">
+          {{ paiement.get_statut_preparation_display|default:paiement.statut_preparation }}
+        </span>
+      </div>
+      {% if paiement.statut_preparation != 'pret' %}
+      <div class="flex gap-2">
+        {% if paiement.statut_preparation == 'recu' %}
+        <form method="post" action="{% url 'vendeur_marquer_commande' paiement.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="statut_preparation" value="en_preparation">
+          <button type="submit"
+                  class="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-4 py-2 rounded-xl transition-colors">
+            <span class="material-symbols-outlined text-base">skillet</span>
+            En préparation
+          </button>
+        </form>
+        {% endif %}
+        {% if paiement.statut_preparation == 'en_preparation' %}
+        <form method="post" action="{% url 'vendeur_marquer_commande' paiement.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="statut_preparation" value="pret">
+          <button type="submit"
+                  class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-4 py-2 rounded-xl transition-colors">
+            <span class="material-symbols-outlined text-base">check_circle</span>
+            Prêt à livrer
+          </button>
+        </form>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    {% if paiement.mode_livraison == 'livraison' %}
+    <div class="mt-4 pt-4 border-t border-slate-50">
+      <p class="text-xs text-slate-400 mb-1">Livraison</p>
+      {% if livraison %}
+      <span class="text-sm font-semibold text-slate-700 flex items-center gap-2">
+        <span class="material-symbols-outlined text-base text-orange-400">local_shipping</span>
+        {{ livraison.get_statut_display }}
+        {% if livraison.livreur %} — {{ livraison.livreur.get_full_name }}{% endif %}
+      </span>
+      {% else %}
+      <span class="text-sm text-slate-400">En attente d'un livreur…</span>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

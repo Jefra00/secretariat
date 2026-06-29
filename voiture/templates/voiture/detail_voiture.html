@@ -1,0 +1,441 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}{{ car.brand }} {{ car.model }} ({{ car.year }}) — Location{% endblock %}
+{% block navbar %}{% include 'base/navbar_voiture.html' %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+<style>
+.thumb-active{outline:2px solid #2563eb;outline-offset:2px;}
+.spec-row{display:flex;align-items:center;gap:.5rem;padding:.5rem 0;border-bottom:1px solid #f3f4f6;}
+.spec-row:last-child{border-bottom:none;}
+/* Flatpickr overrides */
+.flatpickr-day.booked,.flatpickr-day.booked:hover{background:#fecaca!important;color:#dc2626!important;cursor:not-allowed;}
+.flatpickr-day.selected,.flatpickr-day.selected:hover{background:#2563eb!important;border-color:#2563eb!important;}
+.flatpickr-day.inRange{background:#dbeafe!important;box-shadow:-5px 0 0 #dbeafe,5px 0 0 #dbeafe!important;}
+</style>
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Flatpickr locale fr -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Fil d'Ariane ──────────────────────────────────────────────────────── -->
+<nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 text-xs text-gray-500 flex items-center gap-1.5">
+  <a href="{% url 'accueil' %}" class="hover:text-blue-600 transition">Accueil</a>
+  <span>›</span>
+  <a href="{% url 'voiture:voiture_accueil' %}" class="hover:text-blue-600 transition">Location Auto</a>
+  <span>›</span>
+  <span class="text-gray-900 font-semibold">{{ car.brand }} {{ car.model }}</span>
+</nav>
+
+<!-- ── Contenu principal ─────────────────────────────────────────────────── -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+  <div class="lg:grid lg:grid-cols-5 lg:gap-10">
+
+    <!-- ═══ Colonne gauche : galerie + specs (3/5) ════════════════════════ -->
+    <div class="lg:col-span-3 space-y-6">
+
+      <!-- Galerie -->
+      <div>
+        <!-- Image principale -->
+        <div class="relative rounded-2xl overflow-hidden bg-gray-50 h-72 sm:h-96 mb-3">
+          {% if main_image %}
+          <img id="mainImg" src="{{ main_image.url }}" alt="{{ car }}"
+               class="w-full h-full object-cover">
+          {% else %}
+          <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+            <span class="text-7xl">🚗</span>
+          </div>
+          {% endif %}
+
+          {% if car.is_en_promo %}
+          <div class="absolute top-3 left-3 bg-red-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-lg">
+            -{{ car.remise_pct }}% PROMO
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Miniatures -->
+        {% if gallery|length > 1 %}
+        <div class="flex gap-2 overflow-x-auto pb-1">
+          {% for img in gallery %}
+          <button onclick="switchImg('{{ img.url }}', this)"
+                  class="flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border-2 {% if img.principale %}border-blue-500 thumb-active{% else %}border-gray-200{% endif %} hover:border-blue-400 transition">
+            <img src="{{ img.url }}" alt="" class="w-full h-full object-cover">
+          </button>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- En-tête véhicule -->
+      <div>
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            {% if car.category %}
+            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{{ car.category }}</span>
+            {% endif %}
+            <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold text-gray-900">
+              {{ car.brand }} {{ car.model }}
+            </h1>
+            <p class="text-sm text-gray-500 flex items-center gap-1.5 mt-0.5">
+              {% if car.city %}
+              <span class="material-symbols-outlined text-sm">location_on</span>{{ car.city }}
+              {% endif %}
+              {% if car.color %}· {{ car.color }}{% endif %}
+              · {{ car.year }}
+            </p>
+          </div>
+          <div class="text-right">
+            {% if car.is_en_promo %}
+            <p class="text-sm text-gray-400 line-through">{{ car.daily_price|floatformat:0 }} FCFA/j</p>
+            <p class="text-3xl font-black text-blue-600">{{ car.prix_actuel|floatformat:0 }}</p>
+            <p class="text-sm font-semibold text-blue-500">FCFA / jour</p>
+            {% else %}
+            <p class="text-3xl font-black text-blue-600">{{ car.prix_actuel|floatformat:0 }}</p>
+            <p class="text-sm font-semibold text-blue-500">FCFA / jour</p>
+            {% endif %}
+            {% if car.deposit > 0 %}
+            <p class="text-xs text-gray-400 mt-0.5">Caution : {{ car.deposit|floatformat:0 }} FCFA</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      {% if car.description %}
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h2 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-blue-600">description</span>Description
+        </h2>
+        <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{{ car.description }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Caractéristiques -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h2 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-blue-600">construction</span>Caractéristiques
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
+          <div>
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base text-blue-400">airline_seat_recline_normal</span>
+              <span class="text-xs text-gray-500 flex-1">Places</span>
+              <span class="text-sm font-bold text-gray-900">{{ car.seats }}</span>
+            </div>
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base text-blue-400">door_front</span>
+              <span class="text-xs text-gray-500 flex-1">Portes</span>
+              <span class="text-sm font-bold text-gray-900">{{ car.doors }}</span>
+            </div>
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base text-blue-400">settings</span>
+              <span class="text-xs text-gray-500 flex-1">Transmission</span>
+              <span class="text-sm font-bold text-gray-900">{{ car.get_transmission_display }}</span>
+            </div>
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base text-blue-400">local_gas_station</span>
+              <span class="text-xs text-gray-500 flex-1">Carburant</span>
+              <span class="text-sm font-bold text-gray-900">{{ car.get_fuel_display }}</span>
+            </div>
+          </div>
+          <div>
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base text-blue-400">ac_unit</span>
+              <span class="text-xs text-gray-500 flex-1">Climatisation</span>
+              <span class="text-sm font-bold {% if car.air_conditioning %}text-green-600{% else %}text-red-400{% endif %}">
+                {% if car.air_conditioning %}Oui{% else %}Non{% endif %}
+              </span>
+            </div>
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base text-blue-400">luggage</span>
+              <span class="text-xs text-gray-500 flex-1">Bagages</span>
+              <span class="text-sm font-bold text-gray-900">{{ car.luggage_capacity }} valise{{ car.luggage_capacity|pluralize }}</span>
+            </div>
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base text-blue-400">person</span>
+              <span class="text-xs text-gray-500 flex-1">Chauffeur inclus</span>
+              <span class="text-sm font-bold {% if car.driver_included %}text-green-600{% else %}text-gray-400{% endif %}">
+                {% if car.driver_included %}Oui{% else %}Non{% endif %}
+              </span>
+            </div>
+            {% if car.location %}
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base text-blue-400">place</span>
+              <span class="text-xs text-gray-500 flex-1">Lieu de prise</span>
+              <span class="text-sm font-bold text-gray-900">{{ car.location }}</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /colonne gauche -->
+
+    <!-- ═══ Colonne droite : formulaire réservation (2/5) ════════════════ -->
+    <div class="lg:col-span-2 mt-8 lg:mt-0">
+      <div class="sticky top-20 space-y-4">
+
+        <!-- Message de succès -->
+        {% if reservation_ok %}
+        <div class="bg-green-50 border border-green-200 rounded-2xl p-5 text-center">
+          <div class="text-4xl mb-2">✅</div>
+          <h3 class="font-extrabold text-green-700 text-lg">Réservation envoyée !</h3>
+          <p class="text-sm text-green-600 mt-1">
+            <strong>{{ reservation.date_debut }}</strong> → <strong>{{ reservation.date_fin }}</strong>
+            · {{ reservation.nombre_jours }} jour{{ reservation.nombre_jours|pluralize }}
+          </p>
+          <p class="text-sm text-green-600 font-bold mt-1">{{ reservation.prix_total|floatformat:0 }} FCFA</p>
+          <p class="text-xs text-gray-500 mt-2">Votre demande est en attente de confirmation. Nous vous contacterons rapidement.</p>
+          <a href="{% url 'voiture:mes_reservations' %}"
+             class="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition">
+            Voir mes réservations
+          </a>
+        </div>
+
+        {% else %}
+
+        <!-- Formulaire de réservation -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <h2 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-blue-600">event_available</span>Réserver ce véhicule
+          </h2>
+
+          {% if form_error %}
+          <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+            {{ form_error }}
+          </div>
+          {% endif %}
+
+          <form method="post" class="space-y-4" id="reservationForm">
+            {% csrf_token %}
+
+            <!-- Dates -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Date de début</label>
+                <input type="text" name="date_debut" id="datePicker1"
+                       value="{{ form_data.date_debut|default:'' }}"
+                       placeholder="JJ/MM/AAAA" readonly
+                       required
+                       class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer bg-white">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Date de fin</label>
+                <input type="text" name="date_fin" id="datePicker2"
+                       value="{{ form_data.date_fin|default:'' }}"
+                       placeholder="JJ/MM/AAAA" readonly
+                       required
+                       class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer bg-white">
+              </div>
+            </div>
+
+            <!-- Prix estimé -->
+            <div id="prixEstime" class="hidden bg-blue-50 rounded-xl px-4 py-3">
+              <p class="text-xs text-blue-600 font-semibold">Estimation</p>
+              <p class="text-lg font-black text-blue-700" id="prixTotal">—</p>
+              <p class="text-xs text-gray-500" id="nbJours"></p>
+            </div>
+
+            <!-- Téléphone -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Téléphone de contact *</label>
+              <input type="tel" name="telephone"
+                     value="{{ form_data.telephone|default:'' }}"
+                     placeholder="+242 06X XXX XXX" required
+                     class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Message -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Message (optionnel)</label>
+              <textarea name="message" rows="3" placeholder="Précisez vos besoins, lieu de prise en charge…"
+                        class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 resize-none">{{ form_data.message|default:'' }}</textarea>
+            </div>
+
+            {% if user.is_authenticated %}
+            <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow-sm text-sm">
+              Envoyer la demande de réservation
+            </button>
+            {% else %}
+            <a href="/connexion/?next=/voiture/modele/{{ car.pk }}/"
+               class="block text-center w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow-sm text-sm">
+              Connectez-vous pour réserver
+            </a>
+            {% endif %}
+          </form>
+
+          {% if car.deposit > 0 %}
+          <p class="text-xs text-gray-400 mt-3 text-center">
+            ⚠️ Une caution de <strong>{{ car.deposit|floatformat:0 }} FCFA</strong> sera demandée à la remise du véhicule.
+          </p>
+          {% endif %}
+        </div>
+
+        {% endif %}<!-- /reservation_ok -->
+
+        <!-- Aide / Contact -->
+        <div class="bg-blue-50 rounded-2xl p-4 text-center">
+          <p class="text-xs text-blue-700 font-semibold">Besoin d'aide ?</p>
+          <p class="text-xs text-gray-500 mt-0.5">Contactez-nous via WhatsApp ou appelez directement l'agence.</p>
+          {% if car.shop.telephone %}
+          <a href="https://wa.me/{{ car.shop.telephone|cut:' '|cut:'+'|cut:'-' }}"
+             target="_blank" rel="noopener"
+             class="mt-2 inline-flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.557 4.137 1.533 5.874L0 24l6.326-1.513A11.918 11.918 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.013-1.375l-.36-.214-3.728.892.91-3.636-.236-.374A9.818 9.818 0 0112 2.182c5.425 0 9.818 4.393 9.818 9.818S17.425 21.818 12 21.818z"/>
+            </svg>
+            Contacter l'agence
+          </a>
+          {% endif %}
+        </div>
+
+      </div>
+    </div><!-- /colonne droite -->
+  </div><!-- /grid -->
+
+  <!-- ── Véhicules similaires ──────────────────────────────────────────── -->
+  {% if autres %}
+  <section class="mt-14">
+    <h2 class="text-xl font-extrabold text-gray-900 mb-6 flex items-center gap-2">
+      <span class="material-symbols-outlined text-blue-600">directions_car</span>Véhicules similaires
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {% for c in autres %}
+      {% with cimg=c.images.all.0 %}
+      <a href="{% url 'voiture:detail_voiture' c.pk %}"
+         class="car-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group flex flex-col">
+        <div class="relative h-40 overflow-hidden bg-gray-50">
+          {% if cimg %}
+          <img src="{{ cimg.image.url }}" alt="{{ c }}" class="car-img w-full h-full object-cover">
+          {% else %}
+          <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+            <span class="text-4xl">🚗</span>
+          </div>
+          {% endif %}
+          {% if c.is_en_promo %}
+          <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">-{{ c.remise_pct }}%</span>
+          {% endif %}
+        </div>
+        <div class="p-4 flex-1 flex flex-col">
+          <h3 class="font-bold text-gray-900 text-sm">{{ c.brand }} {{ c.model }}</h3>
+          <p class="text-xs text-gray-500 mb-2">{{ c.year }}{% if c.city %} · {{ c.city }}{% endif %}</p>
+          <div class="mt-auto flex items-center justify-between">
+            <p class="font-black text-blue-600 text-sm">{{ c.prix_actuel|floatformat:0 }} <span class="font-semibold text-xs">FCFA/j</span></p>
+            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition">Voir →</span>
+          </div>
+        </div>
+      </a>
+      {% endwith %}
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</div><!-- /max-w-7xl -->
+
+<script>
+// ── Galerie JS ────────────────────────────────────────────────────────────
+function switchImg(url, btn) {
+  const main = document.getElementById('mainImg');
+  if (main) main.src = url;
+  document.querySelectorAll('.thumb-active').forEach(t => t.classList.remove('thumb-active'));
+  if (btn) btn.classList.add('thumb-active');
+}
+
+// ── Flatpickr date picker ─────────────────────────────────────────────────
+const BOOKED = {{ booked_ranges|safe }};
+const TODAY  = '{{ today_str }}';
+const PRIX_JOUR = {{ car.prix_actuel }};
+
+function isBooked(dateStr) {
+  return BOOKED.some(r => dateStr >= r.from && dateStr < r.to);
+}
+
+function computePrix(d1, d2) {
+  const ms = d2 - d1;
+  const days = Math.round(ms / 86400000);
+  return { days, total: days * PRIX_JOUR };
+}
+
+function updatePrixEstime(d1, d2) {
+  if (!d1 || !d2 || d2 <= d1) {
+    document.getElementById('prixEstime').classList.add('hidden');
+    return;
+  }
+  const { days, total } = computePrix(d1, d2);
+  const fmt = n => n.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  document.getElementById('prixTotal').textContent = fmt(total) + ' FCFA';
+  document.getElementById('nbJours').textContent = days + ' jour' + (days > 1 ? 's' : '');
+  document.getElementById('prixEstime').classList.remove('hidden');
+}
+
+// Dates déjà sélectionnées (re-render après erreur POST)
+let initialD1 = null, initialD2 = null;
+const iv1 = document.getElementById('datePicker1').value;
+const iv2 = document.getElementById('datePicker2').value;
+
+// Convertir valeur retournée par form_data (format ISO YYYY-MM-DD)
+function parseISO(s) {
+  if (!s) return null;
+  const parts = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (parts) return new Date(+parts[1], +parts[2]-1, +parts[3]);
+  return null;
+}
+
+if (iv1) initialD1 = parseISO(iv1);
+if (iv2) initialD2 = parseISO(iv2);
+
+const fpConfig = {
+  locale: 'fr',
+  dateFormat: 'Y-m-d',
+  altInput: true,
+  altFormat: 'd/m/Y',
+  minDate: TODAY,
+  disableMobile: true,
+  onDayCreate: function(dObj, dStr, fp, dayElem) {
+    const d = dayElem.dateObj;
+    const ds = d.toISOString().slice(0, 10);
+    if (isBooked(ds)) dayElem.classList.add('booked');
+  },
+  disable: [
+    function(date) {
+      const ds = date.toISOString().slice(0, 10);
+      return isBooked(ds);
+    }
+  ]
+};
+
+const fp1 = flatpickr('#datePicker1', {
+  ...fpConfig,
+  defaultDate: iv1 || null,
+  onChange: function([d]) {
+    initialD1 = d || null;
+    if (fp2.selectedDates[0]) {
+      updatePrixEstime(d, fp2.selectedDates[0]);
+    }
+    // Ouvrir automatiquement le second picker
+    if (d) setTimeout(() => fp2.open(), 100);
+  }
+});
+
+const fp2 = flatpickr('#datePicker2', {
+  ...fpConfig,
+  defaultDate: iv2 || null,
+  onChange: function([d]) {
+    initialD2 = d || null;
+    updatePrixEstime(fp1.selectedDates[0], d);
+  }
+});
+
+// Init prix si déjà des dates (re-render après erreur)
+if (initialD1 && initialD2) updatePrixEstime(initialD1, initialD2);
+</script>
+{% endblock %}

@@ -1,0 +1,345 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Immobilier — Brazzaville{% endblock %}
+{% block navbar %}{% include 'base/navbar_immobilier.html' %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+<style>
+.bien-card:hover .bien-img{transform:scale(1.05);}
+.bien-img{transition:transform .35s ease;}
+.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+<section class="relative overflow-hidden text-white"
+         style="background:linear-gradient(135deg,#064e3b 0%,#065f46 55%,#047857 100%);">
+
+  <!-- Décoration floue -->
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-10 blur-3xl" style="background:#6ee7b7;"></div>
+    <div class="absolute -bottom-16 -left-16 w-72 h-72 rounded-full opacity-15 blur-3xl" style="background:#a7f3d0;"></div>
+  </div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
+
+      <!-- Texte -->
+      <div class="max-w-xl">
+        <div class="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full text-xs font-bold"
+             style="background:rgba(255,255,255,0.15);color:#a7f3d0;">
+          <span class="w-2 h-2 rounded-full bg-yellow-300 animate-pulse inline-block"></span>
+          Brazzaville · République du Congo
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight mb-3">
+          Maisons, villas &amp; appartements<br>
+          <span style="color:#fde68a;">à Brazzaville &amp; environs</span>
+        </h1>
+        <p class="text-base" style="color:#a7f3d0;">
+          Achetez ou louez votre bien idéal. Visitez sur rendez-vous, en toute confiance.
+        </p>
+      </div>
+
+      <!-- Stats -->
+      <div class="flex gap-3 flex-shrink-0">
+        <div class="rounded-2xl px-5 py-4 text-center backdrop-blur-sm" style="background:rgba(255,255,255,0.12);">
+          <p class="text-2xl font-black">{{ total }}</p>
+          <p class="text-xs font-semibold mt-0.5" style="color:#a7f3d0;">bien{{ total|pluralize }}</p>
+        </div>
+        <div class="rounded-2xl px-5 py-4 text-center backdrop-blur-sm" style="background:rgba(255,255,255,0.12);">
+          <p class="text-2xl font-black">🔑</p>
+          <p class="text-xs font-semibold mt-0.5" style="color:#a7f3d0;">visite sur RDV</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barre de recherche -->
+    <form method="get" class="mt-8 flex gap-2 max-w-2xl">
+      <div class="relative flex-1">
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </span>
+        <input type="text" name="q" value="{{ q }}" id="search-immobilier"
+               placeholder="Titre, quartier, ville…" autocomplete="off"
+               class="w-full pl-12 pr-4 py-3.5 rounded-xl text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 shadow-sm"
+               style="--tw-ring-color:#6ee7b7;">
+      </div>
+      {% if cat_id %}<input type="hidden" name="cat"   value="{{ cat_id }}">{% endif %}
+      {% if type_bien  %}<input type="hidden" name="type"  value="{{ type_bien }}">{% endif %}
+      {% if type_offre %}<input type="hidden" name="offre" value="{{ type_offre }}">{% endif %}
+      {% if ville      %}<input type="hidden" name="ville" value="{{ ville }}">{% endif %}
+      {% if prix_max   %}<input type="hidden" name="prix_max" value="{{ prix_max }}">{% endif %}
+      {% if meuble     %}<input type="hidden" name="meuble" value="{{ meuble }}">{% endif %}
+      <button type="submit"
+              class="font-bold px-6 py-3.5 rounded-xl text-sm transition shadow-sm bg-white hover:bg-emerald-50"
+              style="color:#065f46;">
+        Rechercher
+      </button>
+    </form>
+
+  </div>
+</section>
+
+
+<!-- ── Corps ──────────────────────────────────────────────────────────────── -->
+<div class="bg-gray-50 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col lg:flex-row gap-7">
+
+      <!-- ═══ Sidebar filtres ═══════════════════════════════════════════════ -->
+      <aside class="w-full lg:w-60 flex-shrink-0">
+        <form method="get" id="filterForm"
+              class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sticky top-20">
+          {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+
+          <div class="flex items-center gap-2 mb-5">
+            <span class="material-symbols-outlined text-xl" style="color:#065f46;">tune</span>
+            <h2 class="font-bold text-gray-900 text-sm">Filtres</h2>
+            {% if q or cat_id or type_bien or type_offre or ville or prix_max or meuble %}
+            <a href="{% url 'immobilier:accueil' %}"
+               class="ml-auto text-xs font-semibold text-red-400 hover:text-red-600 flex items-center gap-0.5">
+              <span class="material-symbols-outlined text-sm">close</span>Reset
+            </a>
+            {% endif %}
+          </div>
+
+          <!-- Catégorie -->
+          {% if categories %}
+          <div class="mb-4">
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Catégorie</p>
+            <div class="space-y-1">
+              <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="radio" name="cat" value="" {% if not cat_id %}checked{% endif %}
+                       onchange="this.form.submit()" class="text-emerald-600">
+                <span class="text-sm text-gray-600 group-hover:text-emerald-700">Toutes</span>
+              </label>
+              {% for cat in categories %}
+              <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="radio" name="cat" value="{{ cat.pk }}"
+                       {% if cat_id == cat.pk|stringformat:"s" %}checked{% endif %}
+                       onchange="this.form.submit()" class="text-emerald-600">
+                <span class="text-sm text-gray-600 group-hover:text-emerald-700">{{ cat }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Type de bien -->
+          <div class="mb-4">
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Type de bien</p>
+            <select name="type" onchange="this.form.submit()"
+                    class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1"
+                    style="focus:ring-color:#065f46;">
+              <option value="">Tous</option>
+              {% for val, label in TYPE_BIEN %}
+              <option value="{{ val }}" {% if type_bien == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Offre -->
+          <div class="mb-4">
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Offre</p>
+            <select name="offre" onchange="this.form.submit()"
+                    class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none">
+              <option value="">Vente &amp; Location</option>
+              {% for val, label in TYPE_OFFRE %}
+              <option value="{{ val }}" {% if type_offre == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Ville -->
+          <div class="mb-4">
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Ville</p>
+            <input type="text" name="ville" value="{{ ville }}" placeholder="Brazzaville…"
+                   class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none"
+                   onchange="this.form.submit()">
+          </div>
+
+          <!-- Budget max -->
+          <div class="mb-4">
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Budget max (FCFA)</p>
+            <input type="number" name="prix_max" value="{{ prix_max }}" placeholder="50 000 000" min="0"
+                   class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none"
+                   onchange="this.form.submit()">
+          </div>
+
+          <!-- Meublé -->
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="meuble" value="1" {% if meuble == "1" %}checked{% endif %}
+                   class="rounded text-emerald-600" onchange="this.form.submit()">
+            <span class="text-sm text-gray-600">Meublé uniquement</span>
+          </label>
+
+        </form>
+      </aside>
+
+      <!-- ═══ Grille des biens ══════════════════════════════════════════════ -->
+      <section class="flex-1 min-w-0">
+
+        <!-- Compteur résultats -->
+        <div class="flex items-center justify-between mb-5">
+          <p class="text-sm text-gray-500">
+            <span class="font-bold text-gray-900">{{ total }}</span>
+            bien{{ total|pluralize }} disponible{{ total|pluralize }}
+            {% if q %} · « <em class="not-italic font-semibold text-gray-700">{{ q }}</em> »{% endif %}
+          </p>
+        </div>
+
+        {% if biens %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+          {% for b in biens %}
+          {% with photo=b.photos.all.0 %}
+          <a href="{% url 'immobilier:detail' b.pk %}"
+             class="bien-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group flex flex-col"
+             data-searchable="{{ b.titre|lower|escapejs }}{% if b.adresse %} {{ b.adresse|lower|escapejs }}{% endif %}{% if b.ville %} {{ b.ville|lower|escapejs }}{% endif %}{% if b.type_bien %} {{ b.type_bien|lower|escapejs }}{% endif %}">
+
+            <!-- Image -->
+            <div class="relative h-48 overflow-hidden bg-gray-50">
+              {% if photo %}
+              <img src="{{ photo.image.url }}" alt="{{ b.titre }}"
+                   class="bien-img w-full h-full object-cover">
+              {% else %}
+              <div class="w-full h-full flex items-center justify-center"
+                   style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);">
+                <span class="text-5xl">🏠</span>
+              </div>
+              {% endif %}
+
+              <!-- Badge promo -->
+              {% if b.is_en_promo %}
+              <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow">
+                -{{ b.remise_pct }}%
+              </span>
+              {% endif %}
+
+              <!-- Badge offre -->
+              <span class="absolute top-2 right-2 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow
+                {% if b.type_offre == 'vente' %}bg-emerald-700{% else %}bg-teal-600{% endif %}">
+                {{ b.get_type_offre_display }}
+              </span>
+
+              <!-- Badge meublé -->
+              {% if b.meuble %}
+              <span class="absolute bottom-2 left-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Meublé</span>
+              {% endif %}
+            </div>
+
+            <!-- Infos -->
+            <div class="flex-1 p-4 flex flex-col">
+
+              <!-- Type + titre -->
+              <div class="flex items-start gap-2 mb-1">
+                <span class="flex-shrink-0 text-[10px] font-bold text-white px-2 py-0.5 rounded-full mt-0.5"
+                      style="background:#7c3aed;">{{ b.get_type_bien_display }}</span>
+                <h3 class="font-bold text-gray-900 text-sm leading-tight line-clamp-2">{{ b.titre }}</h3>
+              </div>
+
+              {% if b.categorie %}
+              <p class="text-xs font-medium mb-2" style="color:#065f46;">{{ b.categorie }}</p>
+              {% endif %}
+
+              <!-- Specs rapides -->
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 mb-3">
+                <span class="flex items-center gap-1">
+                  <span class="material-symbols-outlined" style="font-size:13px;">straighten</span>
+                  {{ b.superficie|floatformat:0 }} m²
+                </span>
+                {% if b.nombre_chambres %}
+                <span class="flex items-center gap-1">
+                  <span class="material-symbols-outlined" style="font-size:13px;">bed</span>
+                  {{ b.nombre_chambres }} ch.
+                </span>
+                {% endif %}
+                {% if b.nombre_salles_bain %}
+                <span class="flex items-center gap-1">
+                  <span class="material-symbols-outlined" style="font-size:13px;">bathtub</span>
+                  {{ b.nombre_salles_bain }} sdb
+                </span>
+                {% endif %}
+              </div>
+
+              <!-- Localisation -->
+              <p class="text-xs text-gray-400 flex items-center gap-1 mb-3 truncate">
+                <span class="material-symbols-outlined flex-shrink-0" style="font-size:12px;">location_on</span>
+                {{ b.adresse }}{% if b.ville %}, {{ b.ville }}{% endif %}
+              </p>
+
+              <!-- Prix + CTA -->
+              <div class="mt-auto flex items-end justify-between pt-2 border-t border-gray-50">
+                <div>
+                  {% if b.is_en_promo %}
+                  <p class="text-[11px] text-gray-400 line-through leading-tight">{{ b.prix|floatformat:0 }} FCFA</p>
+                  {% endif %}
+                  <p class="font-black text-base leading-tight" style="color:#065f46;">
+                    {{ b.prix_actuel|floatformat:0 }}
+                    <span class="text-xs font-semibold">FCFA{{ b.suffix_prix }}</span>
+                  </p>
+                </div>
+                <span class="text-xs font-bold px-3 py-1.5 rounded-xl transition flex-shrink-0"
+                      style="color:#065f46;background:#d1fae5;">
+                  Voir →
+                </span>
+              </div>
+
+            </div>
+          </a>
+          {% endwith %}
+          {% endfor %}
+        </div>
+        <div id="no-results-immo" style="display:none;"
+             class="flex flex-col items-center justify-center py-14 text-center">
+          <span class="material-symbols-outlined text-5xl text-gray-200 mb-3">search_off</span>
+          <p class="font-bold text-gray-700">Aucun bien trouvé</p>
+          <p class="text-xs text-gray-400 mt-1">Essayez un autre quartier ou titre</p>
+        </div>
+
+        {% else %}
+        <!-- État vide -->
+        <div class="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border border-gray-100">
+          <div class="w-20 h-20 rounded-full flex items-center justify-center mb-4 text-4xl" style="background:#d1fae5;">🏠</div>
+          <h3 class="font-bold text-gray-900 mb-2">Aucun bien disponible</h3>
+          <p class="text-sm text-gray-500 max-w-xs">
+            {% if q or cat_id or type_bien or type_offre or ville or prix_max or meuble %}
+              Essayez d'autres critères ou
+              <a href="{% url 'immobilier:accueil' %}" class="underline font-semibold" style="color:#065f46;">réinitialisez les filtres</a>.
+            {% else %}
+              Aucun bien n'est enregistré pour le moment. Revenez bientôt !
+            {% endif %}
+          </p>
+        </div>
+        {% endif %}
+
+      </section>
+    </div><!-- /flex row -->
+  </div><!-- /max-w -->
+</div><!-- /bg-gray-50 -->
+
+<script>
+(function() {
+  const input = document.getElementById('search-immobilier');
+  if (!input) return;
+  const noRes = document.getElementById('no-results-immo');
+  input.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    const cards = document.querySelectorAll('.bien-card[data-searchable]');
+    let visible = 0;
+    cards.forEach(card => {
+      const match = !q || card.dataset.searchable.includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    if (noRes) noRes.style.display = visible === 0 && q ? '' : 'none';
+  });
+})();
+</script>
+
+{% endblock %}

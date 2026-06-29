@@ -1,0 +1,305 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Location de Voitures — Brazzaville{% endblock %}
+{% block navbar %}{% include 'base/navbar_voiture.html' %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+<style>
+.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.car-card:hover .car-img{transform:scale(1.04);}
+.car-img{transition:transform .35s ease;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+<section class="relative overflow-hidden text-white"
+         style="background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 50%,#3b82f6 100%);">
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-10 blur-3xl" style="background:#93c5fd;"></div>
+    <div class="absolute -bottom-16 -left-16 w-72 h-72 rounded-full opacity-15 blur-3xl" style="background:#bfdbfe;"></div>
+  </div>
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-3xl">🚗</span>
+          <span class="text-xs font-bold uppercase tracking-widest" style="color:#bfdbfe;">Location Automobile</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight mb-2">
+          Véhicules disponibles<br>
+          <span style="color:#fde68a;">à Brazzaville &amp; environs</span>
+        </h1>
+        <p class="text-sm sm:text-base max-w-md" style="color:#bfdbfe;">
+          Berlines, 4×4, minibus, avec ou sans chauffeur. Réservation simple, prix transparent.
+        </p>
+      </div>
+      <div class="hidden sm:flex items-center gap-4 text-center">
+        <div class="bg-white/15 rounded-2xl px-6 py-4 backdrop-blur-sm">
+          <p class="text-2xl font-black">{{ total }}</p>
+          <p class="text-xs font-semibold" style="color:#bfdbfe;">véhicule{{ total|pluralize }}</p>
+        </div>
+        <div class="bg-white/15 rounded-2xl px-6 py-4 backdrop-blur-sm">
+          <p class="text-2xl font-black">24h</p>
+          <p class="text-xs font-semibold" style="color:#bfdbfe;">réponse rapide</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recherche -->
+    <form method="get" class="mt-8 flex gap-2">
+      <div class="relative flex-1 max-w-2xl">
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </span>
+        <input type="text" name="q" value="{{ q }}" id="search-voiture"
+               placeholder="Marque, modèle, couleur, description…" autocomplete="off"
+               class="w-full pl-12 pr-4 py-3.5 rounded-xl text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-300 shadow-sm">
+      </div>
+      {% if cat_id %}<input type="hidden" name="cat" value="{{ cat_id }}">{% endif %}
+      {% if transmission %}<input type="hidden" name="transmission" value="{{ transmission }}">{% endif %}
+      {% if fuel %}<input type="hidden" name="fuel" value="{{ fuel }}">{% endif %}
+      {% if city %}<input type="hidden" name="city" value="{{ city }}">{% endif %}
+      {% if driver %}<input type="hidden" name="driver" value="{{ driver }}">{% endif %}
+      <button type="submit"
+              class="font-bold px-6 py-3.5 rounded-xl transition shadow-sm text-sm text-blue-700 hover:bg-blue-50 bg-white">
+        Rechercher
+      </button>
+    </form>
+  </div>
+</section>
+
+<!-- ── Corps : filtres + grille ────────────────────────────────────────── -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex flex-col lg:flex-row gap-8">
+
+    <!-- Filtres sidebar -->
+    <aside class="lg:w-64 flex-shrink-0">
+      <form method="get" id="filterForm" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-5">
+        {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+
+        <h2 class="font-bold text-gray-900 text-base flex items-center gap-2">
+          <span class="material-symbols-outlined text-blue-600">tune</span> Filtres
+        </h2>
+
+        <!-- Catégorie -->
+        {% if categories %}
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Catégorie</p>
+          <div class="space-y-1">
+            <label class="flex items-center gap-2 cursor-pointer group">
+              <input type="radio" name="cat" value="" {% if not cat_id %}checked{% endif %}
+                     class="text-blue-600 focus:ring-blue-500" onchange="this.form.submit()">
+              <span class="text-sm text-gray-700 group-hover:text-blue-600">Toutes</span>
+            </label>
+            {% for cat in categories %}
+            <label class="flex items-center gap-2 cursor-pointer group">
+              <input type="radio" name="cat" value="{{ cat.pk }}"
+                     {% if cat_id == cat.pk|stringformat:"s" %}checked{% endif %}
+                     class="text-blue-600 focus:ring-blue-500" onchange="this.form.submit()">
+              <span class="text-sm text-gray-700 group-hover:text-blue-600">{{ cat }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Transmission -->
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Transmission</p>
+          <select name="transmission" onchange="this.form.submit()"
+                  class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="">Toutes</option>
+            {% for val, label in TRANS_CHOICES %}
+            <option value="{{ val }}" {% if transmission == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Carburant -->
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Carburant</p>
+          <select name="fuel" onchange="this.form.submit()"
+                  class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="">Tous</option>
+            {% for val, label in FUEL_CHOICES %}
+            <option value="{{ val }}" {% if fuel == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Ville -->
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ville</p>
+          <input type="text" name="city" value="{{ city }}" placeholder="Ex : Brazzaville"
+                 class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                 onchange="this.form.submit()">
+        </div>
+
+        <!-- Avec chauffeur -->
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="driverCb" name="driver" value="1"
+                 {% if driver == "1" %}checked{% endif %}
+                 class="rounded text-blue-600 focus:ring-blue-500" onchange="this.form.submit()">
+          <label for="driverCb" class="text-sm font-medium text-gray-700 cursor-pointer">Chauffeur inclus</label>
+        </div>
+
+        <!-- Reset -->
+        {% if q or cat_id or transmission or fuel or city or driver %}
+        <a href="{% url 'voiture:voiture_accueil' %}"
+           class="flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-600 transition">
+          <span class="material-symbols-outlined text-sm">close</span> Réinitialiser
+        </a>
+        {% endif %}
+      </form>
+    </aside>
+
+    <!-- Grille des véhicules -->
+    <section class="flex-1">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-sm text-gray-500">
+          <span class="font-bold text-gray-900">{{ total }}</span>
+          véhicule{{ total|pluralize }} disponible{{ total|pluralize }}
+          {% if q %} pour « <em>{{ q }}</em> »{% endif %}
+        </p>
+      </div>
+
+      {% if cars %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+        {% for car in cars %}
+        {% with img=car.images.all.0 %}
+        <a href="{% url 'voiture:detail_voiture' car.pk %}"
+           class="car-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group flex flex-col"
+           data-searchable="{{ car.brand|lower|escapejs }} {{ car.model|lower|escapejs }}{% if car.category %} {{ car.category|lower|escapejs }}{% endif %}{% if car.city %} {{ car.city|lower|escapejs }}{% endif %}">
+
+          <!-- Image -->
+          <div class="relative h-44 overflow-hidden bg-gray-50">
+            {% if img %}
+            <img src="{{ img.image.url }}" alt="{{ car }}"
+                 class="car-img w-full h-full object-cover">
+            {% else %}
+            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+              <span class="text-5xl">🚗</span>
+            </div>
+            {% endif %}
+
+            {% if car.is_en_promo %}
+            <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow">
+              -{{ car.remise_pct }}%
+            </span>
+            {% endif %}
+
+            {% if car.driver_included %}
+            <span class="absolute top-2 right-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow flex items-center gap-1">
+              <span class="material-symbols-outlined" style="font-size:12px;">person</span> Chauffeur
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Infos -->
+          <div class="flex-1 p-4 flex flex-col">
+            <div class="flex items-start justify-between gap-2 mb-1">
+              <h3 class="font-bold text-gray-900 text-sm leading-tight line-clamp-2">
+                {{ car.brand }} {{ car.model }}
+              </h3>
+              <span class="flex-shrink-0 text-xs font-semibold text-gray-400">{{ car.year }}</span>
+            </div>
+
+            {% if car.category %}
+            <p class="text-xs text-blue-600 font-medium mb-2">{{ car.category }}</p>
+            {% endif %}
+
+            <!-- Specs rapides -->
+            <div class="flex items-center gap-3 text-xs text-gray-500 mb-3 flex-wrap">
+              <span class="flex items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:14px;">airline_seat_recline_normal</span>
+                {{ car.seats }} places
+              </span>
+              <span class="flex items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:14px;">settings</span>
+                {{ car.get_transmission_display }}
+              </span>
+              <span class="flex items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:14px;">local_gas_station</span>
+                {{ car.get_fuel_display }}
+              </span>
+              {% if car.air_conditioning %}
+              <span class="flex items-center gap-1 text-blue-500">
+                <span class="material-symbols-outlined" style="font-size:14px;">ac_unit</span> Clim
+              </span>
+              {% endif %}
+            </div>
+
+            {% if car.city %}
+            <p class="text-xs text-gray-400 flex items-center gap-1 mb-3">
+              <span class="material-symbols-outlined" style="font-size:13px;">location_on</span>
+              {{ car.city }}
+            </p>
+            {% endif %}
+
+            <div class="mt-auto flex items-end justify-between">
+              <div>
+                {% if car.is_en_promo %}
+                <p class="text-xs text-gray-400 line-through">{{ car.daily_price|floatformat:0 }} FCFA</p>
+                <p class="font-black text-blue-600 text-base">{{ car.prix_actuel|floatformat:0 }} <span class="text-xs font-semibold">FCFA/j</span></p>
+                {% else %}
+                <p class="font-black text-blue-600 text-base">{{ car.prix_actuel|floatformat:0 }} <span class="text-xs font-semibold">FCFA/j</span></p>
+                {% endif %}
+              </div>
+              <span class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition">
+                Réserver →
+              </span>
+            </div>
+          </div>
+        </a>
+        {% endwith %}
+        {% endfor %}
+      </div>
+      <div id="no-results-voiture" style="display:none;"
+           class="flex flex-col items-center justify-center py-14 text-center">
+        <span class="material-symbols-outlined text-5xl text-gray-200 mb-3">search_off</span>
+        <p class="font-bold text-gray-700">Aucun véhicule trouvé</p>
+        <p class="text-xs text-gray-400 mt-1">Essayez une autre marque ou modèle</p>
+      </div>
+
+      {% else %}
+      <div class="flex flex-col items-center justify-center py-24 text-center">
+        <div class="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-4 text-4xl">🚗</div>
+        <h3 class="font-bold text-gray-900 mb-2">Aucun véhicule trouvé</h3>
+        <p class="text-sm text-gray-500 max-w-xs">
+          {% if q or cat_id or transmission or fuel or city or driver %}
+            Essayez d'autres critères ou <a href="{% url 'voiture:voiture_accueil' %}" class="text-blue-600 underline">réinitialisez les filtres</a>.
+          {% else %}
+            Aucun véhicule disponible pour le moment.
+          {% endif %}
+        </p>
+      </div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+
+<script>
+(function() {
+  const input = document.getElementById('search-voiture');
+  if (!input) return;
+  const noRes = document.getElementById('no-results-voiture');
+  input.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    const cards = document.querySelectorAll('.car-card[data-searchable]');
+    let visible = 0;
+    cards.forEach(card => {
+      const match = !q || card.dataset.searchable.includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    if (noRes) noRes.style.display = visible === 0 && q ? '' : 'none';
+  });
+})();
+</script>
+
+{% endblock %}

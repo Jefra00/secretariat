@@ -123,10 +123,16 @@
     </style>
 
 
+  {% block extra_head %}{% endblock %}
+
+  {# Nonce de session : lie cette session à la fenêtre courante du navigateur #}
+  {% if request.user.is_authenticated and request.session.auth_nonce %}
+  <meta name="ue-sn" content="{{ request.session.auth_nonce }}">
+  {% endif %}
   </head>
 
   <body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
-    {% include 'base/navbar.html' %}  {# ton header / navbar ici #}
+    {% block navbar %}{% include 'base/navbar.html' %}{% endblock %}
 
 
     {% block content %}
@@ -136,7 +142,7 @@
     {% endblock %}
 
 
-{% include 'base/footer.html' %}  {# ton header / navbar ici #}
+{% block footer %}{% include 'base/footer.html' %}{% endblock %}
 
     <script>
       // ============ CARROUSEL HERO ============
@@ -639,6 +645,48 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target === mobileMenu) closeMenu();
   });
 });
+</script>
+{% include 'base/_gps_tracker.html' %}
+
+<script>
+// ── Isolation de session par fenêtre (sessionStorage nonce) ──────────────────
+// Empêche qu'une URL copiée dans un autre navigateur donne accès à la session.
+// Si la fenêtre ne possède pas le nonce de la session active, elle est renvoyée
+// vers la page de connexion.
+(function() {
+  const meta = document.querySelector('meta[name="ue-sn"]');
+  if (!meta) return; // page publique ou utilisateur non connecté
+
+  const serverNonce = meta.getAttribute('content');
+  const stored      = sessionStorage.getItem('_ue_sn');
+
+  if (!stored) {
+    // Première visite dans cette fenêtre → mémoriser le nonce
+    sessionStorage.setItem('_ue_sn', serverNonce);
+  } else if (stored !== serverNonce) {
+    // Le nonce a changé : un autre utilisateur s'est connecté dans ce navigateur
+    // → forcer la reconnexion dans cette fenêtre
+    sessionStorage.removeItem('_ue_sn');
+    window.location.replace('/connexion/?raison=session_change');
+  }
+})();
+</script>
+
+<audio id="urban-notif-sound" preload="auto" style="display:none">
+  <source src="/static/son/son.wav" type="audio/wav">
+</audio>
+<script>
+(function(){
+  var _audio = document.getElementById('urban-notif-sound');
+  function _unlock(){ if(!_audio)return; _audio.play().then(function(){_audio.pause();_audio.currentTime=0;}).catch(function(){}); }
+  document.addEventListener('click',   _unlock, {once:true});
+  document.addEventListener('touchstart', _unlock, {once:true});
+  window.playNotifSound = function(){
+    if(!_audio)return;
+    _audio.currentTime = 0;
+    _audio.play().catch(function(){});
+  };
+})();
 </script>
 
 </body>

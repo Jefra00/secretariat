@@ -2,7 +2,7 @@
               <div class="mx-auto w-full max-w-screen-xl p-8 py-10 lg:py-16">
                 <div class="md:flex md:justify-between">
                   <div class="mb-8 md:mb-0 md:w-1/3">
-                    <a class="flex items-center gap-4 mb-4" href="accueil.html">
+                    <a class="flex items-center gap-4 mb-4" href="{% url 'accueil' %}">
                       <div class="size-6 text-primary">
                         <svg
                           fill="none"
@@ -39,17 +39,14 @@
                         class="text-text-muted-light dark:text-text-muted-dark font-medium space-y-3"
                       >
                         <li>
-                          <a class="hover:text-primary" href="accueil.html"
+                          <a class="hover:text-primary" href="{% url 'accueil' %}"
                             >Accueil</a
                           >
                         </li>
                         <li>
-                          <a class="hover:text-primary" href="services.html"
-                            >Services</a
-                          >
                         </li>
                         <li>
-                          <a class="hover:text-primary" href="apropo.html"
+                          <a class="hover:text-primary" href="{% url 'apropo' %}"
                             >À propos</a
                           >
                         </li>

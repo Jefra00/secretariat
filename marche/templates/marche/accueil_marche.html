@@ -1,0 +1,324 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Faire le marché — Marché Intelligent{% endblock %}
+
+{% block navbar %}{% include 'base/navbar_marche.html' %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ── -->
+<section class="bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700 text-white relative overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute -top-16 -right-16 w-72 h-72 bg-yellow-400 rounded-full opacity-10 blur-3xl"></div>
+    <div class="absolute -bottom-16 -left-16 w-64 h-64 bg-emerald-300 rounded-full opacity-15 blur-3xl"></div>
+  </div>
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-3xl">🛒</span>
+          <span class="text-xs font-bold uppercase tracking-widest text-emerald-200">Faire le marché</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight mb-2">
+          Produits frais &amp; locaux<br>
+          <span class="text-yellow-300">livrés à Brazzaville</span>
+        </h1>
+        <p class="text-emerald-100 text-sm sm:text-base max-w-md">
+          Achetez directement auprès des vendeurs du marché. Prix transparents, produits du jour.
+        </p>
+      </div>
+    </div>
+
+    <!-- Barre de recherche -->
+    <form method="get" class="mt-8 flex gap-2">
+      <div class="relative flex-1 max-w-2xl">
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </span>
+        <input type="text" name="q" value="{{ q }}" id="search-marche" placeholder="Rechercher un produit, légume, viande…"
+               class="w-full pl-12 pr-4 py-3.5 rounded-xl text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400 shadow-sm"
+               autocomplete="off">
+      </div>
+      <input type="hidden" name="cat" value="{{ cat_slug }}">
+      <button type="submit"
+              class="bg-white text-emerald-700 font-bold px-6 py-3.5 rounded-xl hover:bg-emerald-50 transition shadow-sm text-sm">
+        Rechercher
+      </button>
+    </form>
+  </div>
+</section>
+
+
+<!-- ── Corps principal ── -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="flex flex-col lg:flex-row gap-8">
+
+    <!-- ── Sidebar filtres ── -->
+    <aside class="lg:w-56 flex-shrink-0">
+
+      <!-- Catégories -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4">
+        <h3 class="font-bold text-gray-900 text-sm uppercase tracking-wider mb-4">Catégories</h3>
+
+        <!-- Tout voir (toujours visible) -->
+        <ul class="space-y-1 mb-1">
+          <li>
+            <a href="?{% if q %}q={{ q }}&{% endif %}"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition
+                      {% if not cat_slug %}bg-emerald-50 text-emerald-700{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+              <span class="text-lg">🏪</span> Tout voir
+            </a>
+          </li>
+        </ul>
+
+        <!-- Liste scrollable : 3 catégories visibles, le reste au scroll -->
+        <div class="relative">
+          <ul id="cat-list" class="space-y-1 overflow-y-auto" style="max-height: 124px; scroll-behavior: smooth;">
+            {% for cat in categories %}
+            <li>
+              <a href="?cat={{ cat.slug }}{% if q %}&q={{ q }}{% endif %}"
+                 class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition
+                        {% if cat_slug == cat.slug %}bg-emerald-50 text-emerald-700{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+                <span class="text-lg">{{ cat.emoji }}</span>
+                <span class="flex-1 truncate">{{ cat.nom }}</span>
+                <span class="text-xs text-gray-400 flex-shrink-0">{{ cat.produits.count }}</span>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+          <!-- Dégradé bas pour indiquer qu'il y a plus -->
+          <div id="cat-fade"
+               class="absolute bottom-0 left-0 right-0 h-8 pointer-events-none
+                      bg-gradient-to-t from-white to-transparent rounded-b-xl transition-opacity duration-300">
+          </div>
+        </div>
+
+        <!-- Indicateur scroll -->
+        {% if categories|length > 3 %}
+        <div class="flex items-center justify-center gap-1 mt-2 text-xs text-gray-400">
+          <span class="material-symbols-outlined text-sm">expand_more</span>
+          <span>{{ categories|length|add:"-3" }} de plus</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Filtre ville -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h3 class="font-bold text-gray-900 text-sm uppercase tracking-wider mb-3">Ville</h3>
+        <form method="get">
+          <input type="hidden" name="cat" value="{{ cat_slug }}">
+          <input type="hidden" name="q" value="{{ q }}">
+          <select name="ville" onchange="this.form.submit()"
+                  class="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-gray-50">
+            <option value="">Toutes les villes</option>
+            {% for v in villes %}
+            <option value="{{ v.pk }}" {% if ville_id|stringformat:'s' == v.pk|stringformat:'s' %}selected{% endif %}>
+              {{ v.nom }}
+            </option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+    </aside>
+
+    <!-- ── Grille produits ── -->
+    <main class="flex-1 min-w-0">
+
+      <!-- Résumé -->
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <p class="text-gray-900 font-bold text-lg">
+            {% if q %}Résultats pour « {{ q }} »{% elif cat_slug %}{{ cat_slug|title }}{% else %}Tous les produits{% endif %}
+          </p>
+          <p class="text-gray-400 text-sm">{{ total }} produit{{ total|pluralize }} disponible{{ total|pluralize }}</p>
+        </div>
+      </div>
+
+      {% if produits %}
+      <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+        {% for produit in produits %}
+        {% with img=produit.images.first %}
+        <div class="group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative flex flex-col search-card"
+             data-searchable="{{ produit.nom|lower|escapejs }}{% if produit.categorie %} {{ produit.categorie.nom|lower|escapejs }}{% endif %}">
+
+          <!-- Image (lien vers détail) -->
+          <a href="{% url 'marche:detail_produit' produit.pk %}" class="block relative overflow-hidden aspect-square bg-gradient-to-br from-gray-50 to-gray-100 flex-shrink-0">
+            {% if img %}
+              <img src="{{ img.image.url }}" alt="{{ produit.nom }}"
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            {% elif produit.image %}
+              <img src="{{ produit.image.url }}" alt="{{ produit.nom }}"
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            {% else %}
+              <div class="w-full h-full flex items-center justify-center text-4xl">
+                {{ produit.categorie.emoji|default:'🛒' }}
+              </div>
+            {% endif %}
+
+            <!-- Badges -->
+            {% if produit.stock <= 5 and produit.stock > 0 %}
+              <span class="absolute top-2 left-2 bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                {{ produit.stock }} restant{{ produit.stock|pluralize }}
+              </span>
+            {% elif produit.stock == 0 %}
+              <span class="absolute top-2 left-2 bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                Épuisé
+              </span>
+            {% endif %}
+
+            <!-- Nb images -->
+            {% with nb=produit.images.count %}
+            {% if nb > 1 %}
+              <span class="absolute top-2 right-2 bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                <span class="material-symbols-outlined text-[11px]">photo_library</span> {{ nb }}
+              </span>
+            {% endif %}
+            {% endwith %}
+          </a>
+
+          <!-- Infos -->
+          <div class="p-3 flex flex-col flex-1">
+            <a href="{% url 'marche:detail_produit' produit.pk %}" class="block mb-1">
+              <p class="font-bold text-gray-900 text-sm leading-tight line-clamp-2 hover:text-emerald-600 transition">{{ produit.nom }}</p>
+            </a>
+            <p class="text-xs text-gray-400 mb-2 truncate">{{ produit.vendeur.nom_boutique }}</p>
+
+            <!-- Couleurs disponibles -->
+            {% with couleurs=produit.images.all %}
+            {% if couleurs %}
+              <div class="flex gap-1 mb-2 flex-wrap">
+                {% for ci in couleurs %}
+                  {% if ci.couleur %}
+                    <span class="w-3.5 h-3.5 rounded-full border border-white shadow-sm flex-shrink-0"
+                          style="background:{{ ci.couleur.code_hex|default:'#e5e7eb' }}"
+                          title="{{ ci.couleur.nom }}"></span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            {% endif %}
+            {% endwith %}
+
+            <div class="flex items-center justify-between mt-auto pt-1">
+              <div>
+                {% if produit.is_en_promo %}
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-extrabold text-base text-red-600">{{ produit.prix_actuel|floatformat:0 }}</span>
+                    <span class="text-gray-400 text-xs line-through">{{ produit.prix|floatformat:0 }}</span>
+                    <span class="bg-red-500 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-full">-{{ produit.remise_pct }}%</span>
+                  </div>
+                  <span class="text-gray-400 text-[10px]">{{ produit.devise }}/{{ produit.unite }}{% if produit.promo_fin %} · jusqu'au {{ produit.promo_fin|date:"d/m" }}{% endif %}</span>
+                {% else %}
+                  <span class="text-emerald-600 font-extrabold text-base">{{ produit.prix|floatformat:0 }}</span>
+                  <span class="text-gray-400 text-[11px]"> {{ produit.devise }}/{{ produit.unite }}</span>
+                {% endif %}
+              </div>
+
+              <!-- Bouton panier -->
+              <button
+                onclick="quickAddToCart(this); event.stopPropagation();"
+                data-id="{{ produit.pk }}"
+                data-nom="{{ produit.nom|escapejs }}"
+                data-prix="{{ produit.prix_actuel }}"
+                data-devise="{{ produit.devise }}"
+                data-unite="{{ produit.unite }}"
+                data-vendeur="{{ produit.vendeur.nom_boutique|escapejs }}"
+                data-image="{% if img %}{{ img.image.url }}{% elif produit.image %}{{ produit.image.url }}{% endif %}"
+                data-url="{% url 'marche:detail_produit' produit.pk %}"
+                class="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-500 text-emerald-600 hover:text-white
+                       font-bold px-2.5 py-1.5 rounded-xl text-xs transition-all duration-200 border border-emerald-100
+                       hover:border-emerald-500 hover:shadow-md"
+                title="Ajouter au panier">
+                <span class="material-symbols-outlined text-base cart-ico">add_shopping_cart</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+      </div>
+      <!-- Message JS aucun résultat -->
+      <div id="no-results-msg" style="display:none;"
+           class="flex flex-col items-center justify-center py-16 text-center">
+        <span class="material-symbols-outlined text-5xl text-gray-200 mb-3">search_off</span>
+        <p class="font-bold text-gray-700">Aucun résultat pour votre recherche</p>
+        <p class="text-xs text-gray-400 mt-1">Essayez un autre mot-clé</p>
+      </div>
+
+      {% else %}
+      <!-- État vide -->
+      <div class="flex flex-col items-center justify-center py-24 text-center">
+        <div class="text-6xl mb-4">🛒</div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Aucun produit trouvé</h3>
+        <p class="text-gray-400 text-sm max-w-sm">
+          Revenez bientôt, de nouveaux produits arrivent chaque jour.
+        </p>
+      </div>
+      {% endif %}
+
+    </main>
+  </div>
+</div>
+
+
+<!-- ── Footer marché ── -->
+<footer class="bg-gray-900 text-white py-10 mt-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-xl">🛒</div>
+      <div>
+        <p class="font-extrabold text-white text-sm">Marché Intelligent</p>
+        <p class="text-emerald-400 text-xs">by Secrétariat Pro — Brazzaville</p>
+      </div>
+    </div>
+    <nav class="flex gap-5 text-sm text-gray-400">
+      <a href="{% url 'accueil' %}" class="hover:text-white transition">Accueil</a>
+      <a href="{% url 'marche:accueil_marche' %}" class="hover:text-white transition">Faire le marché</a>
+    </nav>
+    <p class="text-gray-600 text-xs">© 2025 Marché Intelligent · Tous droits réservés</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  const list = document.getElementById('cat-list');
+  const fade = document.getElementById('cat-fade');
+  if (!list || !fade) return;
+  function update() {
+    const atBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 4;
+    fade.style.opacity = atBottom ? '0' : '1';
+  }
+  list.addEventListener('scroll', update);
+  update();
+})();
+</script>
+
+<script>
+// ── Recherche temps réel ──────────────────────────────────────────────────
+(function() {
+  const input = document.getElementById('search-marche');
+  if (!input) return;
+  const noResults = document.getElementById('no-results-msg');
+
+  input.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    const cards = document.querySelectorAll('.search-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const match = !q || card.dataset.searchable.includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    if (noResults) noResults.style.display = visible === 0 && q ? '' : 'none';
+  });
+
+  // Prevent form submit on Enter for instant feedback, but allow it
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') return; // let form submit for full server search
+  });
+})();
+</script>
+
+{% endblock %}

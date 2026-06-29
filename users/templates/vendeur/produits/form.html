@@ -1,0 +1,208 @@
+{% extends "vendeur/base_vendeur.html" %}
+{% block title %}{% if is_modifier %}Modifier — {{ produit.d_nom }}{% else %}Ajouter un produit{% endif %}{% endblock %}
+{% block page_title %}{% if is_modifier %}Modifier le produit{% else %}Ajouter un produit{% endif %}{% endblock %}
+{% block page_subtitle %}
+  {% if section == 'marche' %}Produit de marché
+  {% elif section == 'shopping' %}Article shopping
+  {% elif section == 'perruque' %}Perruque / Extension
+  {% elif section == 'voiture' %}Véhicule à louer
+  {% elif section == 'immobilier' %}Bien immobilier
+  {% elif section == 'quicaillerie' %}Produit quincaillerie
+  {% elif section == 'resto' %}Plat / Menu
+  {% else %}Produit{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+
+  <!-- Indicateur boutique active + section -->
+  <div class="flex items-center gap-3 mb-6 p-4 bg-orange-50 border border-orange-100 rounded-2xl">
+    <span class="text-3xl leading-none">
+      {% if active_boutique %}{{ active_boutique.type_icon }}
+      {% elif section == 'marche' %}🛒
+      {% elif section == 'shopping' %}🛍️
+      {% elif section == 'perruque' %}💇
+      {% elif section == 'voiture' %}🚗
+      {% elif section == 'immobilier' %}🏢
+      {% elif section == 'quicaillerie' %}🔨
+      {% elif section == 'resto' %}🍽️
+      {% else %}🏪{% endif %}
+    </span>
+    <div class="flex-1 min-w-0">
+      <p class="text-xs text-orange-500 uppercase tracking-wide font-semibold leading-tight">
+        {% if boutique %}Boutique{% else %}Section{% endif %}
+      </p>
+      <p class="font-bold text-slate-800 truncate">
+        {% if boutique %}{{ boutique.nom }}
+        {% elif section == 'marche' %}Marché
+        {% elif section == 'shopping' %}Shopping
+        {% elif section == 'perruque' %}Perruque & Beauté
+        {% elif section == 'voiture' %}Location Voiture
+        {% elif section == 'immobilier' %}Immobilier
+        {% elif section == 'quicaillerie' %}Quincaillerie
+        {% elif section == 'resto' %}Restaurant
+        {% else %}{{ section }}{% endif %}
+      </p>
+      {% if boutique %}
+      <p class="text-[11px] text-orange-400 mt-0.5">{{ boutique.get_type_commerce_display }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Lien pour changer de boutique -->
+    {% if boutiques_list|length > 1 %}
+    <div class="relative flex-shrink-0" id="formBoutiqueSwitcher">
+      <button type="button" onclick="toggleFormBoutiqueSwitcher(event)"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-orange-200
+                     text-xs font-semibold text-orange-600 hover:bg-orange-100 transition-colors">
+        <span class="material-symbols-outlined text-sm">swap_horiz</span>
+        Changer
+      </button>
+      <div id="formBoutiqueSwitcherMenu"
+           class="hidden absolute right-0 top-full mt-1.5 bg-white rounded-xl border border-slate-100
+                  shadow-xl z-50 overflow-hidden min-w-48">
+        <div class="px-3 pt-2 pb-1">
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Choisir une boutique</p>
+        </div>
+        <div class="divide-y divide-slate-50 max-h-44 overflow-y-auto">
+          {% for b in boutiques_list %}
+          <a href="{% url 'vendeur_switch_boutique' b.pk %}?next={% url 'vendeur_ajouter_produit' %}"
+             class="flex items-center gap-2.5 px-3 py-2.5 hover:bg-orange-50 transition-colors
+                    {% if boutique and b.pk == boutique.pk %}bg-orange-50{% endif %}">
+            <span class="text-base leading-none">{{ b.type_icon }}</span>
+            <div class="min-w-0">
+              <p class="text-xs font-semibold text-slate-700 truncate">{{ b.nom }}</p>
+              <p class="text-[10px] text-slate-400">{{ b.get_type_commerce_display }}</p>
+            </div>
+            {% if boutique and b.pk == boutique.pk %}
+            <span class="material-symbols-outlined text-orange-500 text-sm ml-auto">check</span>
+            {% endif %}
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 lg:p-8">
+
+    {% if form.non_field_errors %}
+    <div class="mb-5 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+      {% for err in form.non_field_errors %}<p class="text-red-600 text-sm">⚠️ {{ err }}</p>{% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="space-y-5">
+      {% csrf_token %}
+      {% if boutique %}<input type="hidden" name="boutique" value="{{ boutique.pk }}">{% endif %}
+
+      <!-- ── Sélecteur boutique (admin uniquement) ──────────────────────────── -->
+      {% if is_admin and all_boutiques %}
+      <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+        <label class="block text-sm font-bold text-blue-800 mb-2">
+          🔧 Admin — Sélectionner la boutique destinataire
+        </label>
+        <select name="boutique_admin" class="w-full rounded-lg border border-blue-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+          <option value="">— Choisir une boutique —</option>
+          {% for b in all_boutiques %}
+          <option value="{{ b.pk }}" {% if boutique and b.pk == boutique.pk %}selected{% endif %}>
+            {{ b.nom }} ({{ b.user.get_full_name }} — {{ b.get_type_commerce_display }})
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+
+      <!-- ── Champs du formulaire ────────────────────────────────────────────── -->
+      {% for field in form %}
+
+        {% if field.field.widget.input_type == 'checkbox' %}
+        <!-- Checkbox -->
+        <div class="flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-3">
+          {{ field }}
+          <label for="{{ field.id_for_label }}" class="text-sm font-medium text-slate-700 cursor-pointer">
+            {{ field.label }}
+          </label>
+          {% if field.errors %}<p class="text-red-500 text-xs ml-2">{{ field.errors.0 }}</p>{% endif %}
+        </div>
+
+        {% elif 'description' in field.name or field.field.widget.attrs.rows %}
+        <!-- Textarea pleine largeur -->
+        <div>
+          <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">
+            {{ field.label }}{% if field.field.required %} <span class="text-red-400">*</span>{% endif %}
+          </label>
+          {{ field }}
+          {% if field.errors %}<p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>{% endif %}
+          {% if field.help_text %}<p class="text-slate-400 text-xs mt-1">{{ field.help_text }}</p>{% endif %}
+        </div>
+
+        {% elif field.field.widget.input_type == 'file' %}
+        <!-- Upload image -->
+        <div>
+          <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">
+            📷 {{ field.label }}{% if field.field.required %} <span class="text-red-400">*</span>{% endif %}
+          </label>
+          <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:border-orange-300 transition-colors">
+            {{ field }}
+            <p class="text-xs text-slate-400 mt-2">JPG, PNG, WEBP — max 5 Mo</p>
+          </div>
+          {% if field.errors %}<p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>{% endif %}
+        </div>
+
+        {% else %}
+        <!-- Champ standard dans grille 2 colonnes -->
+        <div>
+          <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">
+            {{ field.label }}{% if field.field.required %} <span class="text-red-400">*</span>{% endif %}
+          </label>
+          {{ field }}
+          {% if field.errors %}<p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>{% endif %}
+          {% if field.help_text %}<p class="text-slate-400 text-xs mt-1">{{ field.help_text }}</p>{% endif %}
+        </div>
+        {% endif %}
+
+      {% endfor %}
+
+      <!-- ── Actions ─────────────────────────────────────────────────────────── -->
+      <div class="flex items-center justify-between pt-5 border-t border-slate-100 mt-6">
+        {% if is_modifier %}
+        <a href="{% url 'vendeur_detail_produit' section pk %}"
+           class="text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors">
+          ← Retour à la fiche
+        </a>
+        <button type="submit"
+                class="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-colors shadow shadow-orange-200">
+          ✓ Enregistrer les modifications
+        </button>
+        {% else %}
+        <a href="{% url 'vendeur_produits' %}"
+           class="text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors">
+          ← Retour à la liste
+        </a>
+        <button type="submit"
+                class="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-colors shadow shadow-orange-200">
+          ✓ Enregistrer et ajouter des photos →
+        </button>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function toggleFormBoutiqueSwitcher(e) {
+  e.stopPropagation();
+  document.getElementById('formBoutiqueSwitcherMenu')?.classList.toggle('hidden');
+}
+document.addEventListener('click', function(e) {
+  const sw = document.getElementById('formBoutiqueSwitcher');
+  if (sw && !sw.contains(e.target)) {
+    document.getElementById('formBoutiqueSwitcherMenu')?.classList.add('hidden');
+  }
+});
+</script>
+{% endblock %}

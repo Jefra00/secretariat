@@ -1,30 +1,69 @@
 {% extends "base/base.html" %}
-{% block title %}Supprimer Commande{% endblock %}
+{% block title %}Supprimer la commande #{{ order.id }}{% endblock %}
 
 {% block content %}
+<div class="min-h-screen bg-gradient-to-br from-red-50 via-white to-gray-50 flex items-center justify-center p-6">
+  <div class="w-full max-w-md">
 
-<div class="max-w-lg mx-auto py-10">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
-    <h1 class="text-2xl font-bold mb-4 text-red-600">
-        Supprimer Commande #{{ order.id }}
-    </h1>
-
-    <p class="mb-6 text-slate-600 dark:text-slate-300">
-        Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.
-    </p>
-
-    <form method="POST">
-        {% csrf_token %}
-        <div class="flex gap-4">
-            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg">
-                Supprimer
-            </button>
-            <a href="{% url 'order_detail' order.id %}" class="px-4 py-2 bg-slate-300 rounded-lg">
-                Annuler
-            </a>
+      <!-- Header danger -->
+      <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-5 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
         </div>
-    </form>
+        <div>
+          <h1 class="text-white font-extrabold text-lg">Supprimer la commande</h1>
+          <p class="text-red-100 text-sm">Commande #{{ order.id }}</p>
+        </div>
+      </div>
 
+      <!-- Corps -->
+      <div class="px-6 py-6">
+        <!-- Alerte -->
+        <div class="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <div>
+            <p class="text-red-800 font-bold text-sm">Action irréversible</p>
+            <p class="text-red-600 text-sm mt-0.5">
+              La suppression de cette commande est permanente et ne peut pas être annulée.
+            </p>
+          </div>
+        </div>
+
+        <!-- Infos commande -->
+        <div class="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
+          <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-2">Résumé</p>
+          <p class="text-sm font-semibold text-gray-800">Commande #{{ order.id }}</p>
+          {% if order.delivery_address %}
+          <p class="text-xs text-gray-500 mt-1">📍 {{ order.delivery_address }}</p>
+          {% endif %}
+          <p class="text-lg font-extrabold text-gray-900 mt-2">{{ order.total|floatformat:0 }} FCFA</p>
+        </div>
+
+        <!-- Boutons -->
+        <form method="POST">
+          {% csrf_token %}
+          <div class="flex gap-3">
+            <button type="submit"
+              class="flex-1 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl shadow-sm shadow-red-200 hover:opacity-90 transition">
+              Confirmer la suppression
+            </button>
+            <a href="{% url 'order_detail' order.id %}"
+              class="px-5 py-3 rounded-xl border border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition flex items-center">
+              Annuler
+            </a>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
 </div>
-
 {% endblock %}

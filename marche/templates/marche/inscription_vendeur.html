@@ -1,0 +1,439 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Créer ma boutique — Marché Intelligent{% endblock %}
+
+{% block navbar %}{% include 'base/navbar_marche.html' %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  .field-wrap input,
+  .field-wrap select,
+  .field-wrap textarea {
+    display: block; width: 100%;
+    padding: .65rem .875rem .65rem 2.5rem;
+    border: 1.5px solid #e5e7eb; border-radius: .75rem;
+    font-size: .875rem; background: #f9fafb;
+    transition: border-color .15s, box-shadow .15s; outline: none;
+  }
+  .field-wrap select,
+  .field-wrap textarea { padding-left: .875rem; }
+  .field-wrap input:focus,
+  .field-wrap select:focus,
+  .field-wrap textarea:focus {
+    border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.15); background:#fff;
+  }
+  .field-wrap input.error,
+  .field-wrap select.error { border-color:#ef4444; }
+  .field-icon {
+    position:absolute; left:.75rem; top:50%; transform:translateY(-50%);
+    color:#9ca3af; font-size:1rem; pointer-events:none;
+  }
+  select:disabled { opacity:.5; cursor:not-allowed; }
+  #map-mini { width:100%; height:280px; border-radius:1rem; border:1.5px solid #e5e7eb; }
+  .map-btn {
+    display:flex; align-items:center; gap:.4rem;
+    padding:.5rem 1rem; border-radius:.75rem; font-size:.8rem; font-weight:700;
+    cursor:pointer; transition:.15s; border:none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex">
+
+  <!-- ── Colonne gauche branding ── -->
+  <div class="hidden lg:flex lg:w-96 xl:w-[420px] flex-col justify-between
+              bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700 text-white p-10
+              flex-shrink-0 relative overflow-hidden">
+    <div class="absolute -top-20 -right-20 w-72 h-72 bg-yellow-400 rounded-full opacity-10 blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-16 -left-16 w-64 h-64 bg-emerald-300 rounded-full opacity-15 blur-3xl pointer-events-none"></div>
+
+    <div class="relative z-10">
+      <a href="{% url 'accueil' %}" class="flex items-center gap-3 mb-12">
+        <div class="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-2xl">🛒</div>
+        <div>
+          <p class="font-extrabold text-white text-lg leading-tight">Marché Intelligent</p>
+          <p class="text-emerald-200 text-xs">by Secrétariat Pro</p>
+        </div>
+      </a>
+      <h2 class="text-3xl font-extrabold leading-tight mb-4">
+        Vendez vos produits<br><span class="text-yellow-300">sur la carte</span>
+      </h2>
+      <p class="text-emerald-100 text-sm mb-8 leading-relaxed">
+        Votre boutique sera géolocalisée avec précision grâce au système PostGIS.
+        Les clients pourront vous trouver directement sur la carte.
+      </p>
+      <ul class="space-y-3 mb-10">
+        <li class="flex items-center gap-3 text-sm"><span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs">✓</span>Boutique en ligne gratuite</li>
+        <li class="flex items-center gap-3 text-sm"><span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs">✓</span>Position GPS précise</li>
+        <li class="flex items-center gap-3 text-sm"><span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs">✓</span>Clients à proximité</li>
+        <li class="flex items-center gap-3 text-sm"><span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs">✓</span>Visibilité sur toute la ville</li>
+      </ul>
+    </div>
+    <p class="relative z-10 text-emerald-300 text-xs">© 2025 Marché Intelligent · Brazzaville, Congo</p>
+  </div>
+
+  <!-- ── Colonne droite formulaire ── -->
+  <div class="flex-1 overflow-y-auto">
+    <div class="max-w-2xl mx-auto px-6 py-10">
+
+      <!-- Mobile logo -->
+      <div class="lg:hidden flex items-center gap-3 mb-8">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-xl">🛒</div>
+        <div>
+          <p class="font-extrabold text-gray-900 text-base">Marché Intelligent</p>
+          <p class="text-gray-400 text-xs">Créez votre boutique</p>
+        </div>
+      </div>
+
+      <div class="mb-8">
+        <h1 class="text-2xl font-extrabold text-gray-900 mb-1">Créer ma boutique</h1>
+        <p class="text-gray-400 text-sm">Inscription gratuite · votre position sera enregistrée sur la carte.</p>
+      </div>
+
+      {% for msg in messages %}
+      <div class="mb-4 px-4 py-3 rounded-xl text-sm font-medium border
+                  {% if msg.tags == 'error' %}bg-red-50 text-red-700 border-red-100{% else %}bg-emerald-50 text-emerald-700 border-emerald-100{% endif %}">
+        {{ msg }}
+      </div>
+      {% endfor %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- ══ 1. Votre compte ══ -->
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-extrabold text-sm">1</div>
+            <h2 class="font-extrabold text-gray-900 text-base">Votre compte</h2>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-1.5">Prénom *</label>
+              <div class="field-wrap relative">
+                <span class="material-symbols-outlined field-icon">person</span>
+                <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" placeholder="Prénom" required class="{{ form.first_name.errors|yesno:'error,' }}">
+              </div>
+              {% for e in form.first_name.errors %}<p class="text-xs text-red-500 mt-1">{{ e }}</p>{% endfor %}
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-1.5">Nom *</label>
+              <div class="field-wrap relative">
+                <span class="material-symbols-outlined field-icon">badge</span>
+                <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" placeholder="Nom" required class="{{ form.last_name.errors|yesno:'error,' }}">
+              </div>
+              {% for e in form.last_name.errors %}<p class="text-xs text-red-500 mt-1">{{ e }}</p>{% endfor %}
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-1.5">Téléphone *</label>
+              <div class="field-wrap relative">
+                <span class="material-symbols-outlined field-icon">phone</span>
+                <input type="tel" name="telephone" value="{{ form.telephone.value|default:'' }}" placeholder="+242 06 XXX XX XX" required class="{{ form.telephone.errors|yesno:'error,' }}">
+              </div>
+              {% for e in form.telephone.errors %}<p class="text-xs text-red-500 mt-1">{{ e }}</p>{% endfor %}
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-1.5">Email</label>
+              <div class="field-wrap relative">
+                <span class="material-symbols-outlined field-icon">mail</span>
+                <input type="email" name="email" value="{{ form.email.value|default:'' }}" placeholder="exemple@mail.com" class="{{ form.email.errors|yesno:'error,' }}">
+              </div>
+              {% for e in form.email.errors %}<p class="text-xs text-red-500 mt-1">{{ e }}</p>{% endfor %}
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-gray-700 mb-1.5">Mot de passe *</label>
+              <div class="field-wrap relative">
+                <span class="material-symbols-outlined field-icon">lock</span>
+                <input type="password" name="password" placeholder="Min. 8 caractères" required class="{{ form.password.errors|yesno:'error,' }}">
+              </div>
+              {% for e in form.password.errors %}<p class="text-xs text-red-500 mt-1">{{ e }}</p>{% endfor %}
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ══ 2. Votre boutique ══ -->
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-extrabold text-sm">2</div>
+            <h2 class="font-extrabold text-gray-900 text-base">Votre boutique</h2>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-gray-700 mb-1.5">Nom de la boutique *</label>
+              <div class="field-wrap relative">
+                <span class="material-symbols-outlined field-icon">storefront</span>
+                <input type="text" name="nom_boutique" value="{{ form.nom_boutique.value|default:'' }}" placeholder="Ex : Chez Mama Céleste" required class="{{ form.nom_boutique.errors|yesno:'error,' }}">
+              </div>
+              {% for e in form.nom_boutique.errors %}<p class="text-xs text-red-500 mt-1">{{ e }}</p>{% endfor %}
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-gray-700 mb-1.5">Type de commerce *</label>
+              <div class="field-wrap">
+                <select name="type_commerce" required>
+                  {% for val, lbl in form.fields.type_commerce.choices %}
+                  <option value="{{ val }}" {% if form.type_commerce.value == val %}selected{% endif %}>{{ lbl }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ══ 3. Localisation ══ -->
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-extrabold text-sm">3</div>
+            <h2 class="font-extrabold text-gray-900 text-base">Localisation</h2>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <!-- Ville -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-1.5">Ville *</label>
+              <div class="field-wrap">
+                <select name="ville" id="sel-ville" required class="{{ form.ville.errors|yesno:'error,' }}">
+                  <option value="">— Choisir une ville —</option>
+                  {% for ville_obj in form.fields.ville.queryset %}
+                  <option value="{{ ville_obj.pk }}" {% if form.ville.value|stringformat:'s' == ville_obj.pk|stringformat:'s' %}selected{% endif %}>
+                    {{ ville_obj.nom }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+              {% for e in form.ville.errors %}<p class="text-xs text-red-500 mt-1">{{ e }}</p>{% endfor %}
+            </div>
+
+            <!-- Commune -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-1.5">Commune</label>
+              <div class="field-wrap">
+                <select name="commune" id="sel-commune" class="{{ form.commune.errors|yesno:'error,' }}">
+                  <option value="">— Choisir une commune —</option>
+                  {% for com in form.fields.commune.queryset %}
+                  <option value="{{ com.pk }}" {% if form.commune.value|stringformat:'s' == com.pk|stringformat:'s' %}selected{% endif %}>{{ com.nom }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              {% for e in form.commune.errors %}<p class="text-xs text-red-500 mt-1">{{ e }}</p>{% endfor %}
+            </div>
+
+            <!-- Quartier -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-1.5">Quartier</label>
+              <div class="field-wrap">
+                <select name="quartier" id="sel-quartier" class="{{ form.quartier.errors|yesno:'error,' }}">
+                  <option value="">— Choisir un quartier —</option>
+                  {% for q in form.fields.quartier.queryset %}
+                  <option value="{{ q.pk }}" {% if form.quartier.value|stringformat:'s' == q.pk|stringformat:'s' %}selected{% endif %}>{{ q.nom }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              {% for e in form.quartier.errors %}<p class="text-xs text-red-500 mt-1">{{ e }}</p>{% endfor %}
+            </div>
+
+            <!-- Stand -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-1.5">Stand / Numéro boutique</label>
+              <div class="field-wrap relative">
+                <span class="material-symbols-outlined field-icon">tag</span>
+                <input type="text" name="stand" value="{{ form.stand.value|default:'' }}" placeholder="Ex : Stand B12">
+              </div>
+            </div>
+
+            <!-- Nom marché libre -->
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-gray-700 mb-1.5">Nom du marché (si non listé)</label>
+              <div class="field-wrap relative">
+                <span class="material-symbols-outlined field-icon">shopping_basket</span>
+                <input type="text" name="nom_marche" value="{{ form.nom_marche.value|default:'' }}" placeholder="Ex : Marché Total, Moungali…">
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ── Carte de position ── -->
+          <div class="mt-5 bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-5 pt-5 pb-3 flex items-center justify-between">
+              <div>
+                <p class="font-bold text-gray-900 text-sm flex items-center gap-2">
+                  <span class="material-symbols-outlined text-emerald-500 text-base">my_location</span>
+                  Position GPS de votre boutique
+                </p>
+                <p class="text-xs text-gray-400 mt-0.5">Cliquez sur la carte ou utilisez votre GPS</p>
+              </div>
+              <div class="flex gap-2">
+                <button type="button" onclick="obtenirGPS()" id="btn-gps"
+                        class="map-btn bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+                  <span class="material-symbols-outlined text-sm">gps_fixed</span>
+                  <span id="btn-gps-label">GPS</span>
+                </button>
+                <button type="button" onclick="effacerPoint()"
+                        class="map-btn bg-gray-50 text-gray-500 hover:bg-gray-100">
+                  <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="px-5 pb-2">
+              <div id="coords-display" class="hidden flex items-center gap-3 text-xs font-mono bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-lg px-3 py-1.5 mb-2">
+                <span class="material-symbols-outlined text-sm">location_on</span>
+                <span id="coords-text">—</span>
+              </div>
+            </div>
+
+            <div id="map-mini"></div>
+
+            <!-- Champ caché position GeoJSON -->
+            <input type="hidden" name="position_json" id="position_json" value="{{ form.position_json.value|default:'' }}">
+          </div>
+
+        </div>
+
+        <!-- ══ Soumettre ══ -->
+        <button type="submit"
+                class="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600
+                       text-white font-extrabold py-4 rounded-2xl text-base shadow-lg transition">
+          <span class="material-symbols-outlined">store</span>
+          Créer ma boutique gratuitement
+        </button>
+        <p class="text-center text-xs text-gray-400 mt-4">
+          Vous avez déjà un compte ?
+          <a href="{% url 'connexion_client' %}" class="text-emerald-600 font-semibold hover:underline">Se connecter</a>
+        </p>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── URLs API cascade ──────────────────────────────────────────────────────────
+const API_COMMUNES  = "{% url 'location:api_communes' %}";
+const API_QUARTIERS = "{% url 'location:api_quartiers' %}";
+
+// ── Carte mini ────────────────────────────────────────────────────────────────
+const map = L.map('map-mini', { zoomControl: true }).setView([-4.2634, 15.2429], 12);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap', maxZoom: 20
+}).addTo(map);
+
+const satellite = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  { attribution: '© Esri', maxZoom: 20 }
+);
+L.control.layers({ '🗺️ Plan': map._layers[Object.keys(map._layers)[0]], '🛰️ Satellite': satellite }, {}, { position: 'topright' }).addTo(map);
+
+const markerIcon = L.divIcon({
+  html: `<div style="width:18px;height:18px;background:#10b981;border:3px solid white;
+                      border-radius:50%;box-shadow:0 2px 8px rgba(16,185,129,.5)"></div>`,
+  iconSize: [18,18], iconAnchor: [9,9]
+});
+let markerPoint = null;
+
+function placerPoint(latlng) {
+  if (markerPoint) map.removeLayer(markerPoint);
+  markerPoint = L.marker(latlng, { icon: markerIcon, draggable: true }).addTo(map);
+  markerPoint.on('dragend', () => mettreAJourCoords(markerPoint.getLatLng()));
+  mettreAJourCoords(latlng);
+}
+
+function mettreAJourCoords(latlng) {
+  document.getElementById('position_json').value = JSON.stringify({
+    type: 'Point', coordinates: [latlng.lng, latlng.lat]
+  });
+  const txt = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+  document.getElementById('coords-text').textContent = txt;
+  document.getElementById('coords-display').classList.remove('hidden');
+  document.getElementById('coords-display').classList.add('flex');
+}
+
+function effacerPoint() {
+  if (markerPoint) { map.removeLayer(markerPoint); markerPoint = null; }
+  document.getElementById('position_json').value = '';
+  document.getElementById('coords-display').classList.add('hidden');
+  document.getElementById('coords-display').classList.remove('flex');
+}
+
+map.on('click', e => placerPoint(e.latlng));
+
+function obtenirGPS() {
+  if (!navigator.geolocation) { alert('GPS non disponible.'); return; }
+  const lbl = document.getElementById('btn-gps-label');
+  lbl.textContent = '…';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const latlng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      placerPoint(latlng);
+      map.setView(latlng, 16);
+      lbl.textContent = 'GPS';
+    },
+    () => { alert("Impossible d'obtenir votre position."); lbl.textContent = 'GPS'; },
+    { enableHighAccuracy: true }
+  );
+}
+
+// Charger position existante (si édition)
+const posInit = document.getElementById('position_json').value;
+if (posInit) {
+  try {
+    const g = JSON.parse(posInit);
+    placerPoint({ lat: g.coordinates[1], lng: g.coordinates[0] });
+    map.setView([g.coordinates[1], g.coordinates[0]], 15);
+  } catch(e) {}
+}
+
+// ── Dropdowns en cascade ───────────────────────────────────────────────────────
+function remplirSelect(sel, data, placeholder) {
+  sel.innerHTML = `<option value="">${placeholder}</option>`;
+  data.forEach(item => {
+    const opt = document.createElement('option');
+    opt.value = item.id; opt.textContent = item.nom;
+    sel.appendChild(opt);
+  });
+  sel.disabled = data.length === 0;
+}
+
+const selVille    = document.getElementById('sel-ville');
+const selCommune  = document.getElementById('sel-commune');
+const selQuartier = document.getElementById('sel-quartier');
+
+selVille.addEventListener('change', () => {
+  const vId = selVille.value;
+  selCommune.innerHTML  = '<option value="">Chargement…</option>';
+  selQuartier.innerHTML = '<option value="">— Quartier —</option>';
+  selQuartier.disabled  = true;
+  if (!vId) { remplirSelect(selCommune, [], '— Commune —'); return; }
+  fetch(`${API_COMMUNES}?ville_id=${vId}`)
+    .then(r => r.json())
+    .then(data => remplirSelect(selCommune, data, '— Choisir une commune —'));
+});
+
+selCommune.addEventListener('change', () => {
+  const cId = selCommune.value;
+  selQuartier.innerHTML = '<option value="">Chargement…</option>';
+  if (!cId) { remplirSelect(selQuartier, [], '— Quartier —'); return; }
+  fetch(`${API_QUARTIERS}?commune_id=${cId}`)
+    .then(r => r.json())
+    .then(data => remplirSelect(selQuartier, data, '— Choisir un quartier —'));
+});
+
+// Empêcher le scroll map d'intercepter le scroll page
+map.scrollWheelZoom.disable();
+document.getElementById('map-mini').addEventListener('mouseenter', () => map.scrollWheelZoom.enable());
+document.getElementById('map-mini').addEventListener('mouseleave', () => map.scrollWheelZoom.disable());
+</script>
+{% endblock %}

@@ -1,0 +1,258 @@
+{% extends 'client/base_client.html' %}
+{% block title %}Mes commandes{% endblock %}
+{% block page_title %}Mes commandes{% endblock %}
+{% block page_subtitle %}Historique de toutes vos commandes{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'accueil' %}"
+   class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white
+          font-bold text-xs px-4 py-2 rounded-xl transition shadow-sm">
+  <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+  Nouvelle commande
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50">
+
+  <!-- Filtres (dans une barre sous le header) -->
+  <div class="bg-white border-b border-gray-100 px-4 sm:px-6 lg:px-8 py-4">
+    <div>
+
+      <!-- Filtres -->
+      <form method="get" class="flex flex-wrap gap-3">
+        <select name="section"
+                class="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
+          <option value="">Toutes les sections</option>
+          {% for val, label in sections %}
+          <option value="{{ val }}" {% if section_filter == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="statut"
+                class="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
+          <option value="">Tous les statuts</option>
+          {% for val, label in statuts %}
+          <option value="{{ val }}" {% if statut_filter == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+
+        <button type="submit"
+                class="text-sm bg-gray-900 hover:bg-gray-700 text-white font-bold px-4 py-2 rounded-xl transition">
+          Filtrer
+        </button>
+        {% if statut_filter or section_filter %}
+        <a href="{% url 'client_commandes' %}"
+           class="text-sm text-gray-500 hover:text-gray-700 font-medium px-4 py-2 rounded-xl hover:bg-gray-100 transition flex items-center gap-1">
+          <span class="material-symbols-outlined text-base">close</span>
+          Effacer
+        </a>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    {% if paiements %}
+
+    <!-- Statistiques rapides -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
+        <p class="text-xl font-extrabold text-gray-900">{{ paiements.count }}</p>
+        <p class="text-xs text-gray-400 mt-0.5">Total</p>
+      </div>
+      <div class="bg-yellow-50 rounded-2xl border border-yellow-100 p-4 text-center">
+        <p class="text-xl font-extrabold text-yellow-600">
+          {{ paiements|dictsort:"statut"|length }}
+        </p>
+        <p class="text-xs text-yellow-500 mt-0.5">En attente</p>
+      </div>
+      <div class="bg-emerald-50 rounded-2xl border border-emerald-100 p-4 text-center">
+        <p class="text-xl font-extrabold text-emerald-600">
+          {% for p in paiements %}{% if p.statut == 'valide' %}✓{% endif %}{% endfor %}
+        </p>
+        <p class="text-xs text-emerald-500 mt-0.5">Validées</p>
+      </div>
+      <div class="bg-blue-50 rounded-2xl border border-blue-100 p-4 text-center">
+        <p class="text-xl font-extrabold text-blue-600">
+          {% with total=0 %}FCFA{% endwith %}
+        </p>
+        <p class="text-xs text-blue-500 mt-0.5">Dépensés</p>
+      </div>
+    </div>
+
+    <!-- Liste commandes -->
+    <div class="space-y-4">
+      {% for paiement in paiements %}
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md
+                  hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group">
+
+        <!-- Corps cliquable vers le détail -->
+        <a href="{% url 'client_commande_detail' paiement.pk %}" class="block">
+          <div class="p-5 sm:p-6">
+            <div class="flex items-start justify-between gap-4">
+
+              <!-- Icône section -->
+              <div class="flex items-center gap-4 flex-1 min-w-0">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0
+                  {% if paiement.section == 'marche' %}bg-emerald-100
+                  {% elif paiement.section == 'quicaillerie' %}bg-slate-100
+                  {% elif paiement.section == 'shopping' %}bg-pink-100
+                  {% elif paiement.section == 'perruque' %}bg-purple-100
+                  {% elif paiement.section == 'voiture' %}bg-blue-100
+                  {% elif paiement.section == 'immobilier' %}bg-orange-100
+                  {% elif paiement.section == 'resto' %}bg-red-100
+                  {% else %}bg-gray-100{% endif %}">
+                  <span class="material-symbols-outlined text-xl
+                    {% if paiement.section == 'marche' %}text-emerald-600
+                    {% elif paiement.section == 'quicaillerie' %}text-slate-600
+                    {% elif paiement.section == 'shopping' %}text-pink-600
+                    {% elif paiement.section == 'perruque' %}text-purple-600
+                    {% elif paiement.section == 'voiture' %}text-blue-600
+                    {% elif paiement.section == 'immobilier' %}text-orange-600
+                    {% elif paiement.section == 'resto' %}text-red-600
+                    {% else %}text-gray-500{% endif %}">
+                    {% if paiement.section == 'marche' %}storefront
+                    {% elif paiement.section == 'quicaillerie' %}hardware
+                    {% elif paiement.section == 'shopping' %}shopping_bag
+                    {% elif paiement.section == 'perruque' %}face_retouching_natural
+                    {% elif paiement.section == 'voiture' %}directions_car
+                    {% elif paiement.section == 'immobilier' %}apartment
+                    {% elif paiement.section == 'resto' %}restaurant
+                    {% else %}receipt{% endif %}
+                  </span>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 mb-0.5">
+                    <p class="font-bold text-gray-900 text-sm">{{ paiement.get_section_display }}</p>
+                    <span class="text-gray-300 text-xs">·</span>
+                    <p class="text-gray-400 text-xs">#{{ paiement.pk }}</p>
+                  </div>
+                  <p class="text-xs text-gray-400">{{ paiement.cree_le|date:"d F Y à H:i" }}</p>
+                  <div class="flex items-center gap-3 mt-2">
+                    <span class="text-xs font-medium text-gray-500 flex items-center gap-1">
+                      <span class="material-symbols-outlined text-xs">
+                        {% if paiement.mode_livraison == 'livraison' %}local_shipping{% else %}storefront{% endif %}
+                      </span>
+                      {{ paiement.get_mode_livraison_display }}
+                    </span>
+                    <span class="text-gray-200">·</span>
+                    <span class="text-xs font-medium text-gray-500">{{ paiement.get_methode_display }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Montant + statut -->
+              <div class="text-right flex-shrink-0">
+                <p class="text-lg font-extrabold text-gray-900">{{ paiement.montant_total|floatformat:0 }}</p>
+                <p class="text-xs text-gray-400">FCFA</p>
+                <span class="mt-2 inline-block text-xs font-bold px-2.5 py-1 rounded-full
+                  {% if paiement.statut == 'valide' %}bg-emerald-100 text-emerald-700
+                  {% elif paiement.statut == 'en_attente' %}bg-yellow-100 text-yellow-700
+                  {% elif paiement.statut == 'echoue' %}bg-red-100 text-red-700
+                  {% elif paiement.statut == 'rembourse' %}bg-blue-100 text-blue-700
+                  {% else %}bg-gray-100 text-gray-600{% endif %}">
+                  {{ paiement.get_statut_display }}
+                </span>
+              </div>
+
+            </div>
+
+            <!-- Quartier livraison si dispo -->
+            {% if paiement.quartier_livraison %}
+            <div class="mt-3 pt-3 border-t border-gray-50 flex items-center gap-1.5 text-xs text-gray-400">
+              <span class="material-symbols-outlined text-xs">location_on</span>
+              {{ paiement.quartier_livraison }}{% if paiement.adresse_livraison %} — {{ paiement.adresse_livraison|truncatechars:60 }}{% endif %}
+            </div>
+            {% endif %}
+          </div>
+        </a>
+
+        <!-- Bannière "En route" si livreur actif -->
+        {% with liv=paiement.livraison %}
+        {% if liv and liv.statut in 'accepte,en_recuperation,en_route' %}
+        <div class="mx-5 mb-3 flex items-center justify-between gap-3
+                    bg-orange-50 border border-orange-200 rounded-xl px-4 py-2.5">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="relative flex-shrink-0">
+              <span class="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full
+                           {% if liv.statut == 'en_route' %}bg-orange-400{% else %}bg-blue-400{% endif %}
+                           opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5
+                           {% if liv.statut == 'en_route' %}bg-orange-500{% else %}bg-blue-500{% endif %}">
+              </span>
+            </span>
+            <div class="min-w-0">
+              {% if liv.statut == 'en_route' %}
+              <p class="text-xs font-bold text-orange-700">En route vers toi !</p>
+              <p class="text-xs text-orange-500 truncate">{{ liv.livreur.get_full_name }}</p>
+              {% elif liv.statut == 'en_recuperation' %}
+              <p class="text-xs font-bold text-blue-700">Le livreur récupère ta commande</p>
+              <p class="text-xs text-blue-500 truncate">{{ liv.livreur.get_full_name }}</p>
+              {% else %}
+              <p class="text-xs font-bold text-slate-700">Livreur assigné</p>
+              <p class="text-xs text-slate-500 truncate">{{ liv.livreur.get_full_name }}</p>
+              {% endif %}
+            </div>
+          </div>
+          <a href="{% url 'suivi_livraison' paiement.pk %}"
+             class="flex-shrink-0 inline-flex items-center gap-1 text-xs font-bold
+                    text-orange-700 bg-orange-100 hover:bg-orange-200 px-3 py-1.5 rounded-lg transition">
+            <span class="material-symbols-outlined text-sm">map</span>
+            Carte
+          </a>
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Barre d'actions -->
+        <div class="px-5 pb-4 flex items-center justify-between gap-3 border-t border-gray-50 pt-3">
+          <a href="{% url 'client_commande_detail' paiement.pk %}"
+             class="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 font-medium transition">
+            <span class="material-symbols-outlined text-sm">receipt_long</span>
+            Voir le détail
+          </a>
+          {% if paiement.mode_livraison == 'livraison' %}
+          <a href="{% url 'suivi_livraison' paiement.pk %}"
+             class="inline-flex items-center gap-1.5 text-xs font-bold text-white
+                    bg-emerald-500 hover:bg-emerald-600 px-3.5 py-1.5 rounded-xl transition shadow-sm">
+            <span class="material-symbols-outlined text-sm">local_shipping</span>
+            Suivre la commande
+          </a>
+          {% endif %}
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- État vide -->
+    <div class="text-center py-24">
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 mb-5">
+        <span class="material-symbols-outlined text-4xl text-gray-300">receipt_long</span>
+      </div>
+      <h2 class="text-xl font-extrabold text-gray-800 mb-2">
+        {% if statut_filter or section_filter %}Aucune commande trouvée{% else %}Vous n'avez pas encore commandé{% endif %}
+      </h2>
+      <p class="text-gray-400 text-sm mb-8">
+        {% if statut_filter or section_filter %}
+          Essayez de modifier les filtres.
+        {% else %}
+          Explorez nos sections et passez votre première commande !
+        {% endif %}
+      </p>
+      <a href="{% url 'accueil' %}"
+         class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white
+                font-bold px-6 py-3 rounded-2xl transition shadow-md">
+        <span class="material-symbols-outlined">storefront</span>
+        Découvrir les produits
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

@@ -2,12 +2,6 @@ from rest_framework import serializers
 from .models import Dish, Ingredient, Category, DishIngredient,Restaurant, RestaurantImage
 
 
-class IngredientSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Ingredient
-        fields = ["id", "name", "price_delta", "time_minutes_delta", "is_allergen"]
-
-
 class DishIngredientWriteSerializer(serializers.Serializer):
     ingredient_id = serializers.IntegerField()
     default_included = serializers.BooleanField(required=False, default=False)

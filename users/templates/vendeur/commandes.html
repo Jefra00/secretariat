@@ -1,0 +1,440 @@
+{% extends "vendeur/base_vendeur.html" %}
+{% block title %}Commandes{% endblock %}
+{% block page_title %}Commandes{% endblock %}
+{% block page_subtitle %}Toutes les commandes liées à vos produits{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  const POLL_URL = '{% url "api_vendeur_commandes_poll" %}';
+
+  // since avance à chaque poll (valeur renvoyée par le serveur) pour ne jamais re-récupérer les mêmes commandes
+  let since = new Date().toISOString();
+
+  // IDs déjà présents dans le DOM au chargement initial
+  const seenIds = new Set(
+    [...document.querySelectorAll('[data-paiement-id]')].map(el => +el.dataset.paiementId)
+  );
+
+  // ── Helpers couleurs ────────────────────────────────────────────────────────
+  function statutBadge(code) {
+    if (code === 'valide')     return 'bg-emerald-100 text-emerald-700';
+    if (code === 'en_attente') return 'bg-yellow-100 text-yellow-700';
+    if (code === 'echoue')     return 'bg-red-100 text-red-600';
+    return 'bg-slate-100 text-slate-600';
+  }
+  function modeBadge(code) {
+    return code === 'livraison' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600';
+  }
+  function fmt(n) { return n.toLocaleString('fr-FR'); }
+
+  // ── Constructeurs HTML ──────────────────────────────────────────────────────
+  function buildRow(p) {
+    return `<tr data-paiement-id="${p.id}"
+               class="hover:bg-slate-50 transition-colors bg-orange-50 new-order-row">
+      <td class="px-4 py-3 font-semibold text-slate-700">#${p.id}</td>
+      <td class="px-4 py-3">
+        <p class="font-medium text-slate-700 text-xs">${p.client_nom}</p>
+        <p class="text-xs text-slate-400">${p.client_tel}</p>
+      </td>
+      <td class="px-4 py-3 text-xs text-slate-500">${p.section}</td>
+      <td class="px-4 py-3 font-semibold text-orange-600 text-xs">${fmt(p.montant)} FCFA</td>
+      <td class="px-4 py-3 text-xs text-slate-500">${p.date}</td>
+      <td class="px-4 py-3">
+        <span class="text-xs px-2 py-0.5 rounded-full font-medium ${modeBadge(p.mode_livraison_code)}">${p.mode_livraison}</span>
+      </td>
+      <td class="px-4 py-3">
+        <span class="text-xs px-2 py-0.5 rounded-full font-medium bg-slate-100 text-slate-500">—</span>
+      </td>
+      <td class="px-4 py-3">
+        <span class="text-xs px-2 py-0.5 rounded-full font-semibold ${statutBadge(p.statut_code)}">${p.statut}</span>
+      </td>
+      <td class="px-4 py-3">
+        <a href="${p.url}" class="text-xs font-semibold text-orange-600 hover:text-orange-700 transition">Voir →</a>
+      </td>
+    </tr>`;
+  }
+
+  function buildCard(p) {
+    return `<a data-paiement-id="${p.id}" href="${p.url}"
+              class="block bg-orange-50 rounded-2xl border border-orange-200 shadow-sm px-4 py-4 new-order-row">
+      <div class="flex justify-between items-start mb-1">
+        <span class="font-bold text-slate-700 text-sm">#${p.id} — ${p.section}</span>
+        <span class="text-xs px-2 py-0.5 rounded-full font-semibold ${statutBadge(p.statut_code)}">${p.statut}</span>
+      </div>
+      <p class="text-xs text-slate-400">${p.client_nom} · ${p.client_tel}</p>
+      <div class="flex items-center justify-between mt-2">
+        <span class="text-sm font-bold text-orange-600">${fmt(p.montant)} FCFA</span>
+        <span class="text-xs text-slate-400">${p.date}</span>
+      </div>
+    </a>`;
+  }
+
+  // ── Son de notification (Web Audio API) ────────────────────────────────────
+  function playSound() {
+    try {
+      const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.45);
+    } catch(e) {}
+  }
+
+  // ── Injection dans le DOM ───────────────────────────────────────────────────
+  function injectOrders(unseen) {
+    // Masquer l'état vide si présent
+    document.getElementById('empty-state')?.remove();
+
+    // Rendre visible la section paiements si elle était vide au chargement
+    const section = document.getElementById('paiements-section');
+    if (section) section.classList.remove('hidden');
+
+    const tbody = document.getElementById('paiements-tbody');
+    if (tbody) unseen.forEach(p => tbody.insertAdjacentHTML('afterbegin', buildRow(p)));
+
+    const cards = document.getElementById('paiements-cards');
+    if (cards) unseen.forEach(p => cards.insertAdjacentHTML('afterbegin', buildCard(p)));
+
+    // Retirer le surlignage orange après 4 s
+    setTimeout(() => {
+      document.querySelectorAll('.new-order-row').forEach(el => {
+        el.classList.remove('bg-orange-50', 'new-order-row');
+      });
+    }, 4000);
+  }
+
+  // ── Bannière ────────────────────────────────────────────────────────────────
+  function showBanner(count) {
+    const banner = document.getElementById('new-orders-banner');
+    const txt    = document.getElementById('new-orders-count');
+    if (!banner || !txt) return;
+    txt.textContent = count === 1 ? '1 nouvelle commande' : count + ' nouvelles commandes';
+    banner.classList.remove('hidden');
+  }
+
+  // ── Boucle de polling ───────────────────────────────────────────────────────
+  async function poll() {
+    try {
+      const res = await fetch(POLL_URL + '?since=' + encodeURIComponent(since));
+      if (!res.ok) return;
+      const data = await res.json();
+
+      // Avancer la fenêtre temporelle (réponse serveur, pas horloge locale)
+      if (data.server_time) since = data.server_time;
+
+      const unseen = (data.nouvelles || []).filter(p => !seenIds.has(p.id));
+      if (!unseen.length) return;
+
+      unseen.forEach(p => seenIds.add(p.id));
+      injectOrders(unseen);
+      showBanner(unseen.length);
+      playSound();
+    } catch(e) {}
+  }
+
+  setInterval(poll, 10000); // toutes les 10 secondes
+})();
+</script>
+{% endblock %}
+
+{% block content %}
+
+<!-- Bannière nouvelles commandes -->
+<div id="new-orders-banner"
+     class="hidden mb-4 flex items-center justify-between gap-3
+            bg-orange-50 border border-orange-200 rounded-2xl px-4 py-3">
+  <div class="flex items-center gap-2">
+    <span class="material-symbols-outlined text-orange-500">notifications</span>
+    <span class="text-sm font-semibold text-orange-700">
+      <span id="new-orders-count"></span> depuis votre dernière visite
+    </span>
+  </div>
+  <div class="flex items-center gap-2 flex-shrink-0">
+    <a href="" class="text-xs font-bold text-orange-600 hover:text-orange-700 bg-orange-100 hover:bg-orange-200 px-3 py-1.5 rounded-xl transition-colors">
+      Actualiser
+    </a>
+    <button onclick="document.getElementById('new-orders-banner').classList.add('hidden');newOrdersDismissed=true"
+            class="text-slate-400 hover:text-slate-600 transition-colors">
+      <span class="material-symbols-outlined text-base">close</span>
+    </button>
+  </div>
+</div>
+
+<!-- Filtres statut -->
+<div class="flex flex-wrap items-center gap-3 mb-6">
+  <a href="?statut=" class="px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors
+    {% if not statut_filter %}bg-orange-600 text-white border-orange-600{% else %}bg-white text-slate-600 border-slate-200 hover:border-orange-300{% endif %}">
+    Tous
+  </a>
+  <a href="?statut=en_attente" class="px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors
+    {% if statut_filter == 'en_attente' %}bg-orange-600 text-white border-orange-600{% else %}bg-white text-slate-600 border-slate-200 hover:border-orange-300{% endif %}">
+    En attente
+  </a>
+  <a href="?statut=valide" class="px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors
+    {% if statut_filter == 'valide' %}bg-orange-600 text-white border-orange-600{% else %}bg-white text-slate-600 border-slate-200 hover:border-orange-300{% endif %}">
+    Validées
+  </a>
+  <a href="?statut=echoue" class="px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors
+    {% if statut_filter == 'echoue' %}bg-orange-600 text-white border-orange-600{% else %}bg-white text-slate-600 border-slate-200 hover:border-orange-300{% endif %}">
+    Échouées
+  </a>
+</div>
+
+<!-- ═══ PAIEMENTS (marché, shopping, perruque, quicaillerie, etc.) ═══ -->
+<div id="paiements-section" class="mb-8{% if not paiements %} hidden{% endif %}">
+  <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">
+    Commandes boutique (<span id="paiements-count">{{ paiements|length }}</span> résultat{% if paiements|length > 1 %}s{% endif %})
+  </h2>
+
+  <!-- Desktop table -->
+  <div class="hidden md:block bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 border-b border-slate-100">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">N°</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Client</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Section</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Total</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Livraison</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Préparation</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Statut</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="paiements-tbody" class="divide-y divide-slate-50">
+        {% for p in paiements %}
+        <tr data-paiement-id="{{ p.pk }}" class="hover:bg-slate-50 transition-colors">
+          <td class="px-4 py-3 font-semibold text-slate-700">#{{ p.pk }}</td>
+          <td class="px-4 py-3">
+            {% if p.client %}
+              <p class="font-medium text-slate-700 text-xs">{{ p.client.get_full_name }}</p>
+              <p class="text-xs text-slate-400">{{ p.client.telephone }}</p>
+            {% else %}<span class="text-slate-400">—</span>{% endif %}
+          </td>
+          <td class="px-4 py-3 text-xs text-slate-500">{{ p.get_section_display }}</td>
+          <td class="px-4 py-3 font-semibold text-orange-600 text-xs">{{ p.montant_total|floatformat:0 }} FCFA</td>
+          <td class="px-4 py-3 text-xs text-slate-500">{{ p.cree_le|date:"d/m/Y H:i" }}</td>
+          <td class="px-4 py-3">
+            <span class="text-xs px-2 py-0.5 rounded-full font-medium
+              {% if p.mode_livraison == 'livraison' %}bg-blue-100 text-blue-700{% else %}bg-slate-100 text-slate-600{% endif %}">
+              {{ p.get_mode_livraison_display }}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <span class="text-xs px-2 py-0.5 rounded-full font-medium
+              {% if p.statut_preparation == 'pret' %}bg-green-100 text-green-700
+              {% elif p.statut_preparation == 'en_preparation' %}bg-yellow-100 text-yellow-700
+              {% else %}bg-slate-100 text-slate-500{% endif %}">
+              {% if p.statut_preparation == 'pret' %}Prêt
+              {% elif p.statut_preparation == 'en_preparation' %}En préparation
+              {% else %}—{% endif %}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <span class="text-xs px-2 py-0.5 rounded-full font-semibold
+              {% if p.statut == 'valide' %}bg-emerald-100 text-emerald-700
+              {% elif p.statut == 'en_attente' %}bg-yellow-100 text-yellow-700
+              {% elif p.statut == 'echoue' %}bg-red-100 text-red-600
+              {% else %}bg-slate-100 text-slate-600{% endif %}">
+              {{ p.get_statut_display }}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <a href="{% url 'vendeur_paiement_detail' p.pk %}"
+               class="text-xs font-semibold text-orange-600 hover:text-orange-700 transition">
+              Voir →
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile cards -->
+  <div id="paiements-cards" class="md:hidden space-y-3">
+    {% for p in paiements %}
+    <a data-paiement-id="{{ p.pk }}" href="{% url 'vendeur_paiement_detail' p.pk %}"
+       class="block bg-white rounded-2xl border border-slate-100 shadow-sm px-4 py-4">
+      <div class="flex justify-between items-start mb-1">
+        <span class="font-bold text-slate-700 text-sm">#{{ p.pk }} — {{ p.get_section_display }}</span>
+        <span class="text-xs px-2 py-0.5 rounded-full font-semibold
+          {% if p.statut == 'valide' %}bg-emerald-100 text-emerald-700
+          {% elif p.statut == 'en_attente' %}bg-yellow-100 text-yellow-700
+          {% elif p.statut == 'echoue' %}bg-red-100 text-red-600
+          {% else %}bg-slate-100 text-slate-600{% endif %}">
+          {{ p.get_statut_display }}
+        </span>
+      </div>
+      {% if p.client %}
+      <p class="text-xs text-slate-400">{{ p.client.get_full_name }} · {{ p.client.telephone }}</p>
+      {% endif %}
+      <div class="flex items-center justify-between mt-2">
+        <span class="text-sm font-bold text-orange-600">{{ p.montant_total|floatformat:0 }} FCFA</span>
+        <span class="text-xs text-slate-400">{{ p.cree_le|date:"d/m/Y H:i" }}</span>
+      </div>
+      {% if p.statut_preparation %}
+      <p class="text-xs mt-1
+        {% if p.statut_preparation == 'pret' %}text-green-600{% else %}text-yellow-600{% endif %}">
+        {% if p.statut_preparation == 'pret' %}Prêt à livrer{% elif p.statut_preparation == 'en_preparation' %}En préparation{% endif %}
+      </p>
+      {% endif %}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+{% if statut_filter %}
+  {% include "vendeur/partials/_pagination.html" with extra_params="statut="|add:statut_filter|add:"&" %}
+{% else %}
+  {% include "vendeur/partials/_pagination.html" with extra_params="" %}
+{% endif %}
+
+<!-- ═══ AUTRES COMMANDES (resto, voiture, immobilier) ═══ -->
+{% if commandes %}
+<div>
+  <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">
+    Autres commandes ({{ commandes|length }})
+  </h2>
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+
+    <!-- Desktop table -->
+    <div class="hidden md:block overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 border-b border-slate-100">
+          <tr>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">N°</th>
+            {% if section == 'resto' %}
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Client</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Total</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Statut</th>
+            {% elif section == 'voiture' %}
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Client</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Véhicule</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Période</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Total</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Statut</th>
+            {% elif section == 'immobilier' %}
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Demandeur</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Bien</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Date souhaitée</th>
+            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Statut</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          {% for cmd in commandes %}
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="px-5 py-3.5 font-semibold text-slate-700">#{{ cmd.id }}</td>
+
+            {% if section == 'resto' %}
+            <td class="px-5 py-3.5">
+              {% if cmd.user %}
+                <p class="font-medium text-slate-700">{{ cmd.user.get_full_name }}</p>
+                <p class="text-xs text-slate-400">{{ cmd.phone_number }}</p>
+              {% else %}<span class="text-slate-400">—</span>{% endif %}
+            </td>
+            <td class="px-5 py-3.5 font-semibold text-orange-600">{{ cmd.total|floatformat:0 }} FCFA</td>
+            <td class="px-5 py-3.5 text-slate-500 text-xs">{{ cmd.created_at|date:"d/m/Y H:i" }}</td>
+            <td class="px-5 py-3.5">
+              <span class="text-xs px-2.5 py-1 rounded-full font-semibold
+                {% if cmd.status == 'done' %}bg-green-100 text-green-700
+                {% elif cmd.status == 'cancelled' %}bg-red-100 text-red-600
+                {% elif cmd.status == 'pending' %}bg-yellow-100 text-yellow-700
+                {% elif cmd.status == 'accepted' %}bg-blue-100 text-blue-700
+                {% else %}bg-slate-100 text-slate-600{% endif %}">
+                {{ cmd.get_status_display }}
+              </span>
+            </td>
+
+            {% elif section == 'voiture' %}
+            <td class="px-5 py-3.5">
+              {% if cmd.client %}{{ cmd.client.get_full_name }}{% else %}—{% endif %}
+            </td>
+            <td class="px-5 py-3.5">
+              {% if cmd.car %}{{ cmd.car.brand }} {{ cmd.car.model }}{% else %}—{% endif %}
+            </td>
+            <td class="px-5 py-3.5 text-xs text-slate-500">
+              {{ cmd.date_debut|date:"d/m" }} → {{ cmd.date_fin|date:"d/m/Y" }}
+            </td>
+            <td class="px-5 py-3.5 font-semibold text-orange-600">{{ cmd.prix_total|floatformat:0 }} FCFA</td>
+            <td class="px-5 py-3.5">
+              <span class="text-xs px-2.5 py-1 rounded-full font-semibold
+                {% if cmd.status == 'confirmed' %}bg-green-100 text-green-700
+                {% elif cmd.status == 'cancelled' %}bg-red-100 text-red-600
+                {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                {{ cmd.get_status_display }}
+              </span>
+            </td>
+
+            {% elif section == 'immobilier' %}
+            <td class="px-5 py-3.5">
+              {% if cmd.client %}{{ cmd.client.get_full_name }}{% else %}—{% endif %}
+            </td>
+            <td class="px-5 py-3.5">
+              {% if cmd.immobilier %}{{ cmd.immobilier.titre }}{% else %}—{% endif %}
+            </td>
+            <td class="px-5 py-3.5 text-xs text-slate-500">
+              {% if cmd.date_souhaitee %}{{ cmd.date_souhaitee|date:"d/m/Y" }}{% else %}—{% endif %}
+            </td>
+            <td class="px-5 py-3.5">
+              <span class="text-xs px-2.5 py-1 rounded-full font-semibold
+                {% if cmd.statut == 'confirmed' %}bg-green-100 text-green-700
+                {% elif cmd.statut == 'cancelled' %}bg-red-100 text-red-600
+                {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                {{ cmd.get_statut_display }}
+              </span>
+            </td>
+            {% endif %}
+
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile cards -->
+    <div class="md:hidden divide-y divide-slate-50">
+      {% for cmd in commandes %}
+      <div class="px-4 py-4">
+        <div class="flex justify-between items-start mb-1">
+          <span class="font-bold text-slate-700">#{{ cmd.id }}</span>
+          <span class="text-xs px-2 py-0.5 rounded-full font-semibold
+            {% if cmd.status == 'done' or cmd.statut == 'confirmed' %}bg-green-100 text-green-700
+            {% elif cmd.status == 'cancelled' or cmd.statut == 'cancelled' %}bg-red-100 text-red-600
+            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+            {% if cmd.status %}{{ cmd.get_status_display }}{% else %}{{ cmd.get_statut_display }}{% endif %}
+          </span>
+        </div>
+        <p class="text-xs text-slate-400">
+          {% if cmd.created_at %}{{ cmd.created_at|date:"d/m/Y H:i" }}{% elif cmd.date_debut %}{{ cmd.date_debut|date:"d/m/Y" }}{% endif %}
+        </p>
+        {% if cmd.total %}<p class="text-sm font-semibold text-orange-600 mt-1">{{ cmd.total|floatformat:0 }} FCFA</p>{% endif %}
+        {% if cmd.prix_total %}<p class="text-sm font-semibold text-orange-600 mt-1">{{ cmd.prix_total|floatformat:0 }} FCFA</p>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- État vide si rien du tout -->
+{% if not paiements and not commandes %}
+<div id="empty-state" class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+  <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+    <span style="font-size:48px;" class="mb-3">📭</span>
+    <p class="font-semibold text-slate-500">Aucune commande</p>
+    <p class="text-sm mt-1">Vos commandes apparaîtront ici dès qu'un client passera commande</p>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

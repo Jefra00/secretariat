@@ -1,0 +1,46 @@
+{% if page_obj.has_other_pages %}
+<div class="flex items-center justify-between mt-5 flex-wrap gap-3">
+  <p class="text-xs text-slate-400">
+    Page <strong class="text-slate-600">{{ page_obj.number }}</strong>
+    / {{ page_obj.paginator.num_pages }}
+    &nbsp;·&nbsp;
+    <strong class="text-slate-600">{{ page_obj.paginator.count }}</strong>
+    résultat{{ page_obj.paginator.count|pluralize }}
+  </p>
+  <div class="flex items-center gap-1.5 flex-wrap">
+
+    {% if page_obj.has_previous %}
+    <a href="?{{ extra_params }}page={{ page_obj.previous_page_number }}"
+       class="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-xl
+              border border-slate-200 text-slate-600
+              hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 transition-colors">
+      ← Précédent
+    </a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+        <span class="text-xs font-bold px-3 py-1.5 rounded-xl bg-orange-600 text-white shadow shadow-orange-200">
+          {{ num }}
+        </span>
+      {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+        <a href="?{{ extra_params }}page={{ num }}"
+           class="text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200
+                  text-slate-500 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 transition-colors">
+          {{ num }}
+        </a>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <a href="?{{ extra_params }}page={{ page_obj.next_page_number }}"
+       class="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-xl
+              border border-slate-200 text-slate-600
+              hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 transition-colors">
+      Suivant →
+    </a>
+    {% endif %}
+
+  </div>
+</div>
+{% endif %}

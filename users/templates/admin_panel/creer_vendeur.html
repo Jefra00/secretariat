@@ -1,0 +1,72 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Créer un vendeur{% endblock %}
+{% block page_title %}Créer un compte vendeur{% endblock %}
+{% block page_subtitle %}Enregistrement du compte uniquement — la boutique sera créée séparément{% endblock %}
+{% block header_actions %}
+<a href="{% url 'admin_panel_vendeurs' %}" class="text-sm text-gray-500 hover:text-gray-800 transition">← Retour aux vendeurs</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-lg">
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+
+    <div class="flex items-center gap-3 mb-6 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+      <span class="material-symbols-outlined text-emerald-600 text-2xl">info</span>
+      <p class="text-sm text-emerald-800">
+        Seul le <strong>compte utilisateur</strong> est créé ici. Pour lier une boutique à ce vendeur,
+        allez dans <a href="{% url 'admin_boutiques_list' %}" class="font-semibold underline">Gestion des boutiques</a>.
+      </p>
+    </div>
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Nom complet <span class="text-red-400">*</span></label>
+        {{ form.first_name }}
+        {% if form.first_name.errors %}<p class="text-xs text-red-500 mt-1">{{ form.first_name.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5">
+          Téléphone <span class="text-red-400">*</span>
+          <span class="text-gray-400 font-normal">(utilisé pour se connecter)</span>
+        </label>
+        {{ form.telephone }}
+        {% if form.telephone.errors %}<p class="text-xs text-red-500 mt-1">{{ form.telephone.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Email <span class="text-gray-400 font-normal">(optionnel)</span></label>
+        {{ form.email }}
+        {% if form.email.errors %}<p class="text-xs text-red-500 mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Mot de passe <span class="text-red-400">*</span></label>
+          {{ form.password1 }}
+          {% if form.password1.errors %}<p class="text-xs text-red-500 mt-1">{{ form.password1.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Confirmer <span class="text-red-400">*</span></label>
+          {{ form.password2 }}
+          {% if form.password2.errors %}<p class="text-xs text-red-500 mt-1">{{ form.password2.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+      {% if form.non_field_errors %}
+      <div class="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+        {{ form.non_field_errors.0 }}
+      </div>
+      {% endif %}
+
+      <button type="submit"
+              class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition shadow-sm flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-base">person_add</span>
+        Créer le compte vendeur
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

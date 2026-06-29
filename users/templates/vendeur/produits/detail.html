@@ -1,0 +1,217 @@
+{% extends "vendeur/base_vendeur.html" %}
+{% block title %}{{ produit.d_nom }}{% endblock %}
+{% block page_title %}Fiche produit{% endblock %}
+{% block page_subtitle %}{{ section|capfirst }} · ID {{ pk }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-5">
+
+  <!-- Barre d'actions -->
+  <div class="flex items-center justify-between">
+    <a href="{% url 'vendeur_produits' %}"
+       class="text-sm text-slate-500 hover:text-slate-700 font-medium flex items-center gap-1.5 transition-colors">
+      ← Retour à la liste
+    </a>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'vendeur_images_produit' section pk %}"
+         class="inline-flex items-center gap-1.5 text-sm border border-slate-200 text-slate-600 hover:border-orange-300 hover:text-orange-600 px-3 py-2 rounded-xl transition-colors font-medium">
+        📷 Photos{% if images %} ({{ images|length }}){% endif %}
+      </a>
+      <a href="{% url 'vendeur_modifier_produit' section pk %}"
+         class="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition-colors shadow shadow-orange-200">
+        ✏️ Modifier
+      </a>
+    </div>
+  </div>
+
+  <!-- Header produit -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="flex flex-col sm:flex-row gap-5 p-6">
+
+      <!-- Image principale -->
+      <div class="flex-shrink-0">
+        {% if images %}
+          {% for img in images %}{% if img.principale or forloop.first %}
+          <img src="{{ img.image.url }}" alt="{{ produit.d_nom }}"
+               class="w-40 h-40 rounded-2xl object-cover border border-slate-100 shadow-sm">
+          {% endif %}{% endfor %}
+        {% elif produit.d_image %}
+          <img src="{{ produit.d_image }}" alt="{{ produit.d_nom }}"
+               class="w-40 h-40 rounded-2xl object-cover border border-slate-100 shadow-sm">
+        {% else %}
+          <div class="w-40 h-40 rounded-2xl bg-slate-100 flex items-center justify-center text-5xl">
+            {% if section == 'marche' %}🛒{% elif section == 'shopping' %}🛍️
+            {% elif section == 'perruque' %}💇{% elif section == 'voiture' %}🚗
+            {% elif section == 'immobilier' %}🏢{% elif section == 'quicaillerie' %}🔨
+            {% elif section == 'resto' %}🍽️{% else %}🏪{% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Infos principales -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="inline-block text-xs font-semibold text-orange-600 bg-orange-50 border border-orange-100 rounded-full px-2.5 py-0.5 mb-2 capitalize">{{ section }}</span>
+            <h1 class="text-xl font-extrabold text-slate-800">{{ produit.d_nom }}</h1>
+          </div>
+          <!-- Statut -->
+          {% if produit.d_stock is not None %}
+            <span class="text-sm px-3 py-1 rounded-full font-semibold flex-shrink-0
+              {% if produit.d_stock > 0 %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-600{% endif %}">
+              {{ produit.d_stock }} en stock
+            </span>
+          {% elif produit.d_statut_txt %}
+            <span class="text-sm px-3 py-1 rounded-full font-semibold flex-shrink-0
+              {% if produit.d_disponible %}bg-green-100 text-green-700{% else %}bg-slate-100 text-slate-500{% endif %}">
+              {{ produit.d_statut_txt }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Prix -->
+        <div class="mt-3 flex items-baseline gap-3 flex-wrap">
+          <span class="text-2xl font-black text-orange-600">{{ produit.d_prix|floatformat:0 }} FCFA</span>
+          {% if produit.d_promo %}
+          <span class="text-sm font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+            Promo disponible
+          </span>
+          {% endif %}
+        </div>
+
+        <!-- Date -->
+        {% if produit.d_date %}
+        <p class="text-xs text-slate-400 mt-2">Ajouté le {{ produit.d_date|date:"d/m/Y" }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Détails spécifiques par section -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+    <h2 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
+      <span class="w-1 h-4 bg-orange-500 rounded-full inline-block"></span>
+      Informations détaillées
+    </h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+
+      {% if section == 'marche' %}
+        {% if produit.description %}<div class="sm:col-span-2"><dt class="text-xs text-slate-400 mb-0.5">Description</dt><dd class="text-sm text-slate-700">{{ produit.description }}</dd></div>{% endif %}
+        <div><dt class="text-xs text-slate-400 mb-0.5">Unité</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.unite|default:"—" }}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Catégorie</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.categorie|default:"—" }}</dd></div>
+        {% if produit.prix_promo %}<div><dt class="text-xs text-slate-400 mb-0.5">Prix promotionnel</dt><dd class="text-sm font-semibold text-emerald-600">{{ produit.prix_promo|floatformat:0 }} FCFA</dd></div>{% endif %}
+        {% if produit.promo_debut %}<div><dt class="text-xs text-slate-400 mb-0.5">Promo</dt><dd class="text-sm text-slate-700">{{ produit.promo_debut|date:"d/m/Y" }} → {{ produit.promo_fin|date:"d/m/Y" }}</dd></div>{% endif %}
+
+      {% elif section == 'shopping' %}
+        {% if produit.description %}<div class="sm:col-span-2"><dt class="text-xs text-slate-400 mb-0.5">Description</dt><dd class="text-sm text-slate-700">{{ produit.description }}</dd></div>{% endif %}
+        <div><dt class="text-xs text-slate-400 mb-0.5">Catégorie</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.category|default:"—" }}</dd></div>
+        {% if produit.prix_promo %}<div><dt class="text-xs text-slate-400 mb-0.5">Prix promotionnel</dt><dd class="text-sm font-semibold text-emerald-600">{{ produit.prix_promo|floatformat:0 }} FCFA</dd></div>{% endif %}
+
+      {% elif section == 'perruque' %}
+        {% if produit.description %}<div class="sm:col-span-2"><dt class="text-xs text-slate-400 mb-0.5">Description</dt><dd class="text-sm text-slate-700">{{ produit.description }}</dd></div>{% endif %}
+        <div><dt class="text-xs text-slate-400 mb-0.5">Matière</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.get_material_display|default:produit.material }}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Texture</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.get_texture_display|default:produit.texture }}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Couleur</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.color|default:"—" }}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Longueur</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.length|default:"—" }}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Ville / Lieu</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.city|default:"—" }}{% if produit.location %} — {{ produit.location }}{% endif %}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Livraison</dt><dd class="text-sm font-semibold {% if produit.delivery_available %}text-green-600{% else %}text-slate-400{% endif %}">{% if produit.delivery_available %}Disponible{% else %}Non disponible{% endif %}</dd></div>
+
+      {% elif section == 'voiture' %}
+        {% if produit.description %}<div class="sm:col-span-2"><dt class="text-xs text-slate-400 mb-0.5">Description</dt><dd class="text-sm text-slate-700">{{ produit.description }}</dd></div>{% endif %}
+        <div><dt class="text-xs text-slate-400 mb-0.5">Marque / Modèle</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.brand }} {{ produit.model }} ({{ produit.year }})</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Couleur</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.color|default:"—" }}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Transmission / Carburant</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.get_transmission_display|default:produit.transmission }} / {{ produit.get_fuel_display|default:produit.fuel }}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Places / Portes</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.seats }} pl. / {{ produit.doors|default:"—" }} p.</dd></div>
+        {% if produit.deposit %}<div><dt class="text-xs text-slate-400 mb-0.5">Caution</dt><dd class="text-sm font-semibold text-orange-600">{{ produit.deposit|floatformat:0 }} FCFA</dd></div>{% endif %}
+        <div><dt class="text-xs text-slate-400 mb-0.5">Lieu</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.city|default:"—" }}{% if produit.location %} — {{ produit.location }}{% endif %}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Options</dt>
+          <dd class="text-sm font-semibold text-slate-700">
+            {% if produit.air_conditioning %}❄️ Clim {% endif %}
+            {% if produit.driver_included %}👤 Chauffeur {% endif %}
+            {% if not produit.air_conditioning and not produit.driver_included %}—{% endif %}
+          </dd>
+        </div>
+
+      {% elif section == 'immobilier' %}
+        {% if produit.description %}<div class="sm:col-span-2"><dt class="text-xs text-slate-400 mb-0.5">Description</dt><dd class="text-sm text-slate-700">{{ produit.description }}</dd></div>{% endif %}
+        <div><dt class="text-xs text-slate-400 mb-0.5">Type</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.get_type_bien_display|default:produit.type_bien }} · {{ produit.get_type_offre_display|default:produit.type_offre }}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Superficie</dt><dd class="text-sm font-semibold text-slate-700">{% if produit.superficie %}{{ produit.superficie|floatformat:0 }} m²{% else %}—{% endif %}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Chambres / SdB</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.nombre_chambres|default:"0" }} / {{ produit.nombre_salles_bain|default:"0" }}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Salons / Cuisines</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.nombre_salons|default:"0" }} / {{ produit.nombre_cuisines|default:"0" }}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Équipements</dt>
+          <dd class="text-sm font-semibold text-slate-700">
+            {% if produit.meuble %}🛋️ Meublé {% endif %}
+            {% if produit.piscine %}🏊 Piscine {% endif %}
+            {% if produit.parking %}🅿️ Parking {% endif %}
+            {% if produit.climatisation %}❄️ Clim {% endif %}
+            {% if not produit.meuble and not produit.piscine and not produit.parking and not produit.climatisation %}—{% endif %}
+          </dd>
+        </div>
+
+      {% elif section == 'quicaillerie' %}
+        {% if produit.description %}<div class="sm:col-span-2"><dt class="text-xs text-slate-400 mb-0.5">Description</dt><dd class="text-sm text-slate-700">{{ produit.description }}</dd></div>{% endif %}
+        <div><dt class="text-xs text-slate-400 mb-0.5">Référence / Marque</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.reference|default:"—" }} / {{ produit.marque|default:"—" }}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">État</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.get_etat_display|default:produit.etat }}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Garantie</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.garantie|default:"—" }}</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Ville / Adresse</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.ville|default:"—" }}{% if produit.adresse %} — {{ produit.adresse }}{% endif %}</dd></div>
+        {% if produit.prix_promotionnel %}<div><dt class="text-xs text-slate-400 mb-0.5">Prix promotionnel</dt><dd class="text-sm font-semibold text-emerald-600">{{ produit.prix_promotionnel|floatformat:0 }} FCFA</dd></div>{% endif %}
+
+      {% elif section == 'resto' %}
+        {% if produit.description %}<div class="sm:col-span-2"><dt class="text-xs text-slate-400 mb-0.5">Description</dt><dd class="text-sm text-slate-700">{{ produit.description }}</dd></div>{% endif %}
+        <div><dt class="text-xs text-slate-400 mb-0.5">Temps de préparation</dt><dd class="text-sm font-semibold text-slate-700">{{ produit.base_time_minutes|default:"—" }} min</dd></div>
+        <div><dt class="text-xs text-slate-400 mb-0.5">Actif</dt><dd class="text-sm font-semibold {% if produit.active %}text-green-600{% else %}text-slate-400{% endif %}">{% if produit.active %}Oui{% else %}Non{% endif %}</dd></div>
+      {% endif %}
+
+    </dl>
+  </div>
+
+  <!-- Galerie photos -->
+  {% if images %}
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+        <span class="w-1 h-4 bg-orange-500 rounded-full inline-block"></span>
+        Photos ({{ images|length }})
+      </h2>
+      <a href="{% url 'vendeur_images_produit' section pk %}"
+         class="text-xs text-orange-600 font-semibold hover:underline">+ Ajouter des photos</a>
+    </div>
+    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+      {% for img in images %}
+      <div class="relative rounded-xl overflow-hidden border border-slate-100">
+        <img src="{{ img.image.url }}" alt="" class="w-full h-24 object-cover">
+        {% if img.principale %}
+        <span class="absolute top-1 left-1 text-[10px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded-full">
+          Principale
+        </span>
+        {% endif %}
+        {% if img.couleur %}
+        <span class="absolute bottom-1 right-1 text-[10px] bg-white/90 text-slate-700 px-1 py-0.5 rounded font-medium">
+          {{ img.couleur.nom }}
+        </span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Danger zone -->
+  <div class="bg-white rounded-2xl border border-red-100 shadow-sm p-5 flex items-center justify-between">
+    <div>
+      <p class="text-sm font-bold text-red-700">Supprimer ce produit</p>
+      <p class="text-xs text-slate-400 mt-0.5">Cette action est irréversible</p>
+    </div>
+    <form method="post"
+          action="{% url 'vendeur_supprimer_produit' section pk %}"
+          onsubmit="return confirm('Supprimer définitivement ce produit ?')">
+      {% csrf_token %}
+      <button type="submit"
+              class="text-sm text-red-600 hover:text-red-800 font-semibold border border-red-200 hover:border-red-400 px-4 py-2 rounded-xl transition-colors">
+        🗑️ Supprimer
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

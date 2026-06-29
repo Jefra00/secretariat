@@ -1,0 +1,330 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Perruques & Beauté — Brazzaville{% endblock %}
+{% block navbar %}{% include 'base/navbar_perruque.html' %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+<style>
+.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ── -->
+<section class="relative overflow-hidden text-white"
+         style="background:linear-gradient(135deg,#7c3aed 0%,#a855f7 50%,#ec4899 100%);">
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full opacity-10 blur-3xl" style="background:#fbbf24;"></div>
+    <div class="absolute -bottom-16 -left-16 w-64 h-64 rounded-full opacity-15 blur-3xl" style="background:#c4b5fd;"></div>
+  </div>
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-3xl">💇</span>
+          <span class="text-xs font-bold uppercase tracking-widest" style="color:#e9d5ff;">Perruques & Beauté</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight mb-2">
+          Coiffures &amp; perruques<br>
+          <span style="color:#fde68a;">livrées à Brazzaville</span>
+        </h1>
+        <p class="text-sm sm:text-base max-w-md" style="color:#e9d5ff;">
+          Perruques naturelles &amp; synthétiques, coiffures de qualité. Trouvez votre style.
+        </p>
+      </div>
+    </div>
+
+    <!-- Recherche -->
+    <form method="get" class="mt-8 flex gap-2">
+      <div class="relative flex-1 max-w-2xl">
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </span>
+        <input type="text" name="q" value="{{ q }}" id="search-perruque" placeholder="Rechercher perruque, couleur, texture…" autocomplete="off"
+               class="w-full pl-12 pr-4 py-3.5 rounded-xl text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 shadow-sm"
+               style="color:#111;">
+      </div>
+      {% if cat_id %}<input type="hidden" name="cat" value="{{ cat_id }}">{% endif %}
+      {% if texture %}<input type="hidden" name="texture" value="{{ texture }}">{% endif %}
+      {% if material %}<input type="hidden" name="material" value="{{ material }}">{% endif %}
+      <button type="submit"
+              class="font-bold px-6 py-3.5 rounded-xl transition shadow-sm text-sm text-purple-700 hover:bg-purple-50"
+              style="background:#fff;">
+        Rechercher
+      </button>
+    </form>
+  </div>
+</section>
+
+
+<!-- ── Corps ── -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="flex flex-col lg:flex-row gap-8">
+
+    <!-- ── Sidebar ── -->
+    <aside class="lg:w-60 flex-shrink-0 space-y-4">
+
+      <!-- Catégories -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h3 class="font-bold text-gray-900 text-sm uppercase tracking-wider mb-4">Catégories</h3>
+        <ul class="space-y-1">
+          <li>
+            <a href="?{% if q %}q={{ q }}{% endif %}"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition
+                      {% if not cat_id %}bg-purple-50 text-purple-700{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+              <span class="text-lg">💄</span> Tout voir
+            </a>
+          </li>
+          {% for cat in categories %}
+          <li>
+            <a href="?cat={{ cat.pk }}{% if q %}&q={{ q }}{% endif %}"
+               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition
+                      {% if cat_id == cat.pk|stringformat:'s' %}bg-purple-50 text-purple-700{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+              <span class="text-lg">{{ cat.icon|default:'💇' }}</span>
+              <span class="flex-1 truncate">{{ cat.name }}</span>
+              <span class="text-xs text-gray-400 flex-shrink-0">{{ cat.products.count }}</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Texture -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h3 class="font-bold text-gray-900 text-sm uppercase tracking-wider mb-3">Texture</h3>
+        <ul class="space-y-1">
+          <li>
+            <a href="?{% if q %}q={{ q }}{% endif %}{% if cat_id %}&cat={{ cat_id }}{% endif %}{% if material %}&material={{ material }}{% endif %}"
+               class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition
+                      {% if not texture %}bg-purple-50 text-purple-700{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+              Toutes
+            </a>
+          </li>
+          {% for val, label in textures %}
+          <li>
+            <a href="?texture={{ val }}{% if q %}&q={{ q }}{% endif %}{% if cat_id %}&cat={{ cat_id }}{% endif %}{% if material %}&material={{ material }}{% endif %}"
+               class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition
+                      {% if texture == val %}bg-purple-50 text-purple-700{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+              {{ label }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Matière -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h3 class="font-bold text-gray-900 text-sm uppercase tracking-wider mb-3">Matière</h3>
+        <ul class="space-y-1">
+          <li>
+            <a href="?{% if q %}q={{ q }}{% endif %}{% if cat_id %}&cat={{ cat_id }}{% endif %}{% if texture %}&texture={{ texture }}{% endif %}"
+               class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition
+                      {% if not material %}bg-purple-50 text-purple-700{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+              Toutes
+            </a>
+          </li>
+          {% for val, label in materials %}
+          <li>
+            <a href="?material={{ val }}{% if q %}&q={{ q }}{% endif %}{% if cat_id %}&cat={{ cat_id }}{% endif %}{% if texture %}&texture={{ texture }}{% endif %}"
+               class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition
+                      {% if material == val %}bg-purple-50 text-purple-700{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+              {{ label }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+    </aside>
+
+    <!-- ── Grille ── -->
+    <main class="flex-1 min-w-0">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <p class="text-gray-900 font-bold text-lg">
+            {% if q %}Résultats pour « {{ q }} »
+            {% else %}Toutes les perruques{% endif %}
+          </p>
+          <p class="text-gray-400 text-sm">{{ total }} produit{{ total|pluralize }}</p>
+        </div>
+      </div>
+
+      {% if products %}
+      <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+        {% for product in products %}
+        {% with img=product.images.first %}
+        <div class="group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative flex flex-col search-card"
+             data-searchable="{{ product.name|lower|escapejs }}{% if product.texture %} {{ product.texture|lower|escapejs }}{% endif %}{% if product.category %} {{ product.category.name|lower|escapejs }}{% endif %}">
+
+          <!-- Image -->
+          <a href="{% url 'perruque:detail_perruque' product.pk %}"
+             class="block relative overflow-hidden flex-shrink-0"
+             style="aspect-ratio:1/1;background:linear-gradient(135deg,#faf5ff,#f3e8ff);">
+            {% if img %}
+              <img src="{{ img.image.url }}" alt="{{ product.name }}"
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            {% else %}
+              <div class="w-full h-full flex items-center justify-center text-5xl">💇</div>
+            {% endif %}
+
+            <!-- Badge promo -->
+            {% if product.is_en_promo %}
+            <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow">
+              -{{ product.remise_pct }}%
+            </span>
+            {% endif %}
+
+            <!-- Badge stock -->
+            {% if product.stock == 0 %}
+              <span class="absolute top-2 {% if product.is_en_promo %}left-14{% else %}left-2{% endif %} bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full">Épuisé</span>
+            {% elif product.stock <= 3 %}
+              <span class="absolute top-2 {% if product.is_en_promo %}left-14{% else %}left-2{% endif %} bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ product.stock }} restant{{ product.stock|pluralize }}</span>
+            {% endif %}
+
+            <!-- Nb images -->
+            {% with nb=product.images.count %}{% if nb > 1 %}
+              <span class="absolute top-2 right-2 bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                <span class="material-symbols-outlined text-[11px]">photo_library</span> {{ nb }}
+              </span>
+            {% endif %}{% endwith %}
+          </a>
+
+          <!-- Infos -->
+          <div class="p-3 flex flex-col flex-1">
+            <a href="{% url 'perruque:detail_perruque' product.pk %}" class="block mb-1">
+              <p class="font-bold text-gray-900 text-sm leading-tight line-clamp-2 hover:text-purple-700 transition">{{ product.name }}</p>
+            </a>
+            <p class="text-xs text-gray-400 mb-1 truncate">{{ product.shop.name }}</p>
+
+            <!-- Attributs -->
+            <div class="flex gap-1 flex-wrap mb-2">
+              {% if product.texture %}
+              <span class="text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-100 px-1.5 py-0.5 rounded-full">
+                {{ product.get_texture_display }}
+              </span>
+              {% endif %}
+              {% if product.material %}
+              <span class="text-[10px] font-semibold bg-violet-50 text-violet-700 border border-violet-100 px-1.5 py-0.5 rounded-full">
+                {{ product.get_material_display }}
+              </span>
+              {% endif %}
+            </div>
+
+            <!-- Prix -->
+            <div class="flex items-center justify-between mt-auto pt-1">
+              <div>
+                {% if product.is_en_promo %}
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-extrabold text-base text-red-600">{{ product.prix_actuel|floatformat:0 }}</span>
+                    <span class="text-gray-400 text-xs line-through">{{ product.price|floatformat:0 }}</span>
+                  </div>
+                  <span class="text-[10px] text-gray-400">FCFA</span>
+                {% else %}
+                  <span class="text-purple-600 font-extrabold text-base">{{ product.price|floatformat:0 }}</span>
+                  <span class="text-gray-400 text-[11px]"> FCFA</span>
+                {% endif %}
+              </div>
+
+              {% if product.stock > 0 %}
+              <button
+                onclick="quickAddToCart(this); event.stopPropagation();"
+                data-id="{{ product.pk }}"
+                data-nom="{{ product.name|escapejs }}"
+                data-prix="{{ product.prix_actuel }}"
+                data-devise="FCFA"
+                data-unite="pièce"
+                data-vendeur="{{ product.shop.name|escapejs }}"
+                data-image="{% if img %}{{ img.image.url }}{% endif %}"
+                data-url="{% url 'perruque:detail_perruque' product.pk %}"
+                class="flex items-center gap-1 bg-purple-50 hover:bg-purple-600 text-purple-600 hover:text-white
+                       font-bold px-2.5 py-1.5 rounded-xl text-xs transition-all duration-200 border border-purple-100
+                       hover:border-purple-600 hover:shadow-md"
+                title="Ajouter au panier">
+                <span class="material-symbols-outlined text-base cart-ico">add_shopping_cart</span>
+              </button>
+              {% else %}
+              <span class="text-xs text-gray-400 font-medium">Épuisé</span>
+              {% endif %}
+            </div>
+
+            {% if product.is_en_promo and product.promo_fin %}
+            <p class="text-[10px] text-red-500 font-semibold mt-1.5">
+              ⏰ Promo jusqu'au {{ product.promo_fin|date:"d/m" }}
+            </p>
+            {% endif %}
+          </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+      </div>
+      <div id="no-results-perruque" style="display:none;"
+           class="flex flex-col items-center justify-center py-14 text-center">
+        <span class="material-symbols-outlined text-5xl text-gray-200 mb-3">search_off</span>
+        <p class="font-bold text-gray-700">Aucun résultat pour votre recherche</p>
+        <p class="text-xs text-gray-400 mt-1">Essayez un autre mot-clé</p>
+      </div>
+
+      {% else %}
+      <div class="flex flex-col items-center justify-center py-24 text-center">
+        <div class="text-6xl mb-4">💇</div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Aucun produit trouvé</h3>
+        <p class="text-gray-400 text-sm max-w-sm">Revenez bientôt, de nouvelles perruques arrivent.</p>
+        {% if q or cat_id or texture or material %}
+        <a href="{% url 'perruque:perruque_accueil' %}"
+           class="mt-6 inline-flex items-center gap-2 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm"
+           style="background:#7c3aed;">
+          Voir tout
+        </a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+    </main>
+  </div>
+</div>
+
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-white py-10 mt-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xl"
+           style="background:linear-gradient(135deg,#7c3aed,#a855f7);">💇</div>
+      <div>
+        <p class="font-extrabold text-white text-sm">Perruques & Beauté</p>
+        <p class="text-xs" style="color:#c4b5fd;">by Secrétariat Pro — Brazzaville</p>
+      </div>
+    </div>
+    <nav class="flex gap-5 text-sm text-gray-400">
+      <a href="{% url 'accueil' %}" class="hover:text-white transition">Accueil</a>
+      <a href="{% url 'perruque:perruque_accueil' %}" class="hover:text-white transition">Perruques</a>
+      <a href="{% url 'marche:panier' %}" class="hover:text-purple-400 transition">Panier</a>
+    </nav>
+    <p class="text-gray-600 text-xs">© 2025 Perruques & Beauté</p>
+  </div>
+</footer>
+
+<script>
+(function() {
+  const input = document.getElementById('search-perruque');
+  if (!input) return;
+  const noRes = document.getElementById('no-results-perruque');
+  input.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    const cards = document.querySelectorAll('.search-card[data-searchable]');
+    let visible = 0;
+    cards.forEach(card => {
+      const match = !q || card.dataset.searchable.includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    if (noRes) noRes.style.display = visible === 0 && q ? '' : 'none';
+  });
+})();
+</script>
+
+{% endblock %}

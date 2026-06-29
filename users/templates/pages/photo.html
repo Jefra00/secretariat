@@ -22,9 +22,8 @@
 <nav class="hidden md:flex items-center gap-9 text-slate-700 dark:text-slate-300">
     <a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" href="{% url 'espace_admin' %}">Accueil</a>
     <a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" href="{% url 'comptes' %}">Créer Compte</a>
-    <a class="text-sm font-medium leading-normal text-primary dark:text-primary" href="services.html">Services</a>
-    <a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" href="apropo.html">À propos</a>
-    <a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" href="contacts.html">Contact</a>
+    <a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" href="{% url 'apropo' %}">À propos</a>
+    <a class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" href="{% url 'accueil' %}">Contact</a>
 </nav>
 </div>
 </header>

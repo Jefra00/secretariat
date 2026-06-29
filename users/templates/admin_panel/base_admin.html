@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Admin Panel{% endblock %} — Urban Eat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: -5px; }
+    .sidebar-link.active { background: rgba(16,185,129,.12); color: #10b981; }
+    .sidebar-link.active .material-symbols-outlined { color: #10b981; }
+    .sidebar-link:hover:not(.active) { background: rgba(255,255,255,.06); }
+    .stat-card { transition: transform .15s, box-shadow .15s; }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,.08); }
+    /* Scrollbar sidebar */
+    #sidebar nav::-webkit-scrollbar { width: 4px; }
+    #sidebar nav::-webkit-scrollbar-track { background: transparent; }
+    #sidebar nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 99px; }
+    #sidebar nav::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.3); }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- ── Mobile header ── -->
+<header class="lg:hidden sticky top-0 z-50 flex items-center justify-between px-4 h-14 bg-gray-900 text-white shadow-md">
+  <div class="flex items-center gap-2">
+    <span class="text-xl">🌍</span>
+    <span class="font-bold text-sm">Admin Panel</span>
+  </div>
+  <button id="sidebarToggle" class="p-1.5 rounded-lg hover:bg-white/10">
+    <span class="material-symbols-outlined">menu</span>
+  </button>
+</header>
+
+<div class="flex min-h-screen">
+
+  <!-- ── Sidebar ── -->
+  <aside id="sidebar"
+         class="fixed lg:sticky lg:top-0 inset-y-0 left-0 z-40 w-64 h-screen bg-gray-900 text-gray-300
+                flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out
+                shadow-2xl flex-shrink-0">
+
+    <!-- Logo -->
+    <div class="px-5 py-5 border-b border-white/10 flex-shrink-0">
+      <a href="{% url 'admin_panel_dashboard' %}" class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-lg shadow-sm">🌍</div>
+        <div class="leading-tight">
+          <p class="font-extrabold text-white text-sm tracking-tight">Urban Eat</p>
+          <p class="text-[10px] text-emerald-400 font-semibold uppercase tracking-widest">Admin Panel</p>
+        </div>
+      </a>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
+
+      <p class="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-gray-500">Tableau de bord</p>
+      <a href="{% url 'admin_panel_dashboard' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_panel_dashboard' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">dashboard</span>
+        Vue d'ensemble
+      </a>
+
+      <p class="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-gray-500">Gestion</p>
+      <a href="{% url 'admin_panel_utilisateurs' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_panel_utilisateurs' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">group</span>
+        Utilisateurs
+      </a>
+      <a href="{% url 'admin_panel_vendeurs' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_panel_vendeurs' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">storefront</span>
+        Vendeurs
+      </a>
+      <a href="{% url 'admin_panel_boutiques' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_panel_boutiques' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">store</span>
+        Boutiques
+      </a>
+      <a href="{% url 'admin_panel_livreurs' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_panel_livreurs' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">delivery_dining</span>
+        Livreurs
+      </a>
+      <a href="{% url 'admin_positions' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_positions' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">location_on</span>
+        Suivi GPS
+        <span class="ml-auto text-[10px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">LIVE</span>
+      </a>
+
+      <p class="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-gray-500">Transactions</p>
+      <a href="{% url 'admin_panel_commandes' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_panel_commandes' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">receipt_long</span>
+        Commandes & Paiements
+      </a>
+      <a href="{% url 'admin_panel_commandes' %}?statut=en_attente"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors">
+        <span class="material-symbols-outlined text-xl text-amber-500">pending</span>
+        En attente
+      </a>
+
+      <p class="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-gray-500">Boutiques</p>
+      <a href="{% url 'admin_boutiques_list' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_boutiques_list' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">store</span>
+        Toutes les boutiques
+      </a>
+      <a href="{% url 'admin_boutique_creer' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors">
+        <span class="material-symbols-outlined text-xl text-gray-400">add_business</span>
+        Créer une boutique
+      </a>
+      <a href="{% url 'admin_geo' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if 'admin_geo' in request.resolver_match.url_name or 'admin_villes' in request.resolver_match.url_name or 'admin_communes' in request.resolver_match.url_name or 'admin_quartiers' in request.resolver_match.url_name or 'admin_marches' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">map</span>
+        Géographie (Villes/Marchés)
+      </a>
+
+      <p class="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-gray-500">Produits</p>
+      <a href="{% url 'admin_produits_hub' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if 'admin_produits' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">inventory_2</span>
+        Tous les produits
+      </a>
+      <a href="{% url 'admin_produits_marche' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_produits_marche' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">storefront</span>
+        Marché
+      </a>
+      <a href="{% url 'admin_produits_shopping' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_produits_shopping' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">shopping_bag</span>
+        Shopping
+      </a>
+      <a href="{% url 'admin_produits_perruque' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_produits_perruque' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">face</span>
+        Perruques
+      </a>
+      <a href="{% url 'admin_produits_quicaillerie' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_produits_quicaillerie' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">construction</span>
+        Quincaillerie
+      </a>
+      <a href="{% url 'admin_produits_voiture' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_produits_voiture' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">directions_car</span>
+        Voitures
+      </a>
+      <a href="{% url 'admin_produits_immobilier' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_produits_immobilier' %}active{% endif %}">
+        <span class="material-symbols-outlined text-xl text-gray-400">apartment</span>
+        Immobilier
+      </a>
+
+      <p class="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-gray-500">Actions rapides</p>
+      <a href="{% url 'admin_creer_vendeur' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors">
+        <span class="material-symbols-outlined text-xl text-gray-400">person_add</span>
+        Créer un vendeur
+      </a>
+      <a href="{% url 'comptes' %}"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors">
+        <span class="material-symbols-outlined text-xl text-gray-400">manage_accounts</span>
+        Créer un compte
+      </a>
+      <a href="/admin/"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors">
+        <span class="material-symbols-outlined text-xl text-gray-400">settings</span>
+        Django Admin
+      </a>
+
+    </nav>
+
+    <!-- Footer sidebar -->
+    <div class="px-4 py-4 border-t border-white/10 flex-shrink-0">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold">
+          {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
+        </div>
+        <div class="min-w-0">
+          <p class="text-white text-xs font-semibold truncate">{{ request.user.first_name }}</p>
+          <p class="text-emerald-400 text-[10px]">Administrateur</p>
+        </div>
+      </div>
+      <a href="{% url 'accueil' %}"
+         class="flex items-center gap-2 text-xs text-gray-400 hover:text-white transition py-1">
+        <span class="material-symbols-outlined text-base">home</span> Retour au site
+      </a>
+      <a href="{% url 'deconnexion_client' %}"
+         class="flex items-center gap-2 text-xs text-red-400 hover:text-red-300 transition py-1">
+        <span class="material-symbols-outlined text-base">logout</span> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── Overlay mobile ── -->
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+
+  <!-- ── Main content ── -->
+  <main class="flex-1 min-w-0 flex flex-col">
+    <!-- Page header -->
+    <div class="bg-white border-b border-gray-100 px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-lg font-bold text-gray-900">{% block page_title %}Dashboard{% endblock %}</h1>
+          <p class="text-sm text-gray-500 mt-0.5">{% block page_subtitle %}{% endblock %}</p>
+        </div>
+        <div class="flex items-center gap-2">
+          {% block header_actions %}{% endblock %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="px-6 pt-4">
+      {% for message in messages %}
+      <div class="mb-2 px-4 py-3 rounded-xl text-sm font-medium
+                  {% if message.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200
+                  {% elif message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200
+                  {% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Page body -->
+    <div class="flex-1 p-6">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  const btn     = document.getElementById('sidebarToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  function open()  { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); }
+  function close() { sidebar.classList.add('-translate-x-full');    overlay.classList.add('hidden'); }
+  btn?.addEventListener('click', open);
+  overlay?.addEventListener('click', close);
+})();
+</script>
+{% include 'base/_gps_tracker.html' %}
+<audio id="urban-notif-sound" preload="auto" style="display:none">
+  <source src="/static/son/son.wav" type="audio/wav">
+</audio>
+<script>
+(function(){
+  var _audio = document.getElementById('urban-notif-sound');
+  function _unlock(){ if(!_audio)return; _audio.play().then(function(){_audio.pause();_audio.currentTime=0;}).catch(function(){}); }
+  document.addEventListener('click',   _unlock, {once:true});
+  document.addEventListener('touchstart', _unlock, {once:true});
+  window.playNotifSound = function(){
+    if(!_audio)return;
+    _audio.currentTime = 0;
+    _audio.play().catch(function(){});
+  };
+})();
+</script>
+</body>
+</html>

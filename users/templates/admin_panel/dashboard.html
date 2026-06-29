@@ -1,0 +1,176 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Vue d'ensemble{% endblock %}
+{% block page_subtitle %}Statistiques globales de la plateforme{% endblock %}
+
+{% block header_actions %}
+<span class="text-xs text-gray-400">Marché Intelligent — Brazzaville</span>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Stat cards ── -->
+<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
+
+  <div class="stat-card bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+    <div class="flex items-center justify-between mb-3">
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+        <span class="material-symbols-outlined text-emerald-600">group</span>
+      </div>
+      <span class="text-xs font-semibold text-gray-400">Total</span>
+    </div>
+    <p class="text-2xl font-extrabold text-gray-900">{{ stats.total_users }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">Utilisateurs</p>
+  </div>
+
+  <div class="stat-card bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+    <div class="flex items-center justify-between mb-3">
+      <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+        <span class="material-symbols-outlined text-blue-600">person</span>
+      </div>
+      <span class="text-xs font-semibold text-emerald-500">+{{ stats.clients }}</span>
+    </div>
+    <p class="text-2xl font-extrabold text-gray-900">{{ stats.clients }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">Clients</p>
+  </div>
+
+  <div class="stat-card bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+    <div class="flex items-center justify-between mb-3">
+      <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+        <span class="material-symbols-outlined text-purple-600">storefront</span>
+      </div>
+    </div>
+    <p class="text-2xl font-extrabold text-gray-900">{{ stats.vendeurs }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">Vendeurs</p>
+  </div>
+
+  <div class="stat-card bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+    <div class="flex items-center justify-between mb-3">
+      <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
+        <span class="material-symbols-outlined text-orange-600">delivery_dining</span>
+      </div>
+    </div>
+    <p class="text-2xl font-extrabold text-gray-900">{{ stats.livreurs }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">Livreurs</p>
+  </div>
+
+  <div class="stat-card bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+    <div class="flex items-center justify-between mb-3">
+      <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+        <span class="material-symbols-outlined text-teal-600">store</span>
+      </div>
+    </div>
+    <p class="text-2xl font-extrabold text-gray-900">{{ stats.boutiques }}</p>
+    <p class="text-xs text-gray-500 mt-0.5">Boutiques actives</p>
+  </div>
+
+</div>
+
+<!-- ── Revenue + commandes ── -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+
+  <div class="md:col-span-2 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl p-5 text-white shadow-lg">
+    <p class="text-sm font-semibold text-emerald-200 mb-1">Chiffre d'affaires total (paiements validés)</p>
+    <p class="text-4xl font-extrabold tracking-tight">{{ stats.revenue|floatformat:0 }} <span class="text-xl font-semibold text-emerald-300">FCFA</span></p>
+    <div class="mt-4 grid grid-cols-2 gap-3">
+      <div class="bg-white/10 rounded-xl p-3">
+        <p class="text-xs text-emerald-200">Total commandes</p>
+        <p class="text-2xl font-bold">{{ stats.commandes }}</p>
+      </div>
+      <div class="bg-white/10 rounded-xl p-3">
+        <p class="text-xs text-amber-200">En attente</p>
+        <p class="text-2xl font-bold text-amber-300">{{ stats.en_attente }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+    <p class="text-sm font-bold text-gray-700 mb-3">Par section</p>
+    <div class="space-y-2">
+      {% for s in section_stats %}
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-gray-600 capitalize font-medium">{{ s.section }}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-400">{{ s.nb }} cmd</span>
+          <span class="font-semibold text-gray-900 text-xs">{{ s.rev|default:0|floatformat:0 }}</span>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-xs text-gray-400">Aucune transaction</p>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Dernières commandes + nouveaux users ── -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+  <!-- Dernières commandes -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      <h2 class="font-bold text-gray-800 text-sm">Dernières commandes</h2>
+      <a href="{% url 'admin_panel_commandes' %}" class="text-xs text-emerald-600 font-semibold hover:underline">Voir tout →</a>
+    </div>
+    <div class="divide-y divide-gray-50">
+      {% for c in recent_commandes %}
+      <div class="flex items-center justify-between px-5 py-3">
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-gray-900 truncate">
+            {% if c.client %}{{ c.client.first_name|default:c.client.telephone|default:"—" }}{% else %}Client supprimé{% endif %}
+          </p>
+          <p class="text-xs text-gray-400">{{ c.section }} · #{{ c.pk }}</p>
+        </div>
+        <div class="text-right flex-shrink-0 ml-3">
+          <p class="text-sm font-bold text-gray-900">{{ c.montant_total|floatformat:0 }} FCFA</p>
+          <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full
+            {% if c.statut == 'valide' %}bg-emerald-100 text-emerald-700
+            {% elif c.statut == 'en_attente' %}bg-amber-100 text-amber-700
+            {% elif c.statut == 'echoue' %}bg-red-100 text-red-700
+            {% else %}bg-gray-100 text-gray-600{% endif %}">
+            {{ c.get_statut_display }}
+          </span>
+        </div>
+      </div>
+      {% empty %}
+      <p class="px-5 py-4 text-sm text-gray-400">Aucune commande</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Nouveaux utilisateurs -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      <h2 class="font-bold text-gray-800 text-sm">Nouveaux utilisateurs</h2>
+      <a href="{% url 'admin_panel_utilisateurs' %}" class="text-xs text-emerald-600 font-semibold hover:underline">Voir tout →</a>
+    </div>
+    <div class="divide-y divide-gray-50">
+      {% for u in recent_users %}
+      <div class="flex items-center gap-3 px-5 py-3">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+          {{ u.first_name|slice:":1"|upper|default:"?" }}
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-semibold text-gray-900 truncate">
+            {% if u.first_name %}{{ u.first_name }}{% else %}{{ u.telephone|default:"—" }}{% endif %}
+          </p>
+          <p class="text-xs text-gray-400">{{ u.telephone|default:"—" }}</p>
+        </div>
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0
+          {% if u.role == 'client' %}bg-blue-100 text-blue-700
+          {% elif u.role == 'vendeur' %}bg-purple-100 text-purple-700
+          {% elif u.role == 'livreur' %}bg-orange-100 text-orange-700
+          {% elif u.role == 'admin' %}bg-red-100 text-red-700
+          {% else %}bg-gray-100 text-gray-600{% endif %}">
+          {{ u.role|default:"—" }}
+        </span>
+      </div>
+      {% empty %}
+      <p class="px-5 py-4 text-sm text-gray-400">Aucun utilisateur</p>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

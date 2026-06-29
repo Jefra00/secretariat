@@ -1,0 +1,398 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Suivi GPS{% endblock %}
+{% block page_title %}Suivi GPS temps réel{% endblock %}
+{% block page_subtitle %}{{ nb_avec_pos }} utilisateur{{ nb_avec_pos|pluralize }} localisé{{ nb_avec_pos|pluralize }} sur {{ nb_total }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  .user-card { transition: background .15s; cursor: pointer; }
+  .user-card:hover { background: #f8fafc; }
+  .user-card.selected { background: #ecfdf5; border-color: #6ee7b7; }
+  .role-btn.active { background:#111827; color:#fff; border-color:#111827; }
+  .pulse { animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex gap-4 h-[calc(100vh-140px)] min-h-[600px]">
+
+  <!-- ── Panneau gauche : liste utilisateurs ── -->
+  <div class="w-72 flex-shrink-0 flex flex-col gap-3 overflow-hidden">
+
+    <!-- Compteurs -->
+    <div class="grid grid-cols-2 gap-2">
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-3 text-center">
+        <p class="text-2xl font-extrabold text-emerald-600" id="nb-online">—</p>
+        <p class="text-xs text-gray-400 mt-0.5">En ligne</p>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-3 text-center">
+        <p class="text-2xl font-extrabold text-slate-700">{{ nb_avec_pos }}</p>
+        <p class="text-xs text-gray-400 mt-0.5">Localisés</p>
+      </div>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="relative">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-base">search</span>
+      <input id="search-users" type="text" placeholder="Rechercher…"
+             class="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+    </div>
+
+    <!-- Filtre rôle -->
+    <div class="flex gap-1.5 flex-wrap">
+      <button onclick="filterRole('')"    data-role="" class="role-btn active px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors bg-gray-900 text-white border-gray-900">Tous</button>
+      <button onclick="filterRole('livreur')"    data-role="livreur"    class="role-btn px-2.5 py-1 rounded-full text-xs font-semibold border border-gray-200 text-gray-600 hover:border-gray-400 transition-colors">Livreurs</button>
+      <button onclick="filterRole('client')"     data-role="client"     class="role-btn px-2.5 py-1 rounded-full text-xs font-semibold border border-gray-200 text-gray-600 hover:border-gray-400 transition-colors">Clients</button>
+      <button onclick="filterRole('vendeur')"    data-role="vendeur"    class="role-btn px-2.5 py-1 rounded-full text-xs font-semibold border border-gray-200 text-gray-600 hover:border-gray-400 transition-colors">Vendeurs</button>
+    </div>
+
+    <!-- Liste -->
+    <div id="user-list" class="flex-1 overflow-y-auto space-y-1.5 pr-1"></div>
+
+    <!-- Statut refresh -->
+    <div class="bg-white rounded-xl border border-gray-100 px-3 py-2 text-xs text-gray-400 flex items-center justify-between">
+      <span id="refresh-status">Chargement…</span>
+      <span class="flex items-center gap-1.5">
+        <span id="refresh-dot" class="w-2 h-2 rounded-full bg-gray-300"></span>
+        <span id="refresh-time">—</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Panneau droit : carte ── -->
+  <div class="flex-1 flex flex-col gap-2 min-w-0">
+
+    <!-- Barre d'info utilisateur sélectionné -->
+    <div id="selected-bar" class="hidden bg-white rounded-xl border border-emerald-200 px-4 py-2.5 flex items-center justify-between shadow-sm">
+      <div class="flex items-center gap-3">
+        <div id="sel-avatar" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"></div>
+        <div>
+          <p id="sel-nom" class="text-sm font-bold text-gray-800"></p>
+          <p id="sel-info" class="text-xs text-gray-400"></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="sel-trail-count" class="text-xs text-emerald-600 font-semibold"></span>
+        <button onclick="clearSelection()" class="text-xs px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">✕ Fermer</button>
+      </div>
+    </div>
+
+    <!-- Carte Leaflet -->
+    <div id="map" class="flex-1 rounded-2xl overflow-hidden border border-gray-200 shadow-sm" style="min-height:500px;"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const BRAZZA   = { lat: -4.2634, lng: 15.2429 };
+const REFRESH  = 5000; // 5 secondes
+const API_POS  = '{% url "api_positions" %}';
+const API_TRAIL_BASE = '{% url "api_positions" %}'.replace('positions/', 'positions/');
+
+const ROLE_COLORS = {
+  livreur:  '#10b981',
+  client:   '#3b82f6',
+  vendeur:  '#f97316',
+  admin:    '#8b5cf6',
+  employe:  '#6366f1',
+};
+const ROLE_LABELS = {
+  livreur: 'Livreur', client: 'Client', vendeur: 'Vendeur',
+  admin: 'Admin', employe: 'Employé',
+};
+
+// ── État ──────────────────────────────────────────────────────────────────────
+let markers       = {};      // user_id → L.Marker
+let usersData     = [];      // dernière réponse API
+let selectedId    = null;
+let trailLayer    = null;
+let trailMarkers  = [];
+let roleFilter    = '';
+let searchText    = '';
+
+// ── Carte ─────────────────────────────────────────────────────────────────────
+const map = L.map('map', { zoomControl: true }).setView([BRAZZA.lat, BRAZZA.lng], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap',
+  maxZoom: 19,
+}).addTo(map);
+
+// ── Icône personnalisée ───────────────────────────────────────────────────────
+function makeIcon(color, online) {
+  const border = online ? 'white' : '#aaa';
+  const shadow = online ? `0 0 0 3px ${color}40` : 'none';
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width:28px;height:28px;
+      background:${color};
+      border:2.5px solid ${border};
+      border-radius:50% 50% 50% 0;
+      transform:rotate(-45deg);
+      box-shadow:0 2px 8px rgba(0,0,0,.25),${shadow};
+      ${online ? '' : 'opacity:.6;'}
+    "></div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 28],
+    popupAnchor: [0, -30],
+  });
+}
+
+// ── Chargement & rafraîchissement ─────────────────────────────────────────────
+async function loadPositions() {
+  try {
+    const res  = await fetch(API_POS);
+    const data = await res.json();
+    usersData  = data;
+    updateMarkers(data);
+    renderUserList(data);
+    updateOnlineCount(data);
+
+    document.getElementById('refresh-status').textContent = `${data.length} utilisateur${data.length>1?'s':''} localisé${data.length>1?'s':''}`;
+    document.getElementById('refresh-time').textContent = new Date().toLocaleTimeString('fr-FR');
+    const dot = document.getElementById('refresh-dot');
+    dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+    setTimeout(() => dot.className = 'w-2 h-2 rounded-full bg-gray-300', 800);
+  } catch(e) {
+    document.getElementById('refresh-status').textContent = 'Erreur de connexion';
+  }
+}
+
+function updateOnlineCount(data) {
+  const n = data.filter(u => u.online).length;
+  document.getElementById('nb-online').textContent = n;
+  document.getElementById('nb-online').className = `text-2xl font-extrabold ${n > 0 ? 'text-emerald-600' : 'text-gray-400'}`;
+}
+
+// ── Marqueurs ─────────────────────────────────────────────────────────────────
+function updateMarkers(data) {
+  const seen = new Set();
+  data.forEach(u => {
+    seen.add(u.id);
+    const color = ROLE_COLORS[u.role] || '#6b7280';
+    const icon  = makeIcon(color, u.online);
+    const popup = `
+      <div style="font-family:Inter,sans-serif;min-width:160px;">
+        <p style="font-weight:700;font-size:13px;margin:0 0 4px">${u.nom}</p>
+        <p style="font-size:11px;color:#6b7280;margin:0 0 2px">${ROLE_LABELS[u.role]||u.role}${u.tel?' · '+u.tel:''}</p>
+        <p style="font-size:11px;margin:0 0 6px;color:${u.online?'#10b981':'#9ca3af'}">
+          ${u.online ? '● En ligne' : '● Hors ligne'} — ${u.age_s !== null ? (u.age_s < 60 ? u.age_s+'s' : Math.round(u.age_s/60)+'min') : '?'}
+        </p>
+        <button onclick="selectUser(${u.id})" style="
+          width:100%;padding:5px 10px;border-radius:8px;border:none;
+          background:#10b981;color:white;font-size:11px;font-weight:600;cursor:pointer;">
+          📍 Voir le déplacement
+        </button>
+      </div>`;
+
+    if (markers[u.id]) {
+      // Animer le déplacement vers la nouvelle position
+      animateMarker(markers[u.id], u.lat, u.lng);
+      markers[u.id].setIcon(icon);
+      markers[u.id].getPopup()?.setContent(popup);
+    } else {
+      const m = L.marker([u.lat, u.lng], { icon })
+        .addTo(map)
+        .bindPopup(popup, { maxWidth: 200 });
+      m.on('click', () => selectUser(u.id));
+      markers[u.id] = m;
+    }
+  });
+
+  // Supprimer les marqueurs des users partis
+  Object.keys(markers).forEach(id => {
+    if (!seen.has(parseInt(id))) {
+      map.removeLayer(markers[id]);
+      delete markers[id];
+    }
+  });
+}
+
+// Animation fluide du marqueur (interpolation sur 500ms)
+function animateMarker(marker, toLat, toLng) {
+  const from = marker.getLatLng();
+  if (Math.abs(from.lat - toLat) < 0.00001 && Math.abs(from.lng - toLng) < 0.00001) return;
+  const steps = 20, dur = 500;
+  let step = 0;
+  const interval = setInterval(() => {
+    step++;
+    const t = step / steps;
+    marker.setLatLng([
+      from.lat + (toLat - from.lat) * t,
+      from.lng + (toLng - from.lng) * t,
+    ]);
+    if (step >= steps) clearInterval(interval);
+  }, dur / steps);
+}
+
+// ── Liste utilisateurs ────────────────────────────────────────────────────────
+function renderUserList(data) {
+  const search = searchText.toLowerCase();
+  const filtered = data.filter(u =>
+    (!roleFilter || u.role === roleFilter) &&
+    (!search || u.nom.toLowerCase().includes(search) || u.tel.includes(search))
+  );
+
+  const container = document.getElementById('user-list');
+  container.innerHTML = filtered.map(u => {
+    const color   = ROLE_COLORS[u.role] || '#6b7280';
+    const initial = u.nom[0]?.toUpperCase() || '?';
+    const age     = u.age_s !== null
+      ? (u.age_s < 60 ? `${u.age_s}s` : `${Math.round(u.age_s/60)} min`)
+      : '—';
+    const isSelected = u.id === selectedId;
+    return `
+    <div class="user-card ${isSelected?'selected':''} bg-white rounded-xl border border-gray-100 px-3 py-2.5 flex items-center gap-2.5"
+         onclick="selectUser(${u.id})">
+      <div style="position:relative;flex-shrink:0;">
+        <div style="
+          width:34px;height:34px;border-radius:50%;
+          background:${color}20;border:2px solid ${color};
+          display:flex;align-items:center;justify-content:center;
+          font-weight:700;font-size:13px;color:${color}
+        ">${initial}</div>
+        <span style="
+          position:absolute;bottom:0;right:0;width:9px;height:9px;
+          border-radius:50%;border:1.5px solid white;
+          background:${u.online?'#10b981':'#d1d5db'};
+        "></span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-semibold text-gray-800 truncate">${u.nom}</p>
+        <p class="text-[10px] text-gray-400">${ROLE_LABELS[u.role]||u.role} · ${age}</p>
+      </div>
+      <button onclick="event.stopPropagation();flyTo(${u.lat},${u.lng})"
+              class="flex-shrink-0 p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-600 transition-colors"
+              title="Centrer sur la carte">
+        <span class="material-symbols-outlined" style="font-size:16px;">my_location</span>
+      </button>
+    </div>`;
+  }).join('');
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<p class="text-center text-xs text-gray-400 py-4">Aucun résultat</p>';
+  }
+}
+
+// ── Sélection & trail ─────────────────────────────────────────────────────────
+async function selectUser(userId) {
+  selectedId = userId;
+  const u = usersData.find(x => x.id === userId);
+  if (!u) return;
+
+  // Mettre en évidence le marqueur
+  if (markers[userId]) {
+    map.flyTo([u.lat, u.lng], 16, { duration: 1 });
+    markers[userId].openPopup();
+  }
+
+  // Afficher la barre info
+  const color = ROLE_COLORS[u.role] || '#6b7280';
+  const bar = document.getElementById('selected-bar');
+  bar.classList.remove('hidden');
+  document.getElementById('sel-avatar').style.background = color;
+  document.getElementById('sel-avatar').textContent = u.nom[0]?.toUpperCase() || '?';
+  document.getElementById('sel-nom').textContent = u.nom;
+  document.getElementById('sel-info').textContent = `${ROLE_LABELS[u.role]||u.role}${u.tel?' · '+u.tel:''}`;
+
+  // Recharger la liste pour mettre à jour la sélection
+  renderUserList(usersData);
+
+  // Charger et afficher le trail
+  await loadTrail(userId);
+}
+
+async function loadTrail(userId) {
+  clearTrail();
+  try {
+    const res  = await fetch(`/admin-panel/api/positions/${userId}/trail/`);
+    const data = await res.json();
+    const pts  = data.trail || [];
+
+    if (pts.length < 2) {
+      document.getElementById('sel-trail-count').textContent = pts.length === 1 ? '1 point' : 'Pas de déplacement enregistré';
+      return;
+    }
+
+    document.getElementById('sel-trail-count').textContent = `${pts.length} positions enregistrées`;
+
+    // Dessiner les segments avec opacité croissante (plus récent = plus visible)
+    for (let i = 1; i < pts.length; i++) {
+      const opacity = 0.2 + 0.8 * (i / pts.length);
+      const color   = ROLE_COLORS[usersData.find(u=>u.id===userId)?.role] || '#10b981';
+      const seg = L.polyline(
+        [[pts[i-1].lat, pts[i-1].lng], [pts[i].lat, pts[i].lng]],
+        { color, weight: 3, opacity }
+      ).addTo(map);
+      trailLayer = trailLayer || L.layerGroup().addTo(map);
+      trailLayer.addLayer(seg);
+    }
+
+    // Points du trail (petits cercles)
+    pts.forEach((p, i) => {
+      const isLast = i === pts.length - 1;
+      const circle = L.circleMarker([p.lat, p.lng], {
+        radius:      isLast ? 6 : 3,
+        fillColor:   ROLE_COLORS[usersData.find(u=>u.id===userId)?.role] || '#10b981',
+        color:       'white',
+        weight:      1.5,
+        opacity:     1,
+        fillOpacity: 0.2 + 0.8 * (i / pts.length),
+      }).bindTooltip(p.t, { permanent: false, direction: 'top' }).addTo(map);
+      trailMarkers.push(circle);
+    });
+
+    // Ajuster la vue sur le trail
+    const bounds = L.latLngBounds(pts.map(p => [p.lat, p.lng]));
+    map.fitBounds(bounds, { padding: [40, 40] });
+
+  } catch(e) {
+    document.getElementById('sel-trail-count').textContent = 'Erreur chargement trail';
+  }
+}
+
+function clearTrail() {
+  if (trailLayer) { map.removeLayer(trailLayer); trailLayer = null; }
+  trailMarkers.forEach(m => map.removeLayer(m));
+  trailMarkers = [];
+}
+
+function clearSelection() {
+  selectedId = null;
+  clearTrail();
+  document.getElementById('selected-bar').classList.add('hidden');
+  document.getElementById('sel-trail-count').textContent = '';
+  renderUserList(usersData);
+}
+
+function flyTo(lat, lng) {
+  map.flyTo([lat, lng], 17, { duration: 1 });
+}
+
+// ── Filtres ───────────────────────────────────────────────────────────────────
+function filterRole(role) {
+  roleFilter = role;
+  document.querySelectorAll('.role-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.role === role);
+  });
+  renderUserList(usersData);
+}
+
+document.getElementById('search-users').addEventListener('input', function() {
+  searchText = this.value;
+  renderUserList(usersData);
+});
+
+// ── Démarrage ─────────────────────────────────────────────────────────────────
+loadPositions();
+setInterval(async () => {
+  await loadPositions();
+  // Recharger le trail si un user est sélectionné
+  if (selectedId) await loadTrail(selectedId);
+}, REFRESH);
+</script>
+{% endblock %}

@@ -1,109 +1,505 @@
-<div
-      class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden"
-    >
-      <div class="layout-container flex h-full grow flex-col">
-        <div class="flex flex-1 justify-center">
-          <div class="layout-content-container flex w-full flex-col">
-            <!-- TopNavBar -->
-            <header
-  class="sticky top-0 z-50 flex w-full items-center justify-between whitespace-nowrap border-b border-solid border-slate-200/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 py-3 md:px-8 lg:px-16 xl:px-24 shadow-sm"
->
-  <!-- Logo -->
-  <a class="flex items-center gap-4" href="{% url 'accueil' %}">
-    <div class="size-6 text-primary">
-      <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z"
-          fill="currentColor"
-        ></path>
-      </svg>
+<!-- ══ NAVBAR PRINCIPALE — Urban Eat / Secrétariat Pro ══ -->
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+
+    <!-- Logo -->
+    <a href="{% url 'accueil' %}" class="flex items-center gap-2.5 flex-shrink-0">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center text-white text-lg shadow-sm">🌍</div>
+      <div class="leading-tight hidden sm:block">
+        <p class="font-extrabold text-gray-900 text-base tracking-tight">Urban Eat</p>
+        <p class="text-[10px] text-emerald-600 font-semibold uppercase tracking-widest">Secrétariat Pro</p>
+      </div>
+    </a>
+
+    <!-- Badge localisation dynamique -->
+    <div id="ue-location-pill"
+         class="hidden items-center gap-1 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 cursor-default select-none flex-shrink-0"
+         title="Votre position détectée automatiquement">
+      <span class="material-symbols-outlined text-sm text-emerald-500" style="font-size:15px">location_on</span>
+      <span id="ue-location-text" class="text-xs font-semibold text-emerald-700 max-w-[140px] truncate"></span>
     </div>
-    <h2
-      class="text-slate-800 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em]"
-    >
-      Secrétariat Pro
-    </h2>
-  </a>
 
-  <!-- Navigation (desktop) -->
-  <nav class="hidden items-center gap-8 md:flex">
-    <a href="{% url 'accueil' %}" class="text-slate-700 dark:text-slate-300 hover:text-primary text-sm font-medium">Accueil</a>
-    <a href="{% url 'services:liste' %}" class="text-slate-700 dark:text-slate-300 hover:text-primary text-sm font-medium">Services</a>
-    <a href="{% url 'apropo' %}" class="text-slate-700 dark:text-slate-300 hover:text-primary text-sm font-medium">À propos</a>
-    <a href="{% url 'order_list' %}" class="hover:text-primary transition">Commandes</a>
-    <a href="{% url 'communication:blog_list' %}" 
-           class="block px-4 py-2 hover:bg-primary/10 hover:text-primary transition">
-          Blog 
-        </a>
-    <a href="" class="text-slate-700 dark:text-slate-300 hover:text-primary text-sm font-medium">Contact</a>
-    {% if not user.is_authenticated %}
-      <a href="{% url 'inscription_client' %}" class="text-slate-700 dark:text-slate-300 hover:text-primary text-sm font-medium">Créer un compte</a>
-      <a href="{% url 'connexion_client' %}" class="text-slate-700 dark:text-slate-300 hover:text-primary text-sm font-medium">Connexion</a>
-    {% endif %}
-  </nav>
+    <!-- Navigation desktop -->
+    <nav class="hidden md:flex items-center gap-1">
 
-  <!-- Actions -->
-  <div class="flex items-center gap-4">
-    {% if user.is_authenticated %}
-      <!-- ✅ Profil utilisateur -->
-      <div class="relative">
-        <button id="profilToggle" class="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800">
-          {% if user.avatar %}
-            <img src="{{ user.avatar.url }}" alt="Profil" class="w-9 h-9 rounded-full object-cover border border-slate-300 dark:border-slate-600">
-          {% else %}
-            <span class="material-symbols-outlined text-3xl text-primary">account_circle</span>
-          {% endif %}
-          <span class="text-sm font-semibold text-slate-800 dark:text-white">{{ user.first_name|default:user.username }}</span>
-          <span id="profilIcon" class="material-symbols-outlined text-slate-500 text-base transition-transform">expand_more</span>
+      <!-- Nos sections (toujours visible) -->
+      <div class="relative group">
+        <button class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200">
+          <span class="material-symbols-outlined text-base text-emerald-500">apps</span>
+          Sections
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
         </button>
-
-        <!-- Menu déroulant profil -->
-        <div id="profilMenu" class="hidden absolute right-0 mt-2 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg overflow-hidden z-50">
-          <a href="{% url 'modifier_profil' %}" class="block px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200">Mon profil</a>
-          <a href="{% url 'commandes:mes_commandes' %}" class="block px-4 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200">Mes commandes</a>
-          <div class="border-t border-slate-200 dark:border-slate-700"></div>
-          <a href="{% url 'deconnexion_client' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-700/30 font-medium">Déconnexion</a>
+        <div class="absolute top-full left-0 mt-1 w-60 bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-2">
+          <a href="{% url 'marche:accueil_marche' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 transition text-sm font-medium">
+            <span class="text-lg">🛒</span> Marché Intelligent
+          </a>
+          <a href="{% url 'shopping:shopping_accueil' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-pink-50 text-gray-700 hover:text-pink-700 transition text-sm font-medium">
+            <span class="text-lg">🛍️</span> Shopping
+          </a>
+          <a href="{% url 'perruque:perruque_accueil' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-violet-50 text-gray-700 hover:text-violet-700 transition text-sm font-medium">
+            <span class="text-lg">💇</span> Beauté & Perruques
+          </a>
+          <a href="{% url 'voiture:voiture_accueil' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 text-gray-700 hover:text-blue-700 transition text-sm font-medium">
+            <span class="text-lg">🚗</span> Location voiture
+          </a>
+          <a href="{% url 'immobilier:accueil' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-amber-50 text-gray-700 hover:text-amber-700 transition text-sm font-medium">
+            <span class="text-lg">🏠</span> Immobilier
+          </a>
+          <a href="{% url 'quicaillerie:accueil' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-100 text-gray-700 hover:text-slate-700 transition text-sm font-medium">
+            <span class="text-lg">🔧</span> Quincaillerie
+          </a>
         </div>
       </div>
-    {% endif %}
 
-    
+      <a href="{% url 'apropo' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200">
+        À propos
+      </a>
 
-    <!-- Bouton menu mobile -->
-    <button id="menuToggle" class="md:hidden p-2 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700">
-      <span class="material-symbols-outlined text-3xl">menu</span>
-    </button>
+      {% if not user.is_authenticated %}
+        <a href="{% url 'connexion_client' %}" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200">
+          Connexion
+        </a>
+        <a href="{% url 'inscription_client' %}"
+           class="ml-1 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold shadow-sm shadow-emerald-200 transition-all duration-200">
+          <span class="material-symbols-outlined text-base">person_add</span>
+          Créer un compte
+        </a>
+      {% endif %}
+
+      {% if user.is_authenticated and user.role == 'admin' or user.is_staff %}
+        <div class="relative group">
+          <button class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200">
+            <span class="material-symbols-outlined text-base text-orange-500">admin_panel_settings</span>
+            Admin
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="absolute top-full left-0 mt-1 w-56 bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-2">
+            <a href="{% url 'admin_panel_dashboard' %}" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 transition text-sm font-medium">
+              <span class="material-symbols-outlined text-base text-emerald-600">dashboard</span> Admin Panel
+            </a>
+            <a href="{% url 'admin_panel_utilisateurs' %}" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-orange-700 transition text-sm font-medium">
+              <span class="material-symbols-outlined text-base text-orange-500">group</span> Utilisateurs
+            </a>
+            <a href="{% url 'admin_panel_commandes' %}" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-orange-700 transition text-sm font-medium">
+              <span class="material-symbols-outlined text-base text-orange-500">receipt_long</span> Commandes
+            </a>
+            <a href="{% url 'admin_creer_vendeur' %}" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-blue-50 text-gray-700 hover:text-blue-700 transition text-sm font-medium">
+              <span class="material-symbols-outlined text-base text-blue-500">person_add</span> Créer vendeur
+            </a>
+            <a href="/admin/" class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition text-sm font-medium">
+              <span class="material-symbols-outlined text-base text-gray-400">settings</span> Django admin
+            </a>
+          </div>
+        </div>
+      {% endif %}
+
+    </nav>
+
+    <!-- Actions droite -->
+    <div class="flex items-center gap-2">
+
+      {% if user.is_authenticated %}
+        <!-- Panier (client) -->
+        {% if user.role == 'client' or not user.role %}
+        <a href="{% url 'marche:panier' %}"
+           class="relative flex items-center justify-center w-9 h-9 rounded-xl text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200">
+          <span class="material-symbols-outlined text-xl">shopping_cart</span>
+          <span id="nav-cart-badge"
+                class="hidden absolute -top-1 -right-1 min-w-[1.1rem] h-[1.1rem] bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white px-0.5"></span>
+        </a>
+        {% endif %}
+
+        <!-- Menu profil -->
+        <div class="relative">
+          <button id="profilToggle"
+                  class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-gray-100 transition-all duration-200">
+            {% if user.avatar %}
+              <img src="{{ user.avatar.url }}" alt="" class="w-8 h-8 rounded-xl object-cover border border-gray-200">
+            {% else %}
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center text-white text-sm font-bold">
+                {{ user.first_name|default:user.username|first|upper }}
+              </div>
+            {% endif %}
+            <div class="hidden sm:block text-left">
+              <p class="text-sm font-bold text-gray-900 leading-tight">{{ user.first_name|default:user.username|truncatechars:14 }}</p>
+              <p class="text-[10px] text-gray-400 font-medium capitalize">{{ user.role|default:"client" }}</p>
+            </div>
+            <span id="profilIcon" class="material-symbols-outlined text-base text-gray-400 transition-transform duration-200">expand_more</span>
+          </button>
+
+          <!-- Dropdown profil -->
+          <div id="profilMenu"
+               class="hidden absolute right-0 mt-2 w-60 bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden z-50">
+            <!-- Header -->
+            <div class="px-4 py-3 bg-gradient-to-r from-emerald-50 to-green-50 border-b border-gray-100">
+              <p class="text-xs text-gray-400 font-medium">Connecté en tant que</p>
+              <p class="text-sm font-bold text-gray-900 truncate mt-0.5">{{ user.get_full_name|default:user.username }}</p>
+              {% if user.telephone %}<p class="text-xs text-emerald-600 mt-0.5">{{ user.telephone }}</p>{% endif %}
+            </div>
+
+            <!-- Liens selon le rôle -->
+            {% if user.role == 'client' or not user.role %}
+              <a href="{% url 'client_profil' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition">
+                <span class="material-symbols-outlined text-base text-emerald-500">account_circle</span> Mon profil
+              </a>
+              <a href="{% url 'client_commandes' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition">
+                <span class="material-symbols-outlined text-base text-emerald-500">receipt_long</span> Mes commandes
+              </a>
+              <a href="{% url 'marche:panier' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition">
+                <span class="material-symbols-outlined text-base text-emerald-500">shopping_cart</span> Mon panier
+              </a>
+            {% endif %}
+
+            {% if user.role == 'vendeur' %}
+              <a href="{% url 'vendeur_dashboard' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition">
+                <span class="material-symbols-outlined text-base text-purple-500">storefront</span> Espace vendeur
+              </a>
+              <a href="{% url 'vendeur_profil' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition">
+                <span class="material-symbols-outlined text-base text-purple-500">account_circle</span> Mon profil vendeur
+              </a>
+              <a href="{% url 'vendeur_commandes' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition">
+                <span class="material-symbols-outlined text-base text-purple-500">receipt_long</span> Mes commandes
+              </a>
+            {% endif %}
+
+            {% if user.role == 'livreur' %}
+              <a href="{% url 'livreur_dashboard' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
+                <span class="material-symbols-outlined text-base text-blue-500">two_wheeler</span> Espace livreur
+              </a>
+            {% endif %}
+
+            {% if user.role == 'admin' or user.is_staff %}
+              <a href="/admin/" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition">
+                <span class="material-symbols-outlined text-base text-orange-500">admin_panel_settings</span> Django admin
+              </a>
+              <a href="{% url 'gestion_commandes' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition">
+                <span class="material-symbols-outlined text-base text-orange-500">receipt_long</span> Gestion commandes
+              </a>
+            {% endif %}
+
+            <div class="border-t border-gray-100 my-1"></div>
+            <a href="{% url 'deconnexion_client' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium transition">
+              <span class="material-symbols-outlined text-base">logout</span> Déconnexion
+            </a>
+          </div>
+        </div>
+
+      {% else %}
+        <!-- Non connecté : CTA mobile -->
+        <a href="{% url 'connexion_client' %}"
+           class="sm:hidden flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold shadow-sm transition-all duration-200">
+          <span class="material-symbols-outlined text-base">login</span>
+        </a>
+      {% endif %}
+
+      <!-- Menu mobile toggle -->
+      <button id="menuToggle"
+              class="md:hidden flex items-center justify-center w-9 h-9 rounded-xl text-gray-600 hover:bg-gray-100 transition-all duration-200">
+        <span class="material-symbols-outlined text-xl" id="menuIcon">menu</span>
+      </button>
+    </div>
   </div>
 </header>
-<!-- =================== MENU MOBILE =================== -->
-<div id="mobileMenu" class="fixed inset-0 hidden z-40 md:hidden">
-  <div id="mobileMenuPanel" class="absolute right-0 top-0 h-full w-4/5 sm:w-2/5 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 shadow-2xl p-6 flex flex-col gap-6 transform translate-x-full transition-transform duration-300">
 
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-bold">Menu</h3>
-      <button id="menuClose" class="text-slate-500 hover:text-primary">
-        <span class="material-symbols-outlined text-3xl">close</span>
+<!-- ══ MENU MOBILE ══ -->
+<div id="mobileMenu" class="fixed inset-0 hidden z-40 md:hidden">
+  <!-- Backdrop -->
+  <div id="mobileBackdrop" class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+  <!-- Panel -->
+  <div id="mobileMenuPanel"
+       class="absolute right-0 top-0 h-full w-4/5 max-w-xs bg-white shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300">
+
+    <!-- Header panel -->
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center text-lg">🌍</div>
+        <div>
+          <p class="font-extrabold text-gray-900 text-sm">Urban Eat</p>
+          <p id="ue-location-mobile" class="text-[10px] text-emerald-600 font-medium hidden"></p>
+        </div>
+      </div>
+      <button id="menuClose" class="w-8 h-8 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-100 transition">
+        <span class="material-symbols-outlined text-xl">close</span>
       </button>
     </div>
 
-    <nav class="flex flex-col gap-4 text-sm font-medium">
-      <a href="{% url 'accueil' %}" class="hover:text-primary transition">Accueil</a>
-      <a href="{% url 'services:liste' %}" class="hover:text-primary transition">Services</a>
-      <a href="{% url 'apropo' %}" class="hover:text-primary transition">À propos</a>
-      <a href="{% url 'communication:blog_list' %}" class="hover:text-primary transition">Blog</a>
-      <a href="" class="hover:text-primary transition">Contact</a> 
-      <a href="{% url 'order_list' %}" class="hover:text-primary transition">Commandes</a>
+    <!-- Contenu scroll -->
+    <div class="flex-1 overflow-y-auto px-4 py-4 space-y-1">
 
       {% if user.is_authenticated %}
-        <hr class="border-slate-300 dark:border-slate-700 my-2">
-        <a href="{% url 'modifier_profil' %}" class="hover:text-primary transition">Mon profil</a>
-        <a href="{% url 'commandes:mes_commandes' %}" class="hover:text-primary transition">Mes commandes</a>
-        <a href="{% url 'deconnexion_client' %}" class="text-red-600 hover:text-red-700 transition">Déconnexion</a>
-      {% else %}
-        <hr class="border-slate-300 dark:border-slate-700 my-2">
-        <a href="{% url 'inscription_client' %}" class="hover:text-primary transition">Créer un compte</a>
-        <a href="{% url 'connexion_client' %}" class="hover:text-primary transition">Connexion</a>
+      <!-- Info utilisateur -->
+      <div class="flex items-center gap-3 px-3 py-3 mb-3 bg-emerald-50 rounded-2xl border border-emerald-100">
+        {% if user.avatar %}
+          <img src="{{ user.avatar.url }}" alt="" class="w-10 h-10 rounded-xl object-cover">
+        {% else %}
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center text-white font-bold text-base">
+            {{ user.first_name|default:user.username|first|upper }}
+          </div>
+        {% endif %}
+        <div>
+          <p class="text-sm font-bold text-gray-900 leading-tight">{{ user.first_name|default:user.username }}</p>
+          <p class="text-xs text-emerald-600 capitalize">{{ user.role|default:"client" }}</p>
+        </div>
+      </div>
       {% endif %}
-    </nav>
+
+      <!-- Sections -->
+      <p class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-2 pb-1">Nos sections</p>
+      <a href="{% url 'marche:accueil_marche' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
+        <span class="text-lg">🛒</span> Marché
+      </a>
+      <a href="{% url 'shopping:shopping_accueil' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-pink-50 hover:text-pink-700 transition">
+        <span class="text-lg">🛍️</span> Shopping
+      </a>
+      <a href="{% url 'perruque:perruque_accueil' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition">
+        <span class="text-lg">💇</span> Beauté
+      </a>
+      <a href="{% url 'voiture:voiture_accueil' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
+        <span class="text-lg">🚗</span> Voiture
+      </a>
+      <a href="{% url 'immobilier:accueil' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-amber-50 hover:text-amber-700 transition">
+        <span class="text-lg">🏠</span> Immobilier
+      </a>
+      <a href="{% url 'quicaillerie:accueil' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-slate-100 hover:text-slate-700 transition">
+        <span class="text-lg">🔧</span> Quincaillerie
+      </a>
+
+      <div class="border-t border-gray-100 my-2"></div>
+
+      {% if user.is_authenticated %}
+        <!-- Liens selon le rôle -->
+        {% if user.role == 'client' or not user.role %}
+          <p class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-1 pb-1">Mon espace</p>
+          <a href="{% url 'client_profil' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+            <span class="material-symbols-outlined text-base text-emerald-500">account_circle</span> Mon profil
+          </a>
+          <a href="{% url 'client_commandes' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+            <span class="material-symbols-outlined text-base text-emerald-500">receipt_long</span> Mes commandes
+          </a>
+          <a href="{% url 'marche:panier' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+            <span class="material-symbols-outlined text-base text-emerald-500">shopping_cart</span> Mon panier
+          </a>
+        {% endif %}
+
+        {% if user.role == 'vendeur' %}
+          <p class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-1 pb-1">Espace vendeur</p>
+          <a href="{% url 'vendeur_dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition">
+            <span class="material-symbols-outlined text-base text-purple-500">storefront</span> Tableau de bord
+          </a>
+          <a href="{% url 'vendeur_profil' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+            <span class="material-symbols-outlined text-base text-purple-500">account_circle</span> Profil vendeur
+          </a>
+          <a href="{% url 'vendeur_commandes' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+            <span class="material-symbols-outlined text-base text-purple-500">receipt_long</span> Commandes
+          </a>
+        {% endif %}
+
+        {% if user.role == 'livreur' %}
+          <a href="{% url 'livreur_dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
+            <span class="material-symbols-outlined text-base text-blue-500">two_wheeler</span> Espace livreur
+          </a>
+        {% endif %}
+
+        {% if user.role == 'admin' or user.is_staff %}
+          <p class="px-3 text-[10px] font-bold text-orange-400 uppercase tracking-widest pt-1 pb-1">Administration</p>
+          <a href="/admin/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition">
+            <span class="material-symbols-outlined text-base text-orange-500">admin_panel_settings</span> Django admin
+          </a>
+          <a href="{% url 'gestion_commandes' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition">
+            <span class="material-symbols-outlined text-base text-orange-500">receipt_long</span> Gestion commandes
+          </a>
+          <a href="{% url 'inscription_restaurant' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition">
+            <span class="material-symbols-outlined text-base text-orange-500">storefront</span> Inscrire restaurant
+          </a>
+          <a href="{% url 'livreur_inscription' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition">
+            <span class="material-symbols-outlined text-base text-orange-500">two_wheeler</span> Inscrire livreur
+          </a>
+        {% endif %}
+
+        <div class="border-t border-gray-100 my-2"></div>
+        <a href="{% url 'deconnexion_client' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition">
+          <span class="material-symbols-outlined text-base">logout</span> Déconnexion
+        </a>
+
+      {% else %}
+        <!-- Non connecté -->
+        <div class="space-y-2 pt-2">
+          <a href="{% url 'connexion_client' %}"
+             class="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-emerald-500 text-emerald-600 font-bold text-sm hover:bg-emerald-50 transition">
+            <span class="material-symbols-outlined text-base">login</span> Se connecter
+          </a>
+          <a href="{% url 'inscription_client' %}"
+             class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm shadow-sm transition">
+            <span class="material-symbols-outlined text-base">person_add</span> Créer un compte
+          </a>
+        </div>
+      {% endif %}
+
+    </div>
   </div>
 </div>
+
+<script>
+(function(){
+  // ── Menu profil desktop ──
+  const toggle = document.getElementById('profilToggle');
+  const menu   = document.getElementById('profilMenu');
+  const icon   = document.getElementById('profilIcon');
+  if (toggle && menu) {
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.toggle('hidden');
+      icon?.classList.toggle('rotate-180');
+    });
+    document.addEventListener('click', (e) => {
+      if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add('hidden');
+        icon?.classList.remove('rotate-180');
+      }
+    });
+  }
+
+  // ── Menu mobile ──
+  const menuToggle   = document.getElementById('menuToggle');
+  const menuClose    = document.getElementById('menuClose');
+  const mobileMenu   = document.getElementById('mobileMenu');
+  const mobilePanel  = document.getElementById('mobileMenuPanel');
+  const backdrop     = document.getElementById('mobileBackdrop');
+  const menuIconEl   = document.getElementById('menuIcon');
+
+  function openMobile() {
+    mobileMenu.classList.remove('hidden');
+    setTimeout(() => mobilePanel.classList.remove('translate-x-full'), 10);
+    menuIconEl && (menuIconEl.textContent = 'close');
+  }
+  function closeMobile() {
+    mobilePanel.classList.add('translate-x-full');
+    setTimeout(() => mobileMenu.classList.add('hidden'), 280);
+    menuIconEl && (menuIconEl.textContent = 'menu');
+  }
+
+  menuToggle?.addEventListener('click', openMobile);
+  menuClose?.addEventListener('click', closeMobile);
+  backdrop?.addEventListener('click', closeMobile);
+
+  // ── Détection de localisation automatique ──────────────────────────────────
+  (function() {
+    const pill    = document.getElementById('ue-location-pill');
+    const pillTxt = document.getElementById('ue-location-text');
+    const mobile  = document.getElementById('ue-location-mobile');
+
+    function showLoc(label) {
+      if (pillTxt) { pillTxt.textContent = '📍 ' + label; }
+      if (pill)    { pill.classList.remove('hidden'); pill.classList.add('flex'); }
+      if (mobile)  { mobile.textContent = '📍 ' + label; mobile.classList.remove('hidden'); }
+      try { sessionStorage.setItem('ue_location', label); } catch(e) {}
+    }
+
+    // Affichage immédiat depuis le cache
+    try {
+      const cached = sessionStorage.getItem('ue_location');
+      if (cached) showLoc(cached);
+    } catch(e) {}
+
+    if (!navigator.geolocation) return;
+
+    // Déclenchement géoloc (une fois par session ou quand le cache est vieux)
+    const CACHE_TTL = 5 * 60 * 1000; // 5 min
+    let lastFetch = 0;
+    try { lastFetch = parseInt(sessionStorage.getItem('ue_loc_ts') || '0'); } catch(e) {}
+    if (Date.now() - lastFetch < CACHE_TTL) return; // cache frais, on ne redemande pas
+
+    navigator.geolocation.getCurrentPosition(
+      async function(pos) {
+        try {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const r = await fetch(
+            'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat +
+            '&lon=' + lng + '&accept-language=fr&addressdetails=1',
+            { headers: { 'Accept': 'application/json', 'User-Agent': 'UrbanEat/1.0' } }
+          );
+          if (!r.ok) return;
+          const data = await r.json();
+          const a = data.address || {};
+
+          // Ville
+          const city = a.city || a.town || a.municipality || a.county || a.state_district || '';
+
+          // Quartier — cherche dans plusieurs champs
+          const quartier = a.suburb || a.quarter || a.neighbourhood ||
+                           a.city_district || a.district || a.village || '';
+
+          let label = city;
+          if (quartier && quartier.toLowerCase() !== city.toLowerCase()) {
+            label += (city ? ', ' : '') + quartier;
+          }
+          if (!label && data.display_name) {
+            label = data.display_name.split(',').slice(0, 2).join(',').trim();
+          }
+          if (!label) return;
+
+          try { sessionStorage.setItem('ue_loc_ts', Date.now().toString()); } catch(e) {}
+          showLoc(label);
+        } catch(e) {}
+      },
+      function() {}, // permission refusée : silencieux
+      { timeout: 8000, maximumAge: 300000, enableHighAccuracy: false }
+    );
+
+    // Surveiller le changement de position (si l'utilisateur bouge d'un quartier)
+    if (navigator.geolocation.watchPosition) {
+      let lastLat = null, lastLng = null;
+      navigator.geolocation.watchPosition(
+        async function(pos) {
+          const lat = pos.coords.latitude, lng = pos.coords.longitude;
+          if (lastLat !== null) {
+            // Distance approximative (formule simple)
+            const dlat = (lat - lastLat) * 111000;
+            const dlng = (lng - lastLng) * 111000 * Math.cos(lat * Math.PI / 180);
+            const dist = Math.sqrt(dlat*dlat + dlng*dlng);
+            if (dist < 600) return; // moins de 600m → on ne met pas à jour
+          }
+          lastLat = lat; lastLng = lng;
+          try {
+            const r = await fetch(
+              'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat +
+              '&lon=' + lng + '&accept-language=fr&addressdetails=1',
+              { headers: { 'Accept': 'application/json', 'User-Agent': 'UrbanEat/1.0' } }
+            );
+            if (!r.ok) return;
+            const data = await r.json();
+            const a = data.address || {};
+            const city     = a.city || a.town || a.municipality || a.county || '';
+            const quartier = a.suburb || a.quarter || a.neighbourhood || a.city_district || a.district || '';
+            let label = city;
+            if (quartier && quartier.toLowerCase() !== city.toLowerCase()) label += (city ? ', ' : '') + quartier;
+            if (label) showLoc(label);
+          } catch(e) {}
+        },
+        function() {},
+        { timeout: 10000, maximumAge: 60000, enableHighAccuracy: false }
+      );
+    }
+  })();
+
+  // ── Badge panier ──
+  function updateNavCartBadge() {
+    try {
+      const items = JSON.parse(localStorage.getItem('mi_cart_v1') || '[]');
+      const total = items.reduce((s, i) => s + (i.quantite || 1), 0);
+      const badge = document.getElementById('nav-cart-badge');
+      if (!badge) return;
+      if (total > 0) {
+        badge.textContent = total > 99 ? '99+' : total;
+        badge.classList.remove('hidden');
+        badge.classList.add('flex');
+      } else {
+        badge.classList.add('hidden');
+      }
+    } catch(e) {}
+  }
+  document.addEventListener('DOMContentLoaded', updateNavCartBadge);
+  window.addEventListener('storage', updateNavCartBadge);
+})();
+</script>

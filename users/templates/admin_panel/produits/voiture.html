@@ -1,0 +1,94 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Produits Voitures{% endblock %}
+{% block page_title %}Produits — Voitures{% endblock %}
+{% block page_subtitle %}Location de véhicules{% endblock %}
+{% block header_actions %}
+<a href="{% url 'admin_produits_hub' %}" class="text-sm text-gray-500 hover:text-gray-800 transition">← Tous les produits</a>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+
+  <!-- Formulaire ajout -->
+  <div class="xl:col-span-2">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sticky top-4 max-h-[85vh] overflow-y-auto">
+      <h2 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-blue-500">add_circle</span>
+        Ajouter un véhicule
+      </h2>
+      <form method="post" enctype="multipart/form-data" class="space-y-3">
+        {% csrf_token %}
+        {% for field in form %}
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">{{ field.label }}{% if field.field.required %} <span class="text-red-400">*</span>{% endif %}</label>
+          {{ field }}
+          {% if field.errors %}<p class="text-xs text-red-500 mt-0.5">{{ field.errors.0 }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        {% if form.non_field_errors %}
+        <p class="text-xs text-red-500">{{ form.non_field_errors.0 }}</p>
+        {% endif %}
+        <button type="submit"
+                class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition">
+          Enregistrer
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Liste véhicules -->
+  <div class="xl:col-span-3">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+        <h2 class="font-semibold text-gray-800">Véhicules enregistrés</h2>
+        <span class="text-xs text-gray-400">{{ page_obj.paginator.count }} véhicules</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-50 text-xs text-gray-400 uppercase">
+              <th class="text-left px-4 py-3">Véhicule</th>
+              <th class="text-left px-4 py-3">Boutique</th>
+              <th class="text-right px-4 py-3">Prix/jour</th>
+              <th class="text-center px-4 py-3">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in page_obj %}
+            <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition">
+              <td class="px-4 py-3">
+                <div class="font-medium text-gray-800">{{ v.brand }} {{ v.model }}</div>
+                <div class="text-xs text-gray-400">{{ v.year }} · {{ v.transmission }} · {{ v.fuel }}</div>
+              </td>
+              <td class="px-4 py-3 text-gray-600">{{ v.shop.name|default:"—" }}</td>
+              <td class="px-4 py-3 text-right font-medium text-gray-800">{{ v.daily_price }} FCFA</td>
+              <td class="px-4 py-3 text-center">
+                {% if v.status == 'available' %}
+                <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">Disponible</span>
+                {% else %}
+                <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs font-medium">{{ v.status }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="px-4 py-8 text-center text-gray-400 text-sm">Aucun véhicule enregistré</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if page_obj.has_other_pages %}
+      <div class="px-5 py-3 border-t border-gray-50 flex items-center justify-between text-sm text-gray-500">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="hover:text-gray-800">← Précédent</a>
+        {% else %}<span></span>{% endif %}
+        <span>Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="hover:text-gray-800">Suivant →</a>
+        {% else %}<span></span>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

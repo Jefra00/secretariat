@@ -1,0 +1,106 @@
+{# Composant réutilisable : carte Leaflet centrée sur Brazzaville pour choisir une position GPS #}
+{# Usage : {% include 'boutique/_map_picker.html' with lat=boutique.position_lat lng=boutique.position_lng %} #}
+
+<div class="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+  <div id="map-picker" style="height:360px;width:100%;"></div>
+</div>
+<div class="mt-2 flex items-center gap-3">
+  <div class="flex-1 grid grid-cols-2 gap-2">
+    <div>
+      <label class="block text-xs font-semibold text-gray-500 mb-1">Latitude</label>
+      <input id="map-lat-display" type="text" readonly placeholder="—"
+             class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono text-gray-700">
+    </div>
+    <div>
+      <label class="block text-xs font-semibold text-gray-500 mb-1">Longitude</label>
+      <input id="map-lng-display" type="text" readonly placeholder="—"
+             class="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono text-gray-700">
+    </div>
+  </div>
+  <button type="button" id="map-reset-btn"
+          class="mt-5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-xl transition">
+    Réinitialiser
+  </button>
+</div>
+<input type="hidden" name="lat" id="map-lat-hidden" value="{{ lat|default:'' }}">
+<input type="hidden" name="lng" id="map-lng-hidden" value="{{ lng|default:'' }}">
+
+<!-- Leaflet CSS + JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+(function(){
+  // Brazzaville, Congo
+  const BRAZZA = { lat: -4.2634, lng: 15.2429 };
+  const ZOOM_DEFAULT = 13;
+  const ZOOM_POINT   = 16;
+
+  const initLat = parseFloat('{{ lat|default:"" }}') || null;
+  const initLng = parseFloat('{{ lng|default:"" }}') || null;
+
+  const center = (initLat && initLng) ? [initLat, initLng] : [BRAZZA.lat, BRAZZA.lng];
+  const zoom   = (initLat && initLng) ? ZOOM_POINT : ZOOM_DEFAULT;
+
+  const map = L.map('map-picker').setView(center, zoom);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19,
+  }).addTo(map);
+
+  // Custom marker icon
+  const icon = L.divIcon({
+    className: '',
+    html: `<div style="width:32px;height:32px;background:#10b981;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.3);"></div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+  });
+
+  let marker = null;
+
+  function setPoint(lat, lng) {
+    const ll = L.latLng(lat, lng);
+    if (marker) {
+      marker.setLatLng(ll);
+    } else {
+      marker = L.marker(ll, { icon, draggable: true }).addTo(map);
+      marker.on('dragend', function(e) {
+        const p = e.target.getLatLng();
+        setFields(p.lat, p.lng);
+      });
+    }
+    setFields(lat, lng);
+  }
+
+  function setFields(lat, lng) {
+    document.getElementById('map-lat-display').value = lat.toFixed(6);
+    document.getElementById('map-lng-display').value = lng.toFixed(6);
+    document.getElementById('map-lat-hidden').value  = lat;
+    document.getElementById('map-lng-hidden').value  = lng;
+  }
+
+  function clearPoint() {
+    if (marker) { map.removeLayer(marker); marker = null; }
+    document.getElementById('map-lat-display').value = '';
+    document.getElementById('map-lng-display').value = '';
+    document.getElementById('map-lat-hidden').value  = '';
+    document.getElementById('map-lng-hidden').value  = '';
+  }
+
+  // Init existing point
+  if (initLat && initLng) setPoint(initLat, initLng);
+
+  map.on('click', function(e) { setPoint(e.latlng.lat, e.latlng.lng); });
+
+  document.getElementById('map-reset-btn').addEventListener('click', function() {
+    clearPoint();
+    map.setView([BRAZZA.lat, BRAZZA.lng], ZOOM_DEFAULT);
+  });
+
+  // Expose function for ville-select cascade
+  window.mapFlyTo = function(lat, lng, zoom) {
+    map.flyTo([lat, lng], zoom || ZOOM_DEFAULT, { duration: 1 });
+  };
+})();
+</script>

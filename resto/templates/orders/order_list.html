@@ -1,61 +1,138 @@
 {% extends "base/base.html" %}
 
-{% block title %}Liste des Commandes{% endblock %}
+{% block title %}Liste des Commandes — Urban Eat{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto py-10">
-    <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-6">
-        Toutes les Commandes
-    </h1>
+<div class="min-h-screen bg-gradient-to-br from-orange-50 via-white to-gray-50">
 
-    <div class="bg-white dark:bg-slate-900 shadow rounded-xl overflow-hidden">
-        <table class="w-full text-left">
-            <thead class="bg-slate-100 dark:bg-slate-800">
-                <tr>
-                    <th class="p-4">ID</th>
-                    <th class="p-4">Client</th>
-                    <th class="p-4">Statut</th>
-                    <th class="p-4">Total</th>
-                    <th class="p-4">Créée</th>
-                    <th class="p-4 text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for o in orders %}
-                <tr class="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
-                    <td class="p-4 font-semibold">#{{ o.id }}</td>
-                    <td class="p-4">{{ o.user|default:"-" }}</td>
-
-                    <td class="p-4">
-                        <span class="px-3 py-1 rounded-full text-sm 
-                            {% if o.status == 'pending' %} bg-yellow-200 text-yellow-800
-                            {% elif o.status == 'accepted' %} bg-blue-200 text-blue-800
-                            {% elif o.status == 'in_progress' %} bg-purple-200 text-purple-800
-                            {% elif o.status == 'done' %} bg-green-200 text-green-800
-                            {% else %} bg-red-200 text-red-800 {% endif %}
-                        ">
-                            {{ o.get_status_display }}
-                        </span>
-                    </td>
-
-                    <td class="p-4 font-semibold">{{ o.total }} FCFA</td>
-                    <td class="p-4">{{ o.created_at|date:"d/m/Y H:i" }}</td>
-
-                    <td class="p-4 text-right">
-                        <a href="{% url 'order_detail' o.id %}" class="text-primary font-semibold">Voir</a>
-                        <a href="{% url 'order_update_status' o.id %}" class="ml-3 text-slate-600 dark:text-slate-300">Statut</a>
-                        <a href="{% url 'order_delete' o.id %}" class="ml-3 text-red-600 font-semibold">Supprimer</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td class="p-4 text-center text-slate-500" colspan="6">
-                        Aucune commande pour le moment.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-100 px-6 py-5 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-lg font-extrabold text-gray-900">Toutes les commandes</h1>
+        <p class="text-xs text-gray-400">Urban Eat · Administration</p>
+      </div>
     </div>
+    <div class="flex items-center gap-3">
+      <a href="{% url 'gestion_commandes' %}"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500 text-white text-sm font-bold hover:bg-orange-600 transition">
+        Kanban
+      </a>
+      <a href="{% url 'espace_admin' %}"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold hover:bg-gray-200 transition">
+        ← Admin
+      </a>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- Stats rapides -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-2xl border border-gray-100 p-4 text-center shadow-sm">
+        <p class="text-2xl font-extrabold text-gray-900">{{ orders|length }}</p>
+        <p class="text-xs text-gray-400 mt-1 font-medium">Total</p>
+      </div>
+      <div class="bg-yellow-50 rounded-2xl border border-yellow-100 p-4 text-center">
+        <p class="text-2xl font-extrabold text-yellow-700">{{ orders|length }}</p>
+        <p class="text-xs text-yellow-600 mt-1 font-medium">En attente</p>
+      </div>
+      <div class="bg-purple-50 rounded-2xl border border-purple-100 p-4 text-center">
+        <p class="text-2xl font-extrabold text-purple-700">—</p>
+        <p class="text-xs text-purple-600 mt-1 font-medium">En préparation</p>
+      </div>
+      <div class="bg-green-50 rounded-2xl border border-green-100 p-4 text-center">
+        <p class="text-2xl font-extrabold text-green-700">—</p>
+        <p class="text-xs text-green-600 mt-1 font-medium">Livrées</p>
+      </div>
+    </div>
+
+    <!-- Tableau -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="font-bold text-gray-800 text-sm">Historique des commandes</h2>
+        <span class="text-xs text-gray-400">{{ orders|length }} commande{{ orders|length|pluralize }}</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b border-gray-100">
+            <tr>
+              <th class="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">ID</th>
+              <th class="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Client</th>
+              <th class="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Statut</th>
+              <th class="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Montant</th>
+              <th class="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
+              <th class="px-5 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            {% for o in orders %}
+            <tr class="hover:bg-orange-50/40 transition-colors">
+              <td class="px-5 py-3.5">
+                <span class="font-bold text-orange-600">#{{ o.id }}</span>
+              </td>
+              <td class="px-5 py-3.5">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-xs flex-shrink-0">
+                    {{ o.user|default:"?"|first|upper }}
+                  </div>
+                  <span class="text-gray-800 font-medium">{{ o.user|default:"—" }}</span>
+                </div>
+              </td>
+              <td class="px-5 py-3.5">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold
+                  {% if o.status == 'pending' %}bg-yellow-100 text-yellow-800
+                  {% elif o.status == 'accepted' %}bg-blue-100 text-blue-800
+                  {% elif o.status == 'in_progress' %}bg-purple-100 text-purple-800
+                  {% elif o.status == 'done' %}bg-green-100 text-green-800
+                  {% else %}bg-red-100 text-red-800{% endif %}">
+                  {{ o.get_status_display }}
+                </span>
+              </td>
+              <td class="px-5 py-3.5 font-bold text-gray-900">{{ o.total|floatformat:0 }} FCFA</td>
+              <td class="px-5 py-3.5 text-gray-400 text-xs">{{ o.created_at|date:"d/m/Y H:i" }}</td>
+              <td class="px-5 py-3.5 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <a href="{% url 'order_detail' o.id %}"
+                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-xs font-semibold hover:bg-blue-100 transition">
+                    Voir
+                  </a>
+                  <a href="{% url 'order_update_status' o.id %}"
+                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-orange-50 text-orange-600 text-xs font-semibold hover:bg-orange-100 transition">
+                    Statut
+                  </a>
+                  <a href="{% url 'order_delete' o.id %}"
+                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100 transition">
+                    Suppr.
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="px-5 py-16 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                  <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                  </svg>
+                </div>
+                <p class="text-gray-500 font-semibold">Aucune commande pour le moment</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
 </div>
 {% endblock %}

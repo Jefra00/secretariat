@@ -1,0 +1,190 @@
+<!-- ══ NAVBAR SHOPPING ══ -->
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+
+    <!-- Logo -->
+    <a href="{% url 'accueil' %}" class="flex items-center gap-2.5 flex-shrink-0">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-white text-lg shadow-sm">🛍️</div>
+      <div class="leading-tight hidden sm:block">
+        <p class="font-extrabold text-gray-900 text-base tracking-tight">Shopping</p>
+        <p class="text-[10px] text-pink-600 font-semibold uppercase tracking-widest">by Secrétariat Pro</p>
+      </div>
+    </a>
+
+    <!-- Recherche desktop -->
+    <form class="hidden md:flex flex-1 max-w-xl mx-6" action="{% url 'shopping:shopping_accueil' %}" method="get">
+      <div class="relative w-full">
+        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </span>
+        <input type="text" name="q" placeholder="Rechercher vêtements, chaussures, accessoires…"
+               class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm
+                      focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition">
+      </div>
+    </form>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2 flex-shrink-0">
+
+      <!-- Panier -->
+      <a href="{% url 'marche:panier' %}" id="cart-nav-btn"
+         class="relative flex items-center gap-1.5 text-gray-700 hover:text-pink-600 transition p-2 rounded-xl hover:bg-pink-50">
+        <span class="material-symbols-outlined text-xl">shopping_bag</span>
+        <span id="cart-badge"
+              class="absolute -top-0.5 -right-0.5 bg-pink-500 text-white text-[10px] font-extrabold
+                     w-4.5 h-4.5 min-w-[1.1rem] px-1 rounded-full flex items-center justify-center hidden leading-none">
+          0
+        </span>
+      </a>
+
+      {% if user.is_authenticated %}
+        {% if user.role == 'client' or not user.role %}
+        <a href="{% url 'client_profil' %}"
+           class="hidden sm:flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-pink-600 transition">
+          <span class="material-symbols-outlined text-base">account_circle</span>
+          <span class="hidden lg:inline">Mon profil</span>
+        </a>
+        <a href="{% url 'client_commandes' %}"
+           class="hidden sm:flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-pink-600 transition">
+          <span class="material-symbols-outlined text-base">receipt_long</span>
+          <span class="hidden lg:inline">Commandes</span>
+        </a>
+        {% endif %}
+        <a href="{% url 'deconnexion_client' %}"
+           class="text-sm font-semibold text-red-500 hover:text-red-600 transition hidden sm:block">
+          Déconnexion
+        </a>
+      {% else %}
+        <a href="{% url 'connexion_client' %}"
+           class="text-sm font-semibold text-gray-700 hover:text-pink-600 transition hidden sm:block">
+          Connexion
+        </a>
+        <a href="{% url 'inscription_client' %}"
+           class="flex items-center gap-1.5 bg-pink-500 hover:bg-pink-600 text-white text-sm font-bold px-4 py-2 rounded-xl transition shadow-sm">
+          <span class="material-symbols-outlined text-base">person_add</span>
+          <span class="hidden sm:inline">Inscription</span>
+        </a>
+      {% endif %}
+
+      <button id="mobileMenuToggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition">
+        <span class="material-symbols-outlined text-gray-600">menu</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Menu mobile -->
+  <div id="mobileMenuPanel" class="hidden md:hidden border-t border-gray-100 bg-white px-4 py-4 space-y-3">
+    <form action="{% url 'shopping:shopping_accueil' %}" method="get">
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </span>
+        <input type="text" name="q" placeholder="Rechercher…"
+               class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm
+                      focus:outline-none focus:ring-2 focus:ring-pink-500">
+      </div>
+    </form>
+    <a href="{% url 'accueil' %}" class="block text-sm font-medium text-gray-700 py-1">Accueil</a>
+    <a href="{% url 'marche:panier' %}" class="block text-sm font-medium text-pink-600 py-1 flex items-center gap-2">
+      <span class="material-symbols-outlined text-base">shopping_bag</span> Mon panier
+    </a>
+    {% if user.is_authenticated %}
+      {% if user.role == 'client' or not user.role %}
+        <a href="{% url 'client_profil' %}" class="flex items-center gap-2 text-sm font-medium text-gray-700 py-1 hover:text-pink-600">
+          <span class="material-symbols-outlined text-base">account_circle</span> Mon profil
+        </a>
+        <a href="{% url 'client_commandes' %}" class="flex items-center gap-2 text-sm font-medium text-gray-700 py-1 hover:text-pink-600">
+          <span class="material-symbols-outlined text-base">receipt_long</span> Mes commandes
+        </a>
+      {% endif %}
+      <a href="{% url 'deconnexion_client' %}" class="block text-sm font-medium text-red-500 py-1">Déconnexion</a>
+    {% else %}
+      <a href="{% url 'connexion_client' %}" class="block text-sm font-semibold text-gray-700 py-1">Connexion</a>
+      <a href="{% url 'inscription_client' %}" class="block text-sm font-semibold text-pink-600 py-1">Inscription</a>
+    {% endif %}
+  </div>
+</header>
+
+<script>
+// ══ CART ENGINE (localStorage) ════════════════════════════════════════════
+const CART_KEY = 'mi_cart_v1';
+
+function cartGet()        { try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch(e){ return []; } }
+function cartSave(c, anim){ localStorage.setItem(CART_KEY, JSON.stringify(c)); cartBadge(); if (anim) animateCartIcon(); }
+function cartCount()      { return cartGet().reduce((s,i) => s + i.quantite, 0); }
+
+function cartBadge() {
+  const n = cartCount();
+  const b = document.getElementById('cart-badge');
+  if (!b) return;
+  b.textContent = n > 99 ? '99+' : n;
+  b.classList.toggle('hidden', n === 0);
+}
+
+function animateCartIcon() {
+  const btn = document.getElementById('cart-nav-btn');
+  if (!btn) return;
+  const ico = btn.querySelector('.material-symbols-outlined');
+  if (ico) ico.animate([
+    {transform:'scale(1) rotate(0deg)'},
+    {transform:'scale(1.5) rotate(-15deg)'},
+    {transform:'scale(1.28) rotate(11deg)'},
+    {transform:'scale(1.1) rotate(-5deg)'},
+    {transform:'scale(1.04) rotate(2deg)'},
+    {transform:'scale(1) rotate(0deg)'}
+  ], {duration:680, easing:'ease-out'});
+  const b = document.getElementById('cart-badge');
+  if (b && !b.classList.contains('hidden'))
+    b.animate([
+      {transform:'scale(1)',   boxShadow:'0 0 0 0 rgba(236,72,153,.75)'},
+      {transform:'scale(1.25)',boxShadow:'0 0 0 9px rgba(236,72,153,0)'},
+      {transform:'scale(1)',   boxShadow:'0 0 0 0 rgba(236,72,153,0)'}
+    ], {duration:720});
+}
+
+function cartAdd(item, couleur_nom, couleur_hex) {
+  const c = cartGet();
+  const key = item.id + '|' + (couleur_nom || '') + '|' + (item.taille || '');
+  const ex  = c.find(i => i._key === key);
+  if (ex) { ex.quantite += 1; }
+  else    { c.push({ ...item, couleur_nom, couleur_hex, quantite: 1, _key: key }); }
+  cartSave(c, true);
+}
+
+function cartRemove(key)  { cartSave(cartGet().filter(i => i._key !== key)); }
+function cartSetQty(key, q) {
+  const c = cartGet();
+  const i = c.find(i => i._key === key);
+  if (i) { if (q < 1) { cartRemove(key); return; } i.quantite = q; }
+  cartSave(c);
+}
+function cartClear()      { cartSave([]); }
+
+function quickAddToCart(btn) {
+  const d = btn.dataset;
+  cartAdd(
+    { id: d.id, nom: d.nom, prix: parseFloat(d.prix), devise: d.devise || 'FCFA',
+      unite: d.unite || 'pièce', vendeur: d.vendeur, image: d.image, url: d.url },
+    null, null
+  );
+  const ico = btn.querySelector('.cart-ico');
+  if (ico) { ico.textContent = 'check_circle'; btn.classList.add('!bg-pink-500','!text-white'); }
+  setTimeout(() => {
+    if (ico) { ico.textContent = 'add_shopping_cart'; btn.classList.remove('!bg-pink-500','!text-white'); }
+  }, 1200);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  cartBadge();
+  sessionStorage.setItem('last_shop_page', window.location.href);
+});
+document.getElementById('mobileMenuToggle')?.addEventListener('click', () => {
+  document.getElementById('mobileMenuPanel').classList.toggle('hidden');
+});
+</script>
+
+{% include 'base/components/_section_nav.html' %}

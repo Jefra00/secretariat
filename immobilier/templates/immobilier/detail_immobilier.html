@@ -1,0 +1,396 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}{{ bien.titre }} — Immobilier{% endblock %}
+{% block navbar %}{% include 'base/navbar_immobilier.html' %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+<style>
+.thumb-active{outline:2.5px solid #065f46;outline-offset:2px;}
+.spec-row{display:flex;align-items:center;gap:.5rem;padding:.5rem 0;border-bottom:1px solid #f3f4f6;}
+.spec-row:last-child{border-bottom:none;}
+.equip-chip{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .75rem;border-radius:9999px;font-size:.7rem;font-weight:700;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Fil d'Ariane ──────────────────────────────────────────────────────── -->
+<nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 text-xs text-gray-500 flex items-center gap-1.5">
+  <a href="{% url 'accueil' %}" class="hover:text-emerald-700 transition">Accueil</a>
+  <span>›</span>
+  <a href="{% url 'immobilier:accueil' %}" class="hover:text-emerald-700 transition">Immobilier</a>
+  <span>›</span>
+  <span class="text-gray-900 font-semibold">{{ bien.titre }}</span>
+</nav>
+
+<!-- ── Contenu principal ─────────────────────────────────────────────────── -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+  <div class="lg:grid lg:grid-cols-5 lg:gap-10">
+
+    <!-- ═══ Colonne gauche : galerie + specs (3/5) ════════════════════════ -->
+    <div class="lg:col-span-3 space-y-6">
+
+      <!-- Galerie principale -->
+      <div>
+        <div class="relative rounded-2xl overflow-hidden bg-gray-50 h-72 sm:h-96 mb-3">
+          {% if main_photo %}
+          <img id="mainImg" src="{{ main_photo.image.url }}" alt="{{ bien.titre }}"
+               class="w-full h-full object-cover">
+          {% else %}
+          <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-50 to-emerald-100">
+            <span class="text-7xl">🏠</span>
+          </div>
+          {% endif %}
+
+          <!-- Badges superposés -->
+          <div class="absolute top-3 left-3 flex gap-2">
+            {% if bien.is_en_promo %}
+            <span class="bg-red-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-lg">-{{ bien.remise_pct }}%</span>
+            {% endif %}
+            <span class="text-white text-xs font-bold px-3 py-1 rounded-full shadow
+              {% if bien.type_offre == 'vente' %}bg-emerald-600{% else %}bg-teal-600{% endif %}">
+              {{ bien.get_type_offre_display }}
+            </span>
+          </div>
+          {% if bien.meuble %}
+          <span class="absolute top-3 right-3 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow">Meublé</span>
+          {% endif %}
+        </div>
+
+        <!-- Miniatures galerie -->
+        {% if gallery|length > 1 %}
+        <div class="flex gap-2 overflow-x-auto pb-1">
+          {% for photo in gallery %}
+          <button onclick="switchImg('{{ photo.image.url }}', this)"
+                  class="flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border-2 {% if photo.principale %}border-emerald-600 thumb-active{% else %}border-gray-200{% endif %} hover:border-emerald-500 transition">
+            <img src="{{ photo.image.url }}" alt="" class="w-full h-full object-cover">
+          </button>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- En-tête du bien -->
+      <div>
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            {% if bien.categorie %}
+            <span class="text-xs font-bold px-2 py-0.5 rounded-full" style="background:#d1fae5;color:#065f46;">{{ bien.categorie }}</span>
+            {% endif %}
+            <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold text-gray-900">{{ bien.titre }}</h1>
+            <p class="text-sm text-gray-500 flex items-center gap-1.5 mt-0.5">
+              <span class="material-symbols-outlined text-sm">location_on</span>
+              {{ bien.adresse }}{% if bien.ville %}, {{ bien.ville }}{% endif %}
+            </p>
+          </div>
+          <div class="text-right">
+            {% if bien.is_en_promo %}
+            <p class="text-sm text-gray-400 line-through">{{ bien.prix|floatformat:0 }} FCFA</p>
+            <p class="text-3xl font-black" style="color:#065f46;">{{ bien.prix_actuel|floatformat:0 }}</p>
+            <p class="text-sm font-semibold" style="color:#047857;">FCFA{{ bien.suffix_prix }}</p>
+            {% else %}
+            <p class="text-3xl font-black" style="color:#065f46;">{{ bien.prix_actuel|floatformat:0 }}</p>
+            <p class="text-sm font-semibold" style="color:#047857;">FCFA{{ bien.suffix_prix }}</p>
+            {% endif %}
+            {% if bien.caution %}
+            <p class="text-xs text-gray-500 mt-2">Caution</p>
+            <p class="text-lg font-bold text-orange-600">{{ bien.caution }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Caractéristiques chiffrées -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h2 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined" style="color:#065f46;">construction</span>Caractéristiques
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
+          <div>
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base" style="color:#059669;">straighten</span>
+              <span class="text-xs text-gray-500 flex-1">Superficie</span>
+              <span class="text-sm font-bold text-gray-900">{{ bien.superficie|floatformat:0 }} m²</span>
+            </div>
+            {% if bien.nombre_chambres %}
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base" style="color:#059669;">bed</span>
+              <span class="text-xs text-gray-500 flex-1">Chambres</span>
+              <span class="text-sm font-bold text-gray-900">{{ bien.nombre_chambres }}</span>
+            </div>
+            {% endif %}
+            {% if bien.nombre_salles_bain %}
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base" style="color:#059669;">bathtub</span>
+              <span class="text-xs text-gray-500 flex-1">Salles de bain</span>
+              <span class="text-sm font-bold text-gray-900">{{ bien.nombre_salles_bain }}</span>
+            </div>
+            {% endif %}
+            {% if bien.nombre_salons %}
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base" style="color:#059669;">weekend</span>
+              <span class="text-xs text-gray-500 flex-1">Salons</span>
+              <span class="text-sm font-bold text-gray-900">{{ bien.nombre_salons }}</span>
+            </div>
+            {% endif %}
+          </div>
+          <div>
+            {% if bien.nombre_cuisines %}
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base" style="color:#059669;">kitchen</span>
+              <span class="text-xs text-gray-500 flex-1">Cuisines</span>
+              <span class="text-sm font-bold text-gray-900">{{ bien.nombre_cuisines }}</span>
+            </div>
+            {% endif %}
+            {% if bien.nombre_garages %}
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base" style="color:#059669;">garage</span>
+              <span class="text-xs text-gray-500 flex-1">Garages</span>
+              <span class="text-sm font-bold text-gray-900">{{ bien.nombre_garages }}</span>
+            </div>
+            {% endif %}
+            {% if bien.etage is not None %}
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base" style="color:#059669;">stairs</span>
+              <span class="text-xs text-gray-500 flex-1">Étage</span>
+              <span class="text-sm font-bold text-gray-900">{{ bien.etage }}</span>
+            </div>
+            {% endif %}
+            {% if bien.annee_construction %}
+            <div class="spec-row">
+              <span class="material-symbols-outlined text-base" style="color:#059669;">calendar_month</span>
+              <span class="text-xs text-gray-500 flex-1">Année construction</span>
+              <span class="text-sm font-bold text-gray-900">{{ bien.annee_construction }}</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Équipements -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h2 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined" style="color:#065f46;">verified</span>Équipements &amp; services
+        </h2>
+        <div class="flex flex-wrap gap-2">
+          <span class="equip-chip {% if bien.meuble %}bg-amber-100 text-amber-800{% else %}bg-gray-100 text-gray-400 line-through{% endif %}">
+            🛋️ Meublé
+          </span>
+          <span class="equip-chip {% if bien.piscine %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-400 line-through{% endif %}">
+            🏊 Piscine
+          </span>
+          <span class="equip-chip {% if bien.parking %}bg-emerald-100 text-emerald-800{% else %}bg-gray-100 text-gray-400 line-through{% endif %}">
+            🅿️ Parking
+          </span>
+          <span class="equip-chip {% if bien.gardien %}bg-purple-100 text-purple-800{% else %}bg-gray-100 text-gray-400 line-through{% endif %}">
+            💂 Gardien
+          </span>
+          <span class="equip-chip {% if bien.wifi %}bg-sky-100 text-sky-800{% else %}bg-gray-100 text-gray-400 line-through{% endif %}">
+            📶 Wi-Fi
+          </span>
+          <span class="equip-chip {% if bien.climatisation %}bg-cyan-100 text-cyan-800{% else %}bg-gray-100 text-gray-400 line-through{% endif %}">
+            ❄️ Climatisation
+          </span>
+          <span class="equip-chip {% if bien.generatrice %}bg-orange-100 text-orange-800{% else %}bg-gray-100 text-gray-400 line-through{% endif %}">
+            ⚡ Groupe élec.
+          </span>
+          <span class="equip-chip {% if bien.eau_courante %}bg-teal-100 text-teal-800{% else %}bg-gray-100 text-gray-400 line-through{% endif %}">
+            💧 Eau courante
+          </span>
+        </div>
+      </div>
+
+      <!-- Description -->
+      {% if bien.description %}
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h2 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined" style="color:#065f46;">description</span>Description
+        </h2>
+        <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{{ bien.description }}</p>
+      </div>
+      {% endif %}
+
+    </div><!-- /colonne gauche -->
+
+    <!-- ═══ Colonne droite : demande de visite (2/5) ═══════════════════════ -->
+    <div class="lg:col-span-2 mt-8 lg:mt-0">
+      <div class="sticky top-20 space-y-4">
+
+        <!-- Succès -->
+        {% if visite_ok %}
+        <div class="rounded-2xl p-5 text-center border" style="background:#ecfdf5;border-color:#6ee7b7;">
+          <div class="text-4xl mb-2">✅</div>
+          <h3 class="font-extrabold text-lg" style="color:#065f46;">Demande envoyée !</h3>
+          <p class="text-sm mt-1" style="color:#047857;">
+            Visite le <strong>{{ demande.date_souhaitee }}</strong>
+            {% if demande.heure_souhaitee %}à <strong>{{ demande.heure_souhaitee|time:"H\hi" }}</strong>{% endif %}
+          </p>
+          <p class="text-xs text-gray-500 mt-2">Nous vous contacterons au <strong>{{ demande.telephone }}</strong> pour confirmer le rendez-vous.</p>
+          <a href="{% url 'immobilier:mes_visites' %}"
+             class="mt-4 inline-block text-white text-sm font-bold px-5 py-2.5 rounded-xl transition"
+             style="background:#065f46;">
+            Voir mes demandes
+          </a>
+        </div>
+
+        {% else %}
+
+        <!-- Formulaire de demande de visite -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <h2 class="font-bold text-gray-900 mb-1 flex items-center gap-2">
+            <span class="material-symbols-outlined" style="color:#065f46;">event_available</span>Demander une visite
+          </h2>
+          <p class="text-xs text-gray-400 mb-4">Remplissez ce formulaire et nous vous rappelons sous 24h.</p>
+
+          {% if form_error %}
+          <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+            {{ form_error }}
+          </div>
+          {% endif %}
+
+          <form method="post" class="space-y-4">
+            {% csrf_token %}
+
+            <!-- Date souhaitée -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Date souhaitée *</label>
+              <input type="date" name="date_souhaitee"
+                     value="{{ form_data.date_souhaitee|default:'' }}"
+                     min="{{ today_str }}" required
+                     class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+            </div>
+
+            <!-- Heure souhaitée -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Heure souhaitée (optionnel)</label>
+              <input type="time" name="heure_souhaitee"
+                     value="{{ form_data.heure_souhaitee|default:'' }}"
+                     class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <!-- Téléphone -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Téléphone de contact *</label>
+              <input type="tel" name="telephone"
+                     value="{{ form_data.telephone|default:'' }}"
+                     placeholder="+242 06X XXX XXX" required
+                     class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <!-- Message -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Message (optionnel)</label>
+              <textarea name="message" rows="3"
+                        placeholder="Précisez vos besoins, disponibilités supplémentaires…"
+                        class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 resize-none">{{ form_data.message|default:'' }}</textarea>
+            </div>
+
+            {% if user.is_authenticated %}
+            <button type="submit"
+                    class="w-full text-white font-bold py-3 rounded-xl transition shadow-sm text-sm hover:opacity-90"
+                    style="background:#065f46;">
+              Envoyer ma demande de visite
+            </button>
+            {% else %}
+            <a href="/connexion/?next=/immobilier/bien/{{ bien.pk }}/"
+               class="block text-center w-full text-white font-bold py-3 rounded-xl transition shadow-sm text-sm hover:opacity-90"
+               style="background:#065f46;">
+              Connectez-vous pour demander une visite
+            </a>
+            {% endif %}
+          </form>
+        </div>
+
+        {% endif %}<!-- /visite_ok -->
+
+        <!-- Prix récap -->
+        <div class="rounded-2xl p-4" style="background:#d1fae5;">
+          <p class="text-xs font-bold mb-1" style="color:#065f46;">Prix</p>
+          <p class="text-2xl font-black" style="color:#065f46;">
+            {{ bien.prix_actuel|floatformat:0 }} <span class="text-sm font-semibold">FCFA{{ bien.suffix_prix }}</span>
+          </p>
+          {% if bien.is_en_promo %}
+          <p class="text-xs text-gray-500 line-through">Prix initial : {{ bien.prix|floatformat:0 }} FCFA</p>
+          {% endif %}
+          <p class="text-xs mt-1" style="color:#047857;">
+            {{ bien.get_type_offre_display }} · {{ bien.get_type_bien_display }}
+          </p>
+        </div>
+
+        <!-- Contact agence -->
+        <div class="rounded-2xl p-4 text-center bg-white border border-gray-100 shadow-sm">
+          <p class="text-xs font-semibold text-gray-700">Agence : {{ bien.vendeur.name }}</p>
+          {% if bien.vendeur.telephone %}
+          <a href="https://wa.me/{{ bien.vendeur.telephone|cut:' '|cut:'+'|cut:'-' }}"
+             target="_blank" rel="noopener"
+             class="mt-2 inline-flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.557 4.137 1.533 5.874L0 24l6.326-1.513A11.918 11.918 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.013-1.375l-.36-.214-3.728.892.91-3.636-.236-.374A9.818 9.818 0 0112 2.182c5.425 0 9.818 4.393 9.818 9.818S17.425 21.818 12 21.818z"/>
+            </svg>
+            Contacter l'agence
+          </a>
+          {% endif %}
+        </div>
+
+      </div>
+    </div><!-- /colonne droite -->
+  </div><!-- /grid -->
+
+  <!-- ── Biens similaires ──────────────────────────────────────────────── -->
+  {% if autres %}
+  <section class="mt-14">
+    <h2 class="text-xl font-extrabold text-gray-900 mb-6 flex items-center gap-2">
+      <span class="material-symbols-outlined" style="color:#065f46;">home</span>Biens similaires
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {% for b in autres %}
+      {% with photo=b.photos.all.0 %}
+      <a href="{% url 'immobilier:detail' b.pk %}"
+         class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group flex flex-col">
+        <div class="relative h-40 overflow-hidden bg-gray-50">
+          {% if photo %}
+          <img src="{{ photo.image.url }}" alt="{{ b.titre }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+          {% else %}
+          <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-50 to-emerald-100">
+            <span class="text-4xl">🏠</span>
+          </div>
+          {% endif %}
+          <span class="absolute top-2 right-2 text-white text-[10px] font-bold px-2 py-0.5 rounded-full
+            {% if b.type_offre == 'vente' %}bg-emerald-600{% else %}bg-teal-600{% endif %}">
+            {{ b.get_type_offre_display }}
+          </span>
+        </div>
+        <div class="p-4 flex-1 flex flex-col">
+          <h3 class="font-bold text-gray-900 text-sm line-clamp-2">{{ b.titre }}</h3>
+          <p class="text-xs text-gray-400 flex items-center gap-1 mt-0.5 mb-2">
+            <span class="material-symbols-outlined" style="font-size:12px;">location_on</span>
+            {{ b.ville }}
+          </p>
+          <div class="mt-auto flex items-center justify-between">
+            <p class="font-black text-sm" style="color:#065f46;">
+              {{ b.prix_actuel|floatformat:0 }} <span class="font-semibold text-xs">FCFA{{ b.suffix_prix }}</span>
+            </p>
+            <span class="text-xs font-bold px-2 py-1 rounded-lg transition"
+                  style="color:#065f46;background:#d1fae5;">Voir →</span>
+          </div>
+        </div>
+      </a>
+      {% endwith %}
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</div><!-- /max-w-7xl -->
+
+<script>
+function switchImg(url, btn) {
+  const main = document.getElementById('mainImg');
+  if (main) main.src = url;
+  document.querySelectorAll('.thumb-active').forEach(t => t.classList.remove('thumb-active'));
+  if (btn) btn.classList.add('thumb-active');
+}
+</script>
+{% endblock %}

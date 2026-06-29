@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ titre }} — Urban Eat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .material-symbols-outlined { vertical-align: -5px; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+{% include 'base/navbar.html' %}
+
+<div class="max-w-3xl mx-auto px-4 py-8">
+
+  <!-- Breadcrumb -->
+  <div class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+    <a href="{% url 'vendeur_mes_boutiques' %}" class="hover:text-emerald-600 transition">Mes boutiques</a>
+    <span>/</span>
+    <span class="text-gray-900 font-medium">{{ titre }}</span>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+  {% for msg in messages %}
+  <div class="mb-4 px-4 py-3 rounded-xl text-sm font-medium
+    {% if msg.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200
+    {% else %}bg-red-50 text-red-800 border border-red-200{% endif %}">{{ msg }}</div>
+  {% endfor %}
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- Identité -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <h2 class="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-emerald-600">storefront</span> Identité
+      </h2>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Nom de la boutique <span class="text-red-400">*</span></label>
+          {{ form.nom }}
+          {% if form.nom.errors %}<p class="text-xs text-red-500 mt-1">{{ form.nom.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5">Téléphone</label>
+            {{ form.telephone }}
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1.5">Type de commerce</label>
+            {{ form.type_commerce }}
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Description</label>
+          {{ form.description }}
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Logo</label>
+          {% if boutique.logo %}
+          <img src="{{ boutique.logo.url }}" alt="Logo" class="w-16 h-16 rounded-xl object-cover mb-2 border border-gray-200">
+          {% endif %}
+          <input type="file" name="logo" accept="image/*"
+                 class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+        </div>
+      </div>
+    </div>
+
+    <!-- Localisation -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <h2 class="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-emerald-600">location_on</span> Localisation
+      </h2>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Ville</label>
+          {{ form.ville }}
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Commune</label>
+          {{ form.commune }}
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Quartier</label>
+          {{ form.quartier }}
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1.5">Marché</label>
+          {{ form.marche }}
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1.5">Adresse exacte</label>
+        {{ form.adresse_exacte }}
+      </div>
+    </div>
+
+    <!-- Carte GPS -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <h2 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+        <span class="material-symbols-outlined text-emerald-600">map</span>
+        Position sur la carte
+        <span class="text-xs font-normal text-gray-400">— Cliquez pour placer votre boutique</span>
+      </h2>
+      {% include 'boutique/_map_picker.html' with lat=boutique.position_lat lng=boutique.position_lng %}
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-3">
+      <button type="submit"
+              class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-xl transition shadow-sm">
+        <span class="material-symbols-outlined text-base">save</span>
+        Enregistrer
+      </button>
+      <a href="{% url 'vendeur_mes_boutiques' %}"
+         class="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition text-sm">
+        Annuler
+      </a>
+    </div>
+  </form>
+</div>
+
+{% include 'base/footer.html' %}
+
+<script>
+(function(){
+  const villeEl    = document.getElementById('id_ville');
+  const communeEl  = document.getElementById('id_commune');
+  const quartierEl = document.getElementById('id_quartier');
+  const marcheEl   = document.getElementById('id_marche');
+  const VILLES = {{ villes_json|safe }};
+
+  function populateSelect(el, items, key) {
+    const cur = el.value;
+    el.innerHTML = '<option value="">—</option>';
+    items.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item.id; opt.textContent = item[key];
+      if (String(item.id) === cur) opt.selected = true;
+      el.appendChild(opt);
+    });
+  }
+
+  villeEl?.addEventListener('change', function() {
+    const id = this.value;
+    if (!id) { populateSelect(communeEl, [], 'nom'); populateSelect(quartierEl, [], 'nom'); populateSelect(marcheEl, [], 'nom'); return; }
+    fetch(`/ajax/communes/${id}/`).then(r=>r.json()).then(d=>populateSelect(communeEl, d.communes, 'nom'));
+    const v = VILLES.find(v => String(v.id) === id);
+    if (v?.lat && window.mapFlyTo) window.mapFlyTo(v.lat, v.lng, 13);
+  });
+
+  communeEl?.addEventListener('change', function() {
+    const id = this.value;
+    if (!id) { populateSelect(quartierEl, [], 'nom'); populateSelect(marcheEl, [], 'nom'); return; }
+    fetch(`/ajax/quartiers/${id}/`).then(r=>r.json()).then(d=>populateSelect(quartierEl, d.quartiers, 'nom'));
+    fetch(`/ajax/marches/${id}/`).then(r=>r.json()).then(d=>populateSelect(marcheEl, d.marches, 'nom'));
+  });
+})();
+</script>
+</body>
+</html>

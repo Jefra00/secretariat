@@ -1,102 +1,309 @@
 {% extends 'base/base.html' %}
 {% load static %}
-{% block title %}Créer un compte client{% endblock %}
+{% block title %}Inscription — Marché Intelligent{% endblock %}
+
+{% block navbar %}{% include 'base/navbar_marche.html' %}{% endblock %}
+{% block footer %}{% endblock %}
 
 {% block content %}
+<div class="min-h-screen bg-gray-50 flex">
 
-<section class="relative w-full h-[70vh] overflow-hidden rounded-b-[3rem]">
-    <div
-      class="absolute inset-0 bg-cover bg-center"
-      style="background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80'); filter: brightness(0.5); background-attachment: fixed;">
+  <!-- ── Panneau gauche (branding) ── -->
+  <div class="hidden lg:flex lg:w-5/12 xl:w-2/5 relative overflow-hidden bg-gradient-to-br from-emerald-600 via-green-600 to-teal-700 flex-col justify-between p-12">
+
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute -top-20 -right-20 w-80 h-80 bg-yellow-400 rounded-full opacity-10 blur-3xl"></div>
+      <div class="absolute -bottom-20 -left-20 w-72 h-72 bg-emerald-300 rounded-full opacity-15 blur-3xl"></div>
+      <div class="absolute top-1/2 right-0 w-48 h-48 bg-teal-200 rounded-full opacity-10 blur-2xl"></div>
     </div>
 
-    <div class="relative z-10 flex flex-col justify-center items-center text-center h-full text-white px-6 md:px-12">
-      <h1 class="text-6xl font-extrabold drop-shadow-xl mb-6">
-        <span class="text-primary">Secrétariat Pro</span> Blog
-      </h1>
-      <p class="max-w-2xl text-lg text-gray-100 leading-relaxed">
-        Rejoignez notre communauté et explorez des histoires inspirantes, des astuces pratiques et des retours d’expérience réels.
-      </p>
-    </div>pyth
-  </section>)
+    <a href="{% url 'accueil' %}" class="relative z-10 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-2xl">🛒</div>
+      <div>
+        <p class="font-extrabold text-white text-lg leading-tight">Marché Intelligent</p>
+        <p class="text-emerald-200 text-xs font-semibold uppercase tracking-widest">by Secrétariat Pro</p>
+      </div>
+    </a>
 
-<main class="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-<div class="text-center mb-12">
-<h1 class="text-4xl font-black tracking-tighter sm:text-5xl text-text-light dark:text-text-dark">Créer un compte client</h1>
-<p class="mt-4 max-w-2xl mx-auto text-lg text-text-muted-light dark:text-text-muted-dark">Rejoignez notre espace client pour accéder à vos services personnalisés.</p>
-</div>
-
-{% if messages %}
-<div class="mb-6">
-  {% for message in messages %}
-    <div class="p-4 mb-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% elif message.tags == 'success' %}bg-green-100 text-green-700{% endif %}">
-      {{ message }}
-    </div>
-  {% endfor %}
-</div>
-{% endif %}
-
-<div class="p-8 rounded-lg bg-foreground-light dark:bg-foreground-dark border border-slate-200 dark:border-slate-800 shadow-sm">
-<form method="POST" enctype="multipart/form-data" class="space-y-6">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div>
-            {{ form.first_name.label_tag }}
-            {{ form.first_name }}
-            {{ form.first_name.errors }}
+    <div class="relative z-10 text-white space-y-6">
+      <div>
+        <h2 class="text-4xl font-extrabold leading-tight mb-3">
+          Rejoignez<br>la communauté<br>
+          <span class="text-yellow-300">Brazzaville</span>
+        </h2>
+        <p class="text-emerald-100 text-base leading-relaxed max-w-sm">
+          Créez votre compte en quelques secondes et accédez à tout le marché depuis votre téléphone.
+        </p>
+      </div>
+      <div class="grid grid-cols-2 gap-2.5">
+        <div class="flex items-center gap-2 bg-white/10 border border-white/15 rounded-xl px-3 py-2.5">
+          <span class="text-xl">🍽️</span><span class="text-xs font-semibold text-emerald-100">Restaurants</span>
         </div>
-        <div>
-            {{ form.last_name.label_tag }}
-            {{ form.last_name }}
-            {{ form.last_name.errors }}
+        <div class="flex items-center gap-2 bg-white/10 border border-white/15 rounded-xl px-3 py-2.5">
+          <span class="text-xl">🛒</span><span class="text-xs font-semibold text-emerald-100">Faire le marché</span>
         </div>
-    </div>
-    <div>
-        {{ form.email.label_tag }}
-        {{ form.email }}
-        {{ form.email.errors }}
-    </div>
-    <div>
-        {{ form.telephone.label_tag }}
-        {{ form.telephone }}
-        {{ form.telephone.errors }}
-    </div>
-    <div>
-        {{ form.pays.label_tag }}
-        {{ form.pays }}
-        {{ form.pays.errors }}
-    </div>
-    <div>
-        {{ form.adresse.label_tag }}
-        {{ form.adresse }}
-        {{ form.adresse.errors }}
-    </div>
-    <div>
-        {{ form.password1.label_tag }}
-        {{ form.password1 }}
-        {{ form.password1.errors }}
-    </div>
-    <div>
-        {{ form.password2.label_tag }}
-        {{ form.password2 }}
-        {{ form.password2.errors }}
+        <div class="flex items-center gap-2 bg-white/10 border border-white/15 rounded-xl px-3 py-2.5">
+          <span class="text-xl">🚗</span><span class="text-xs font-semibold text-emerald-100">Location voiture</span>
+        </div>
+        <div class="flex items-center gap-2 bg-white/10 border border-white/15 rounded-xl px-3 py-2.5">
+          <span class="text-xl">🏠</span><span class="text-xs font-semibold text-emerald-100">Immobilier</span>
+        </div>
+        <div class="flex items-center gap-2 bg-white/10 border border-white/15 rounded-xl px-3 py-2.5">
+          <span class="text-xl">📱</span><span class="text-xs font-semibold text-emerald-100">Électronique</span>
+        </div>
+        <div class="flex items-center gap-2 bg-white/10 border border-white/15 rounded-xl px-3 py-2.5">
+          <span class="text-xl">💇</span><span class="text-xs font-semibold text-emerald-100">Beauté</span>
+        </div>
+      </div>
     </div>
 
-    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
-        Créer mon compte
-    </button>
-</form>
-</div>
-</main>
+    <div class="relative z-10 flex items-center gap-2 text-xs text-emerald-200">
+      <span class="w-2 h-2 bg-yellow-300 rounded-full animate-pulse inline-block"></span>
+      Rejoignez des centaines d'utilisateurs actifs à Brazzaville
+    </div>
+  </div>
 
-<footer class="w-full border-t border-slate-200 dark:border-slate-800 bg-foreground-light dark:bg-foreground-dark mt-12">
-<div class="max-w-7xl mx-auto py-8 px-4 text-center text-sm text-text-muted-light dark:text-text-muted-dark">
-<p>© 2025 Secrétariat Pro. Tous droits réservés.</p>
-</div>
-</footer>
+  <!-- ── Panneau droit (formulaire) ── -->
+  <div class="w-full lg:w-7/12 xl:w-3/5 flex items-center justify-center px-6 py-10 sm:px-12">
+    <div class="w-full max-w-md">
+
+      <!-- En-tête mobile -->
+      <div class="lg:hidden text-center mb-8">
+        <a href="{% url 'accueil' %}" class="inline-flex items-center gap-2 mb-4">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-xl shadow-sm">🛒</div>
+          <div class="text-left">
+            <p class="font-extrabold text-gray-900 text-base">Marché Intelligent</p>
+            <p class="text-emerald-600 text-xs font-semibold">by Secrétariat Pro</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Titre -->
+      <div class="mb-7">
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-1.5">Créer un compte</h1>
+        <p class="text-gray-500 text-sm">C'est gratuit et rapide. Déjà inscrit ?
+          <a href="{% url 'connexion_client' %}" class="text-emerald-600 font-semibold hover:underline">Se connecter</a>
+        </p>
+      </div>
+
+      <!-- Messages Django -->
+      {% if messages %}
+        <div class="space-y-2 mb-5">
+          {% for message in messages %}
+            <div class="flex items-center gap-2.5 p-3.5 rounded-xl text-sm font-medium
+              {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200
+              {% elif message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200
+              {% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}">
+              <span class="material-symbols-outlined text-base">
+                {% if message.tags == 'error' %}error{% else %}check_circle{% endif %}
+              </span>
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Formulaire -->
+      <form method="POST" class="space-y-4" novalidate>
+        {% csrf_token %}
+
+        <!-- Erreurs globales -->
+        {% if form.non_field_errors %}
+        <div class="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 flex items-start gap-2">
+          <span class="material-symbols-outlined text-base flex-shrink-0 mt-0.5">error</span>
+          <div>{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>
+        </div>
+        {% endif %}
+
+        <!-- Nom d'utilisateur -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+            Nom d'utilisateur <span class="text-red-400">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+              <span class="material-symbols-outlined text-lg">person</span>
+            </span>
+            <input type="text" name="first_name" id="id_first_name"
+                   value="{{ form.first_name.value|default:'' }}"
+                   placeholder="Votre nom complet"
+                   autocomplete="name"
+                   class="w-full pl-11 pr-4 py-3 rounded-xl border {% if form.first_name.errors %}border-red-400{% else %}border-slate-200{% endif %} bg-white text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
+          </div>
+          {% if form.first_name.errors %}
+          <p class="text-red-500 text-xs mt-1 flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs">error</span>{{ form.first_name.errors.0 }}
+          </p>
+          {% endif %}
+        </div>
+
+        <!-- Numéro de téléphone -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+            Numéro de téléphone <span class="text-red-400">*</span>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+              <span class="material-symbols-outlined text-lg">phone</span>
+            </span>
+            <input type="tel" name="telephone" id="id_telephone"
+                   value="{{ form.telephone.value|default:'' }}"
+                   placeholder="+242 06 000 00 00"
+                   inputmode="tel" autocomplete="tel"
+                   class="w-full pl-11 pr-4 py-3 rounded-xl border {% if form.telephone.errors %}border-red-400{% else %}border-slate-200{% endif %} bg-white text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
+          </div>
+          {% if form.telephone.errors %}
+          <p class="text-red-500 text-xs mt-1 flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs">error</span>{{ form.telephone.errors.0 }}
+          </p>
+          {% endif %}
+          <p class="text-gray-400 text-xs mt-1">Utilisé pour vous connecter. Format : +242 06 000 00 00</p>
+        </div>
+
+        <!-- Email (optionnel) -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+            Adresse e-mail <span class="text-gray-400 font-normal normal-case">(optionnel)</span>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+              <span class="material-symbols-outlined text-lg">mail</span>
+            </span>
+            <input type="email" name="email" id="id_email"
+                   value="{{ form.email.value|default:'' }}"
+                   placeholder="exemple@mail.com"
+                   autocomplete="email"
+                   class="w-full pl-11 pr-4 py-3 rounded-xl border {% if form.email.errors %}border-red-400{% else %}border-slate-200{% endif %} bg-white text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
+          </div>
+          {% if form.email.errors %}
+          <p class="text-red-500 text-xs mt-1 flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs">error</span>{{ form.email.errors.0 }}
+          </p>
+          {% endif %}
+        </div>
+
+        <!-- Mots de passe -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Mot de passe -->
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+              Mot de passe <span class="text-red-400">*</span>
+            </label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <span class="material-symbols-outlined text-lg">lock</span>
+              </span>
+              <input type="password" name="password1" id="id_password1"
+                     placeholder="••••••••"
+                     autocomplete="new-password"
+                     class="w-full pl-11 pr-10 py-3 rounded-xl border {% if form.password1.errors %}border-red-400{% else %}border-slate-200{% endif %} bg-white text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
+              <button type="button" onclick="togglePwd('id_password1','eye1')" tabindex="-1"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
+                <span class="material-symbols-outlined text-lg" id="eye1">visibility</span>
+              </button>
+            </div>
+            {% if form.password1.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ form.password1.errors.0 }}</p>
+            {% endif %}
+          </div>
+          <!-- Confirmer -->
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+              Confirmer <span class="text-red-400">*</span>
+            </label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <span class="material-symbols-outlined text-lg">lock_check</span>
+              </span>
+              <input type="password" name="password2" id="id_password2"
+                     placeholder="••••••••"
+                     autocomplete="new-password"
+                     class="w-full pl-11 pr-10 py-3 rounded-xl border {% if form.password2.errors %}border-red-400{% else %}border-slate-200{% endif %} bg-white text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
+              <button type="button" onclick="togglePwd('id_password2','eye2')" tabindex="-1"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
+                <span class="material-symbols-outlined text-lg" id="eye2">visibility</span>
+              </button>
+            </div>
+            {% if form.password2.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ form.password2.errors.0 }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Indicateur force mot de passe -->
+        <div id="pwd-strength" class="hidden">
+          <div class="flex gap-1 mt-1">
+            <div class="h-1 flex-1 rounded-full bg-gray-200" id="s1"></div>
+            <div class="h-1 flex-1 rounded-full bg-gray-200" id="s2"></div>
+            <div class="h-1 flex-1 rounded-full bg-gray-200" id="s3"></div>
+            <div class="h-1 flex-1 rounded-full bg-gray-200" id="s4"></div>
+          </div>
+          <p class="text-xs text-gray-400 mt-1" id="strength-label"></p>
+        </div>
+
+        <!-- CGU -->
+        <p class="text-xs text-gray-400 leading-relaxed">
+          En créant un compte, vous acceptez nos
+          <a href="#" class="text-emerald-600 hover:underline font-medium">Conditions d'utilisation</a>
+          et notre
+          <a href="#" class="text-emerald-600 hover:underline font-medium">Politique de confidentialité</a>.
+        </p>
+
+        <!-- Bouton submit -->
+        <button type="submit"
+                class="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl
+                       bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-base
+                       shadow-md shadow-emerald-200 focus:outline-none focus:ring-4 focus:ring-emerald-300
+                       transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99]">
+          <span class="material-symbols-outlined text-xl">person_add</span>
+          Créer mon compte gratuitement
+        </button>
+      </form>
+
+      <!-- Lien connexion -->
+      <div class="text-center mt-6 space-y-3">
+        <p class="text-sm text-gray-500">
+          Déjà un compte ?
+          <a href="{% url 'connexion_client' %}" class="text-emerald-600 font-semibold hover:underline">Se connecter</a>
+        </p>
+        <a href="{% url 'accueil' %}" class="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Retour à l'accueil
+        </a>
+      </div>
+
+    </div>
+  </div>
 
 </div>
-</div>
 
+<script>
+function togglePwd(inputId, eyeId) {
+  const inp = document.getElementById(inputId);
+  const eye = document.getElementById(eyeId);
+  if (inp.type === 'password') { inp.type = 'text'; eye.textContent = 'visibility_off'; }
+  else { inp.type = 'password'; eye.textContent = 'visibility'; }
+}
+
+document.getElementById('id_password1').addEventListener('input', function() {
+  const val = this.value;
+  const wrap = document.getElementById('pwd-strength');
+  if (!val) { wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+  let score = 0;
+  if (val.length >= 8)  score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  const colors = ['bg-red-400','bg-orange-400','bg-yellow-400','bg-emerald-500'];
+  const labels = ['Trop court','Faible','Moyen','Fort'];
+  ['s1','s2','s3','s4'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    el.className = 'h-1 flex-1 rounded-full ' + (i < score ? colors[score-1] : 'bg-gray-200');
+  });
+  document.getElementById('strength-label').textContent = labels[Math.max(0,score-1)];
+});
+</script>
 {% endblock %}

@@ -1,0 +1,669 @@
+{% extends 'livreur/base_livreur.html' %}
+{% block title %}Mission #{{ liv.pk }}{% endblock %}
+{% block page_title %}Mission #{{ liv.pk }}{% endblock %}
+{% block page_subtitle %}{{ liv.get_statut_display }} · Commande #{{ liv.paiement.pk }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+  /* ── Fix conflit Tailwind / Leaflet ── */
+  .leaflet-tile              { max-width: none !important; height: 256px !important; }
+  .leaflet-container img     { max-width: none !important; height: auto !important; box-shadow: none !important; }
+  .leaflet-container         { font-family: 'Inter', sans-serif; }
+
+  #mission-map {
+    height: 400px;
+    width: 100%;
+    background: #cbd5e1;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── GPS dot ── */
+  #gps-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #94a3b8; display: inline-block;
+    vertical-align: middle; transition: background .3s;
+    flex-shrink: 0;
+  }
+  #gps-dot.active {
+    background: #10b981;
+    animation: pulse-green 1.5s infinite;
+  }
+  @keyframes pulse-green {
+    0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,.5); }
+    50%      { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+  }
+
+  /* ── Bouton Google Maps ── */
+  .nav-btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    background: #4285f4; color: white; font-weight: 700;
+    font-size: 13px; padding: 10px 16px; border-radius: 12px;
+    text-decoration: none; transition: background .2s; width: 100%;
+  }
+  .nav-btn:hover { background: #3367d6; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-slate-50 pb-12 min-h-full">
+<div class="max-w-lg mx-auto px-4 pt-5 space-y-4">
+
+  <!-- ── Header ── -->
+  <div class="flex items-center gap-3">
+    <a href="{% url 'livreur_mes_missions' %}"
+       class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors flex-shrink-0">
+      <span class="material-symbols-outlined text-slate-500">arrow_back</span>
+    </a>
+    <div class="min-w-0 flex-1">
+      <h1 class="font-extrabold text-slate-800 truncate">Mission #{{ liv.pk }}</h1>
+      <p class="text-xs text-slate-400">Commande #{{ liv.paiement.pk }} · {{ liv.paiement.get_section_display }}</p>
+    </div>
+    <span class="flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-full
+      {% if liv.statut == 'livree' %}bg-emerald-100 text-emerald-700
+      {% elif liv.statut == 'en_route' %}bg-orange-100 text-orange-700
+      {% elif liv.statut == 'en_recuperation' %}bg-blue-100 text-blue-700
+      {% elif liv.statut == 'accepte' %}bg-indigo-100 text-indigo-700
+      {% else %}bg-slate-100 text-slate-500{% endif %}">
+      {{ liv.get_statut_display }}
+    </span>
+  </div>
+
+  <!-- ── CARTE ── -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm" style="overflow:hidden;">
+
+    <!-- Titre carte -->
+    <div class="px-4 pt-4 pb-2 flex items-center justify-between">
+      <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+        <span class="material-symbols-outlined text-orange-500 text-base">map</span>
+        Itinéraire
+      </h2>
+      <div class="flex items-center gap-2">
+        <span id="gps-dot"></span>
+        <span id="gps-label" class="text-xs text-slate-400">GPS inactif</span>
+      </div>
+    </div>
+
+    <!-- Conteneur carte -->
+    <div id="mission-map"></div>
+
+    <!-- Avertissement GPS client absent -->
+    <div id="no-gps-warning" class="hidden px-4 py-2 bg-amber-50 border-t border-amber-100">
+      <p class="text-xs text-amber-700 flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-sm">location_off</span>
+        Coordonnées GPS client non disponibles.
+      </p>
+    </div>
+
+    <!-- Distances -->
+    <div class="grid grid-cols-3 divide-x divide-slate-50 border-t border-slate-100">
+      <div class="text-center px-2 py-3">
+        <p class="text-[10px] text-slate-400 font-medium mb-1">Vous → Vendeur</p>
+        <p class="text-sm font-extrabold text-indigo-600" id="dist-lv">—</p>
+        <p class="text-[10px] text-slate-400 mt-0.5" id="time-lv">—</p>
+      </div>
+      <div class="text-center px-2 py-3">
+        <p class="text-[10px] text-slate-400 font-medium mb-1">Vendeur → Client</p>
+        <p class="text-sm font-extrabold text-orange-500" id="dist-vc">—</p>
+        <p class="text-[10px] text-slate-400 mt-0.5" id="time-vc">—</p>
+      </div>
+      <div class="text-center px-2 py-3">
+        <p class="text-[10px] text-slate-400 font-medium mb-1">Vous → Client</p>
+        <p class="text-sm font-extrabold text-emerald-600" id="dist-lc">—</p>
+        <p class="text-[10px] text-slate-400 mt-0.5" id="time-lc">—</p>
+      </div>
+    </div>
+
+    <!-- Légende -->
+    <div class="flex items-center gap-4 px-4 py-2.5 border-t border-slate-50 flex-wrap">
+      <span class="flex items-center gap-1.5 text-xs text-slate-500">
+        <span class="w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow inline-block"></span>Vous
+      </span>
+      <span class="flex items-center gap-1.5 text-xs text-slate-500">
+        <span class="w-3 h-3 rounded-full bg-orange-500 border-2 border-white shadow inline-block"></span>Vendeur
+      </span>
+      <span class="flex items-center gap-1.5 text-xs text-slate-500">
+        <span class="w-3 h-3 rounded-full bg-blue-500 border-2 border-white shadow inline-block"></span>Client
+      </span>
+      <span class="ml-auto text-[10px] text-slate-300" id="last-update"></span>
+    </div>
+
+    <!-- Bouton Google Maps -->
+    {% if liv.paiement.gps_lat and liv.paiement.gps_lng %}
+    <div class="px-4 pb-4">
+      <a href="https://www.google.com/maps/dir/?api=1&destination={{ liv.paiement.gps_lat }},{{ liv.paiement.gps_lng }}&travelmode=driving"
+         target="_blank" rel="noopener" class="nav-btn">
+        <span class="material-symbols-outlined text-sm">navigation</span>
+        Ouvrir dans Google Maps
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── Timeline statut ── -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
+    <div class="flex items-center gap-1">
+      {% for s, label in liv.STATUTS %}
+      {% if s != 'echouee' %}
+      <div class="flex-1 text-center">
+        <div class="w-7 h-7 rounded-full mx-auto flex items-center justify-center text-xs font-bold
+          {% if liv.statut == s %}bg-orange-500 text-white ring-2 ring-orange-300
+          {% elif s == 'attente_livreur' and liv.statut != 'attente_livreur' %}bg-emerald-500 text-white
+          {% elif s == 'assigne' and liv.statut in 'accepte,en_recuperation,en_route,livree' %}bg-emerald-500 text-white
+          {% elif s == 'accepte' and liv.statut in 'en_recuperation,en_route,livree' %}bg-emerald-500 text-white
+          {% elif s == 'en_recuperation' and liv.statut in 'en_route,livree' %}bg-emerald-500 text-white
+          {% elif s == 'en_route' and liv.statut == 'livree' %}bg-emerald-500 text-white
+          {% else %}bg-slate-100 text-slate-400{% endif %}">
+          {% if s == 'attente_livreur' %}1
+          {% elif s == 'assigne' %}2
+          {% elif s == 'accepte' %}3
+          {% elif s == 'en_recuperation' %}4
+          {% elif s == 'en_route' %}5
+          {% elif s == 'livree' %}✓{% endif %}
+        </div>
+        <p class="text-[9px] text-slate-400 mt-0.5 leading-tight">{{ label|truncatechars:10 }}</p>
+      </div>
+      {% if not forloop.last and s != 'echouee' %}
+      <div class="h-px flex-shrink-0 w-2 bg-slate-200"></div>
+      {% endif %}
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ── Adresse client ── -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+    <h2 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+      <span class="material-symbols-outlined text-blue-500 text-base">home_pin</span>
+      Adresse client
+    </h2>
+    <p class="font-semibold text-slate-700">{{ liv.paiement.quartier_livraison|default:"Quartier non précisé" }}</p>
+    <p class="text-sm text-slate-500 mt-0.5">{{ liv.paiement.adresse_livraison|default:"Adresse non précisée" }}</p>
+    {% if liv.paiement.gps_lat and liv.paiement.gps_lng %}
+    <div class="flex items-center gap-2 mt-3">
+      <span class="text-xs text-slate-400 font-mono">{{ liv.paiement.gps_lat|floatformat:5 }}, {{ liv.paiement.gps_lng|floatformat:5 }}</span>
+      <a href="https://www.google.com/maps/dir/?api=1&destination={{ liv.paiement.gps_lat }},{{ liv.paiement.gps_lng }}&travelmode=driving"
+         target="_blank" rel="noopener"
+         class="text-xs text-blue-600 font-semibold hover:underline flex items-center gap-0.5">
+        <span class="material-symbols-outlined text-sm">open_in_new</span>Naviguer
+      </a>
+    </div>
+    {% else %}
+    <p class="text-xs text-amber-600 mt-2 flex items-center gap-1">
+      <span class="material-symbols-outlined text-sm">location_off</span>
+      Pas de coordonnées GPS — navigation approximative
+    </p>
+    {% endif %}
+  </div>
+
+  <!-- ── Infos client ── -->
+  {% if liv.paiement.client %}
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+    <div class="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center text-xl flex-shrink-0">👤</div>
+    <div class="flex-1 min-w-0">
+      <p class="text-xs text-slate-400">Client</p>
+      <p class="font-bold text-slate-800 truncate">{{ liv.paiement.client.get_full_name }}</p>
+    </div>
+    {% if liv.paiement.client.telephone %}
+    <div class="flex gap-2 flex-shrink-0">
+      <a href="tel:{{ liv.paiement.client.telephone }}"
+         class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+        <span class="material-symbols-outlined text-emerald-600 text-lg">call</span>
+      </a>
+      <a href="https://wa.me/{{ liv.paiement.client.telephone }}" target="_blank"
+         class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+        <span class="material-symbols-outlined text-green-600 text-lg">chat</span>
+      </a>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- ── Articles de la commande ── -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="px-5 pt-4 pb-3 border-b border-slate-50 flex items-center justify-between">
+      <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+        <span class="material-symbols-outlined text-orange-500 text-base">shopping_bag</span>
+        Articles commandés
+      </h2>
+      {% if cart_items %}
+      <span class="text-xs text-slate-400">{{ cart_items|length }} article{{ cart_items|length|pluralize }}</span>
+      {% endif %}
+    </div>
+
+    {% if cart_items %}
+    <ul class="divide-y divide-slate-50">
+      {% for item in cart_items %}
+      <li class="flex items-center gap-3 px-4 py-3">
+
+        <!-- Photo -->
+        {% if item.image %}
+        <img src="{{ item.image }}"
+             alt="{{ item.nom }}"
+             class="w-14 h-14 rounded-xl object-cover border border-slate-100 flex-shrink-0 bg-slate-100"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="w-14 h-14 rounded-xl bg-orange-50 border border-orange-100 flex-shrink-0
+                    items-center justify-center text-2xl hidden" aria-hidden="true">🛍️</div>
+        {% else %}
+        <div class="w-14 h-14 rounded-xl bg-orange-50 border border-orange-100 flex-shrink-0
+                    flex items-center justify-center text-2xl" aria-hidden="true">🛍️</div>
+        {% endif %}
+
+        <!-- Infos article -->
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-slate-800 text-sm leading-tight truncate">{{ item.nom }}</p>
+          {% if item.vendeur %}
+          <p class="text-xs text-slate-400 mt-0.5 truncate">🏪 {{ item.vendeur }}</p>
+          {% endif %}
+          {% if item.couleur_nom or item.taille %}
+          <p class="text-xs text-slate-400 mt-0.5">
+            {% if item.couleur_nom %}{{ item.couleur_nom }}{% endif %}
+            {% if item.couleur_nom and item.taille %} · {% endif %}
+            {% if item.taille %}{{ item.taille }}{% endif %}
+          </p>
+          {% endif %}
+        </div>
+
+        <!-- Qté + prix -->
+        <div class="flex-shrink-0 text-right">
+          <p class="text-sm font-extrabold text-orange-600">
+            {{ item.prix|floatformat:0 }} {{ item.devise|default:"FCFA" }}
+          </p>
+          <p class="text-xs text-slate-400 mt-0.5">× {{ item.quantite }}</p>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="px-5 py-8 text-center text-slate-400">
+      <span class="text-3xl block mb-2">📦</span>
+      <p class="text-sm">Détail des articles non disponible</p>
+    </div>
+    {% endif %}
+
+    <!-- Récap prix -->
+    <div class="border-t border-slate-100 px-5 py-4 space-y-2 bg-slate-50/60">
+      <div class="flex justify-between text-sm">
+        <span class="text-slate-500">Sous-total</span>
+        <span class="font-semibold text-slate-700">{{ liv.paiement.montant|floatformat:0 }} FCFA</span>
+      </div>
+      {% if liv.paiement.frais_livraison %}
+      <div class="flex justify-between text-sm">
+        <span class="text-slate-500">Livraison</span>
+        <span class="font-semibold text-slate-700">{{ liv.paiement.frais_livraison|floatformat:0 }} FCFA</span>
+      </div>
+      {% endif %}
+      {% if liv.paiement.frais_service %}
+      <div class="flex justify-between text-sm">
+        <span class="text-slate-500">Frais de service</span>
+        <span class="font-semibold text-slate-700">{{ liv.paiement.frais_service|floatformat:0 }} FCFA</span>
+      </div>
+      {% endif %}
+      <div class="flex justify-between pt-2 border-t border-slate-200">
+        <span class="font-bold text-slate-800">Total</span>
+        <span class="font-extrabold text-orange-600 text-base">{{ liv.paiement.montant_total|floatformat:0 }} FCFA</span>
+      </div>
+      <div class="flex justify-between text-xs pt-1">
+        <span class="text-slate-400">Paiement</span>
+        <span class="font-medium text-slate-600">{{ liv.paiement.get_methode_display }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Actions selon statut ── -->
+  {% if liv.statut == 'accepte' %}
+  <form method="post" action="{% url 'livreur_maj_statut' liv.pk %}">
+    {% csrf_token %}
+    <button type="submit"
+            class="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700
+                   text-white font-extrabold py-4 rounded-2xl text-sm transition-colors shadow-lg">
+      <span class="material-symbols-outlined">inventory_2</span>
+      Je suis chez le vendeur — Colis récupéré
+    </button>
+  </form>
+  {% endif %}
+
+  {% if liv.statut == 'en_recuperation' %}
+  <form method="post" action="{% url 'livreur_maj_statut' liv.pk %}">
+    {% csrf_token %}
+    <button type="submit"
+            class="w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700
+                   text-white font-extrabold py-4 rounded-2xl text-sm transition-colors shadow-lg">
+      <span class="material-symbols-outlined">local_shipping</span>
+      Colis récupéré — En route vers le client 🛵
+    </button>
+  </form>
+  {% endif %}
+
+  {% if liv.statut == 'en_route' %}
+  <div class="bg-white rounded-2xl border-2 border-orange-200 shadow-sm p-6">
+    <h2 class="text-sm font-bold text-orange-700 mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-orange-500">pin</span>
+      Code OTP du client
+    </h2>
+    <p class="text-xs text-slate-500 mb-4">Demandez au client son code à 6 chiffres pour confirmer la livraison.</p>
+    <form method="post" action="{% url 'livreur_valider_otp' liv.pk %}">
+      {% csrf_token %}
+      <div class="flex gap-3">
+        <input type="text" name="otp" maxlength="6" minlength="6" pattern="[0-9]{6}"
+               placeholder="_ _ _ _ _ _"
+               class="flex-1 text-center text-2xl font-black tracking-[0.5em]
+                      border-2 border-slate-200 focus:border-orange-400 rounded-xl py-3
+                      outline-none transition-colors"
+               autocomplete="off" inputmode="numeric" required>
+        <button type="submit"
+                class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700
+                       text-white font-bold px-5 rounded-xl text-sm transition-colors">
+          <span class="material-symbols-outlined text-base">check</span>
+          Valider
+        </button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+  {% if liv.statut == 'livree' %}
+  <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center">
+    <span class="text-5xl">✅</span>
+    <p class="font-extrabold text-emerald-700 mt-3 text-lg">Mission accomplie !</p>
+    {% if liv.delivered_at %}
+    <p class="text-xs text-emerald-500 mt-1">{{ liv.delivered_at|date:"d/m/Y à H\h i" }}</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function () {
+'use strict';
+
+// ── Données injectées par Django ──────────────────────────────────────────────
+var MAP_API_URL = "{% url 'livreur_mission_map_api' liv.pk %}";
+var POS_URL     = "{% url 'livreur_update_position' %}";
+var CSRF        = "{{ csrf_token }}";
+var STATUT      = "{{ liv.statut }}";
+var CLIENT_LAT  = {{ liv.paiement.gps_lat|default:"null" }};
+var CLIENT_LNG  = {{ liv.paiement.gps_lng|default:"null" }};
+
+// ── Formatage ─────────────────────────────────────────────────────────────────
+function fmtDist(m) {
+  if (m == null) return '—';
+  return m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km';
+}
+function fmtTime(s) {
+  if (s == null) return '—';
+  var m = Math.round(s / 60);
+  return m < 1 ? Math.round(s) + ' sec'
+       : m < 60 ? m + ' min'
+       : Math.floor(m/60) + 'h' + String(m%60).padStart(2,'0');
+}
+
+// ── Icônes ────────────────────────────────────────────────────────────────────
+function pinIcon(color, emoji, size) {
+  size = size || 38;
+  return L.divIcon({
+    html: '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50% 50% 50% 0;'
+        + 'background:' + color + ';border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,.3);'
+        + 'display:flex;align-items:center;justify-content:center;'
+        + 'font-size:' + Math.round(size*.45) + 'px;transform:rotate(-45deg)">'
+        + '<span style="transform:rotate(45deg)">' + emoji + '</span></div>',
+    iconSize: [size, size],
+    iconAnchor: [size/2, size],
+    popupAnchor: [0, -size],
+    className: '',
+  });
+}
+
+// ── Haversine ────────────────────────────────────────────────────────────────
+function haversine(a, b) {
+  var R  = 6371000;
+  var φ1 = a[0] * Math.PI/180, φ2 = b[0] * Math.PI/180;
+  var dφ = (b[0]-a[0]) * Math.PI/180;
+  var dλ = (b[1]-a[1]) * Math.PI/180;
+  var x  = Math.sin(dφ/2)*Math.sin(dφ/2)
+          + Math.cos(φ1)*Math.cos(φ2)*Math.sin(dλ/2)*Math.sin(dλ/2);
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+}
+
+// ── Etat carte ────────────────────────────────────────────────────────────────
+var map = null;
+var livreurMk = null, vendeurMk = null, clientMk = null;
+var layers = {};
+
+// ── OSRM route ────────────────────────────────────────────────────────────────
+function fetchOsrm(from, to, callback) {
+  // from, to = [lat, lng]
+  var url = 'https://router.project-osrm.org/route/v1/driving/'
+          + from[1] + ',' + from[0] + ';'
+          + to[1]   + ',' + to[0]
+          + '?geometries=geojson&overview=full&steps=false';
+
+  var controller = new AbortController();
+  var timer = setTimeout(function () { controller.abort(); }, 6000);
+
+  fetch(url, { signal: controller.signal })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      clearTimeout(timer);
+      if (!data.routes || !data.routes[0]) throw new Error('no route');
+      var leg = data.routes[0].legs[0];
+      var coords = data.routes[0].geometry.coordinates.map(function(c){ return [c[1], c[0]]; });
+      callback(null, { coords: coords, distance: leg.distance, duration: leg.duration });
+    })
+    .catch(function (e) {
+      clearTimeout(timer);
+      // Fallback ligne droite
+      var dist = haversine(from, to);
+      callback(null, { coords: [from, to], distance: dist, duration: dist / 8, straight: true });
+    });
+}
+
+function drawRoute(id, from, to, color, distId, timeId) {
+  if (layers[id]) { map.removeLayer(layers[id]); delete layers[id]; }
+  if (!from || !to || !map) return;
+
+  fetchOsrm(from, to, function (err, result) {
+    layers[id] = L.polyline(result.coords, {
+      color: color,
+      weight: result.straight ? 3 : 5,
+      opacity: result.straight ? 0.6 : 0.85,
+      dashArray: result.straight ? '8,6' : null,
+    }).addTo(map);
+
+    if (distId) document.getElementById(distId).textContent = fmtDist(result.distance) + (result.straight ? '*' : '');
+    if (timeId) document.getElementById(timeId).textContent = '~' + fmtTime(result.duration) + ' en moto';
+  });
+}
+
+// ── Fetch positions ───────────────────────────────────────────────────────────
+function fetchPositions() {
+  fetch(MAP_API_URL)
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      var bounds = [];
+      var lvPos = null, vdPos = null, clPos = null;
+
+      // Livreur
+      if (data.livreur && data.livreur.lat != null) {
+        lvPos = [data.livreur.lat, data.livreur.lng];
+        if (!livreurMk) {
+          livreurMk = L.marker(lvPos, { icon: pinIcon('#10b981', '🛵', 42), zIndexOffset: 500 })
+            .addTo(map).bindPopup('<strong>🛵 ' + data.livreur.nom + '</strong><br>Votre position');
+        } else {
+          livreurMk.setLatLng(lvPos);
+        }
+        bounds.push(lvPos);
+      }
+
+      // Vendeur
+      if (data.vendeur && data.vendeur.lat != null) {
+        vdPos = [data.vendeur.lat, data.vendeur.lng];
+        if (!vendeurMk) {
+          vendeurMk = L.marker(vdPos, { icon: pinIcon('#f97316', '🏪') })
+            .addTo(map).bindPopup('<strong>🏪 ' + data.vendeur.nom + '</strong>');
+        }
+        bounds.push(vdPos);
+      }
+
+      // Client
+      if (data.client && data.client.lat != null) {
+        clPos = [data.client.lat, data.client.lng];
+        if (!clientMk) {
+          clientMk = L.marker(clPos, { icon: pinIcon('#3b82f6', '🏠') })
+            .addTo(map).bindPopup('<strong>📍 Client</strong><br>' + (data.client.quartier || ''));
+        }
+        bounds.push(clPos);
+      } else if (CLIENT_LAT && CLIENT_LNG) {
+        clPos = [CLIENT_LAT, CLIENT_LNG];
+        bounds.push(clPos);
+      }
+
+      // Routes selon statut
+      if (data.statut === 'accepte' || data.statut === 'en_recuperation') {
+        if (lvPos && vdPos) drawRoute('lv', lvPos, vdPos, '#6366f1', 'dist-lv', 'time-lv');
+        if (vdPos && clPos) drawRoute('vc', vdPos, clPos, '#f97316', 'dist-vc', 'time-vc');
+        document.getElementById('dist-lc').textContent = '—';
+        document.getElementById('time-lc').textContent = 'phase 2';
+      } else if (data.statut === 'en_route') {
+        if (layers['lv']) { map.removeLayer(layers['lv']); delete layers['lv']; }
+        if (layers['vc']) { map.removeLayer(layers['vc']); delete layers['vc']; }
+        if (lvPos && clPos) drawRoute('lc', lvPos, clPos, '#10b981', 'dist-lc', 'time-lc');
+        document.getElementById('dist-lv').textContent = '✓';
+        document.getElementById('time-lv').textContent = 'récupéré';
+        document.getElementById('dist-vc').textContent = '—';
+        document.getElementById('time-vc').textContent = '—';
+      }
+
+      // Fit bounds
+      if (bounds.length > 1) {
+        try {
+          map.fitBounds(L.latLngBounds(bounds), { padding: [50, 50], maxZoom: 16 });
+        } catch(e) {}
+      }
+
+      // Heure
+      var t = new Date();
+      var el = document.getElementById('last-update');
+      if (el) el.textContent = 'màj ' + String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0');
+    })
+    .catch(function (e) { console.warn('map api error', e); });
+}
+
+// ── Init carte ────────────────────────────────────────────────────────────────
+function initMap() {
+  if (!window.L) {
+    document.getElementById('mission-map').innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b;font-size:14px">'
+      + '⚠️ Carte indisponible (vérifiez votre connexion)</div>';
+    return;
+  }
+
+  var center = (CLIENT_LAT && CLIENT_LNG) ? [CLIENT_LAT, CLIENT_LNG] : [-4.2659, 15.2832];
+  var zoom   = (CLIENT_LAT && CLIENT_LNG) ? 14 : 12;
+
+  try {
+    map = L.map('mission-map', {
+      center: center,
+      zoom: zoom,
+      zoomControl: true,
+      scrollWheelZoom: false,
+      tap: false,
+    });
+  } catch(e) {
+    console.error('Leaflet init failed:', e);
+    return;
+  }
+
+  // Tuiles OSM
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 19,
+    errorTileUrl: '',
+  }).addTo(map);
+
+  // Marqueur client fixe (si connus dès le départ)
+  if (CLIENT_LAT && CLIENT_LNG && !clientMk) {
+    clientMk = L.marker([CLIENT_LAT, CLIENT_LNG], { icon: pinIcon('#3b82f6', '🏠') })
+      .addTo(map)
+      .bindPopup('<strong>📍 Adresse client</strong><br>{{ liv.paiement.quartier_livraison|default:"" }}');
+  } else if (!CLIENT_LAT || !CLIENT_LNG) {
+    var warn = document.getElementById('no-gps-warning');
+    if (warn) warn.classList.remove('hidden');
+  }
+
+  // Forcer le recalcul de taille après rendu CSS
+  setTimeout(function () { if (map) map.invalidateSize(true); }, 300);
+  setTimeout(function () { if (map) map.invalidateSize(true); }, 800);
+
+  fetchPositions();
+}
+
+// ── GPS livreur ───────────────────────────────────────────────────────────────
+function setGpsStatus(etat, msg) {
+  var dot = document.getElementById('gps-dot');
+  var lbl = document.getElementById('gps-label');
+  if (!dot || !lbl) return;
+  dot.classList.remove('active');
+  dot.style.background = '';
+  if (etat === 'actif') {
+    dot.classList.add('active');
+    lbl.textContent = 'GPS actif';
+  } else if (etat === 'recherche') {
+    dot.style.background = '#f59e0b';
+    lbl.textContent = 'Recherche GPS…';
+  } else {
+    dot.style.background = '#ef4444';
+    lbl.textContent = msg || 'GPS inactif';
+  }
+}
+
+function envoyerPosition(lat, lng) {
+  if (map) {
+    var p = [lat, lng];
+    if (livreurMk) {
+      livreurMk.setLatLng(p);
+    } else {
+      livreurMk = L.marker(p, { icon: pinIcon('#10b981', '🛵', 42), zIndexOffset: 500 })
+        .addTo(map).bindPopup('<strong>🛵 Vous</strong>');
+    }
+  }
+  fetch(POS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF },
+    body: 'lat=' + lat + '&lng=' + lng,
+  }).catch(function(){});
+}
+
+function demarrerGPS() {
+  if (!navigator.geolocation) { setGpsStatus('erreur', 'GPS non supporté'); return; }
+  setGpsStatus('recherche');
+  navigator.geolocation.watchPosition(
+    function (p) {
+      setGpsStatus('actif');
+      envoyerPosition(p.coords.latitude, p.coords.longitude);
+    },
+    function (err) {
+      var msgs = { 1: 'Permission refusée', 2: 'GPS indisponible', 3: 'Délai dépassé' };
+      setGpsStatus('erreur', msgs[err.code] || 'GPS inactif');
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+  );
+}
+
+// ── Démarrage (DOMContentLoaded déjà passé — on appelle directement) ─────────
+initMap();
+
+{% if liv.statut not in 'livree,echouee' %}
+demarrerGPS();
+setInterval(fetchPositions, 12000);
+{% endif %}
+
+})();
+</script>
+{% endblock %}

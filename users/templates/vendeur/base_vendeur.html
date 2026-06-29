@@ -1,0 +1,309 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Espace Vendeur{% endblock %} — Urban Eat</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            vendeur: {
+              50:  '#fff7ed', 100: '#ffedd5', 200: '#fed7aa',
+              500: '#f97316', 600: '#ea580c', 700: '#c2410c', 800: '#9a3412',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.625rem 1rem;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #475569;
+      text-decoration: none;
+      transition: background-color 150ms, color 150ms;
+    }
+    .sidebar-link:hover { background-color: #fff7ed; color: #ea580c; }
+    .sidebar-link.active { background-color: #ffedd5; color: #c2410c; font-weight: 600; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+<!-- ── Mobile top bar ── -->
+<div class="lg:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-slate-100 sticky top-0 z-40">
+  <div class="flex items-center gap-2">
+    <span class="text-xl">{{ vp.section_icon }}</span>
+    <span class="font-bold text-orange-600 text-sm">Espace Vendeur</span>
+  </div>
+  <button id="sidebarToggle" class="p-2 rounded-lg hover:bg-slate-100">
+    <span class="material-symbols-outlined text-slate-600">menu</span>
+  </button>
+</div>
+
+<div class="flex min-h-screen">
+
+  <!-- ── Sidebar ── -->
+  <aside id="sidebar" class="fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-slate-100 flex flex-col z-30 shadow-sm
+                              -translate-x-full lg:translate-x-0 transition-transform duration-300">
+
+    <!-- Logo / brand -->
+    <div class="px-5 py-5 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
+             style="background-color:{{ vp.section_color }}22;">
+          {{ vp.section_icon }}
+        </div>
+        <div>
+          <p class="font-bold text-sm text-slate-800 leading-tight">{{ vp.nom_commercial|default:request.user.get_full_name }}</p>
+          <p class="text-xs text-slate-400">{{ vp.get_section_display }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Boutique Switcher ── -->
+    {% if boutiques_list %}
+    <div class="px-3 py-3 border-b border-slate-100">
+      <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">Boutique active</p>
+      <div class="relative" id="boutiqueSwitcher">
+
+        <!-- Déclencheur -->
+        <button onclick="toggleBoutiqueSwitcher(event)"
+                class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl
+                       bg-orange-50 hover:bg-orange-100 border border-orange-100
+                       transition-colors text-left group">
+          <span class="text-xl flex-shrink-0 leading-none">
+            {% if active_boutique %}{{ active_boutique.type_icon }}{% else %}🏪{% endif %}
+          </span>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-orange-700 truncate leading-tight">
+              {% if active_boutique %}{{ active_boutique.nom }}{% else %}Aucune boutique{% endif %}
+            </p>
+            <p class="text-[10px] text-orange-400 leading-tight mt-0.5">
+              {% if active_boutique %}{{ active_boutique.get_type_commerce_display }}{% endif %}
+            </p>
+          </div>
+          <span class="material-symbols-outlined text-orange-400 text-base flex-shrink-0
+                        group-hover:text-orange-600 transition-colors">unfold_more</span>
+        </button>
+
+        <!-- Dropdown -->
+        <div id="boutiqueSwitcherMenu"
+             class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white rounded-xl
+                    border border-slate-100 shadow-xl z-50 overflow-hidden">
+
+          <div class="px-3 pt-2.5 pb-1.5">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mes boutiques ({{ boutiques_list|length }})</p>
+          </div>
+
+          <div class="max-h-52 overflow-y-auto divide-y divide-slate-50">
+            {% for b in boutiques_list %}
+            <a href="{% url 'vendeur_switch_boutique' b.pk %}?next={{ request.path|urlencode }}"
+               class="flex items-center gap-2.5 px-3 py-2.5 hover:bg-orange-50 transition-colors
+                      {% if active_boutique and b.pk == active_boutique.pk %}bg-orange-50{% endif %}">
+              <span class="text-lg flex-shrink-0 leading-none">{{ b.type_icon }}</span>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold truncate leading-tight
+                          {% if active_boutique and b.pk == active_boutique.pk %}text-orange-700{% else %}text-slate-700{% endif %}">
+                  {{ b.nom }}
+                </p>
+                <p class="text-[10px] text-slate-400 leading-tight mt-0.5">{{ b.get_type_commerce_display }}</p>
+              </div>
+              {% if active_boutique and b.pk == active_boutique.pk %}
+              <span class="material-symbols-outlined text-orange-500 text-sm flex-shrink-0">check_circle</span>
+              {% endif %}
+              {% if not b.actif %}
+              <span class="text-[9px] bg-red-100 text-red-500 font-bold px-1.5 py-0.5 rounded-full flex-shrink-0">Bloquée</span>
+              {% endif %}
+            </a>
+            {% endfor %}
+          </div>
+
+          <div class="border-t border-slate-100 bg-slate-50">
+            <a href="{% url 'vendeur_boutique_creer' %}"
+               class="flex items-center gap-2 px-3 py-2.5 text-xs text-emerald-600
+                      hover:bg-emerald-50 transition-colors font-semibold">
+              <span class="material-symbols-outlined text-sm">add_circle</span>
+              Nouvelle boutique
+            </a>
+            <a href="{% url 'vendeur_boutiques' %}"
+               class="flex items-center gap-2 px-3 py-2 text-xs text-slate-500
+                      hover:bg-slate-100 transition-colors">
+              <span class="material-symbols-outlined text-sm">store</span>
+              Gérer mes boutiques
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Nav links -->
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <a href="{% url 'vendeur_dashboard' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'vendeur_dashboard' %}active{% endif %}">
+        <span class="material-symbols-outlined">dashboard</span>Tableau de bord
+      </a>
+      <a href="{% url 'vendeur_commandes' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'vendeur_commandes' %}active{% endif %}">
+        <span class="material-symbols-outlined">receipt_long</span>Commandes
+      </a>
+      <a href="{% url 'vendeur_boutiques' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'vendeur_boutiques' %}active{% endif %}">
+        <span class="material-symbols-outlined">store</span>Mes boutiques
+      </a>
+      <a href="{% url 'vendeur_produits' %}"
+         class="sidebar-link {% if 'vendeur_produit' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="material-symbols-outlined">inventory_2</span>Mes produits
+      </a>
+      <a href="{% url 'vendeur_paiements' %}"
+         class="sidebar-link {% if 'vendeur_paiement' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="material-symbols-outlined">payments</span>Paiements
+      </a>
+
+      <div class="pt-3 pb-1 px-1">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Compte</p>
+      </div>
+      <a href="{% url 'vendeur_profil' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'vendeur_profil' %}active{% endif %}">
+        <span class="material-symbols-outlined">manage_accounts</span>Mon profil
+      </a>
+      <a href="{% url 'vendeur_deconnexion' %}"
+         class="sidebar-link text-red-500 hover:bg-red-50 hover:text-red-600">
+        <span class="material-symbols-outlined">logout</span>Déconnexion
+      </a>
+    </nav>
+
+    <!-- User card bottom -->
+    <div class="px-4 py-4 border-t border-slate-100">
+      <div class="flex items-center gap-3">
+        {% if request.user.avatar %}
+          <img src="{{ request.user.avatar.url }}" class="w-8 h-8 rounded-full object-cover">
+        {% else %}
+          <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-sm">
+            {{ request.user.first_name|first|upper }}
+          </div>
+        {% endif %}
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-semibold text-slate-700 truncate">{{ request.user.get_full_name }}</p>
+          <p class="text-xs text-slate-400 truncate">{{ request.user.email }}</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Overlay mobile -->
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-20 hidden lg:hidden"></div>
+
+  <!-- ── Main content ── -->
+  <main class="flex-1 min-w-0">
+
+    <!-- Top header -->
+    <header class="hidden lg:flex items-center justify-between px-6 py-4 bg-white border-b border-slate-100 sticky top-0 z-10">
+      <div>
+        <h1 class="text-base font-bold text-slate-800">{% block page_title %}Tableau de bord{% endblock %}</h1>
+        <p class="text-xs text-slate-400">{% block page_subtitle %}{% endblock %}</p>
+      </div>
+      <div class="flex items-center gap-3">
+        {% if messages %}
+          {% for msg in messages %}
+          <span class="text-xs px-3 py-1 rounded-full
+            {% if msg.tags == 'success' %}bg-green-100 text-green-700
+            {% elif msg.tags == 'error' %}bg-red-100 text-red-700
+            {% else %}bg-blue-100 text-blue-700{% endif %}">
+            {{ msg }}
+          </span>
+          {% endfor %}
+        {% endif %}
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border"
+              style="background:{{ vp.section_color }}15; color:{{ vp.section_color }}; border-color:{{ vp.section_color }}30;">
+          {{ vp.section_icon }} {{ vp.get_section_display }}
+        </span>
+      </div>
+    </header>
+
+    <!-- Messages mobile -->
+    {% if messages %}
+    <div class="lg:hidden px-4 pt-3 space-y-2">
+      {% for msg in messages %}
+      <div class="text-xs px-3 py-2 rounded-lg
+        {% if msg.tags == 'success' %}bg-green-100 text-green-700
+        {% elif msg.tags == 'error' %}bg-red-100 text-red-700
+        {% else %}bg-blue-100 text-blue-700{% endif %}">
+        {{ msg }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="p-4 lg:p-6">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+const toggle  = document.getElementById('sidebarToggle');
+
+toggle?.addEventListener('click', () => {
+  sidebar.classList.toggle('-translate-x-full');
+  overlay.classList.toggle('hidden');
+});
+overlay?.addEventListener('click', () => {
+  sidebar.classList.add('-translate-x-full');
+  overlay.classList.add('hidden');
+});
+
+// ── Boutique Switcher ──────────────────────────────────────────────────────
+function toggleBoutiqueSwitcher(e) {
+  e.stopPropagation();
+  document.getElementById('boutiqueSwitcherMenu')?.classList.toggle('hidden');
+}
+document.addEventListener('click', function(e) {
+  const sw = document.getElementById('boutiqueSwitcher');
+  if (sw && !sw.contains(e.target)) {
+    document.getElementById('boutiqueSwitcherMenu')?.classList.add('hidden');
+  }
+});
+</script>
+{% block extra_scripts %}{% endblock %}
+{% include 'base/_gps_tracker.html' %}
+<audio id="urban-notif-sound" preload="auto" style="display:none">
+  <source src="/static/son/son.wav" type="audio/wav">
+</audio>
+<script>
+(function(){
+  var _audio = document.getElementById('urban-notif-sound');
+  function _unlock(){ if(!_audio)return; _audio.play().then(function(){_audio.pause();_audio.currentTime=0;}).catch(function(){}); }
+  document.addEventListener('click',   _unlock, {once:true});
+  document.addEventListener('touchstart', _unlock, {once:true});
+  window.playNotifSound = function(){
+    if(!_audio)return;
+    _audio.currentTime = 0;
+    _audio.play().catch(function(){});
+  };
+})();
+</script>
+</body>
+</html>

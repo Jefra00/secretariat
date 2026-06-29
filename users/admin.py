@@ -1,9 +1,6 @@
 from django.contrib import admin
-
-# Register your models here.
-from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User
+from .models import User, VendeurProfile, Paiement
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
@@ -59,3 +56,22 @@ class CustomUserAdmin(UserAdmin):
             ),
         }),
     )
+
+
+@admin.register(VendeurProfile)
+class VendeurProfileAdmin(admin.ModelAdmin):
+    list_display  = ('user', 'section', 'nom_commercial', 'actif', 'date_creation')
+    list_filter   = ('section', 'actif')
+    search_fields = ('user__first_name', 'user__last_name', 'user__email', 'nom_commercial')
+    raw_id_fields = ('user',)
+    ordering      = ('-date_creation',)
+
+
+@admin.register(Paiement)
+class PaiementAdmin(admin.ModelAdmin):
+    list_display  = ('pk', 'client', 'section', 'montant_total', 'methode', 'statut', 'cree_le')
+    list_filter   = ('section', 'statut', 'methode', 'mode_livraison')
+    search_fields = ('client__first_name', 'client__last_name', 'client__email', 'reference_externe')
+    date_hierarchy = 'cree_le'
+    ordering      = ('-cree_le',)
+    readonly_fields = ('cree_le', 'mis_a_jour_le')

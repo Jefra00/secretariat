@@ -1,0 +1,273 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}{{ produit.nom }} — Quincaillerie{% endblock %}
+{% block navbar %}{% include 'base/navbar_quicaillerie.html' %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+<style>
+.thumb-active{border-color:#ea580c;opacity:1;}
+.thumb-item{cursor:pointer;opacity:.65;transition:opacity .2s,border-color .2s;}
+.thumb-item:hover{opacity:1;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Fil d'Ariane -->
+  <nav class="flex items-center gap-1.5 text-xs text-gray-400 mb-6">
+    <a href="{% url 'quicaillerie:accueil' %}" class="hover:text-orange-600 transition">Quincaillerie</a>
+    {% if produit.categorie %}
+    <span>/</span>
+    <a href="{% url 'quicaillerie:accueil' %}?cat={{ produit.categorie.pk }}"
+       class="hover:text-orange-600 transition">{{ produit.categorie.nom }}</a>
+    {% endif %}
+    <span>/</span>
+    <span class="text-gray-700 font-semibold truncate">{{ produit.nom }}</span>
+  </nav>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+
+    <!-- ══ Galerie ══════════════════════════════════════════════════════════ -->
+    <div class="space-y-3">
+      <!-- Image principale -->
+      <div id="mainImg" class="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm aspect-square flex items-center justify-center">
+        {% if images %}
+        <img id="mainImgEl" src="{{ images.0.image.url }}" alt="{{ produit.nom }}"
+             class="w-full h-full object-cover">
+        {% else %}
+        <div class="flex flex-col items-center gap-2 text-gray-300">
+          <span class="text-7xl">🔧</span>
+          <p class="text-sm">Pas d'image</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Miniatures -->
+      {% if images|length > 1 %}
+      <div class="flex gap-2 overflow-x-auto pb-1">
+        {% for img in images %}
+        <button onclick="switchImg('{{ img.image.url }}')"
+                class="thumb-item flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 border-transparent {% if forloop.first %}thumb-active{% endif %}">
+          <img src="{{ img.image.url }}" alt="" class="w-full h-full object-cover">
+        </button>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ══ Infos produit ════════════════════════════════════════════════════ -->
+    <div class="flex flex-col gap-4">
+
+      <!-- Badges -->
+      <div class="flex flex-wrap gap-2">
+        {% if produit.categorie %}
+        <span class="text-xs font-bold text-white px-3 py-1 rounded-full"
+              style="background:#ea580c;">
+          {% if produit.categorie.icone %}{{ produit.categorie.icone }} {% endif %}{{ produit.categorie.nom }}
+        </span>
+        {% endif %}
+        <span class="text-xs font-bold px-3 py-1 rounded-full
+          {% if produit.etat == 'neuf' %}bg-emerald-100 text-emerald-700{% else %}bg-amber-100 text-amber-700{% endif %}">
+          {{ produit.get_etat_display }}
+        </span>
+        {% if produit.is_en_promo %}
+        <span class="text-xs font-bold px-3 py-1 rounded-full bg-red-100 text-red-600">
+          Promo -{{ produit.remise_pct }}%
+        </span>
+        {% endif %}
+        <span class="text-xs font-bold px-3 py-1 rounded-full
+          {% if produit.statut == 'disponible' %}bg-green-100 text-green-700
+          {% elif produit.statut == 'rupture' %}bg-red-100 text-red-600
+          {% else %}bg-blue-100 text-blue-700{% endif %}">
+          {{ produit.get_statut_display }}
+        </span>
+      </div>
+
+      <!-- Titre -->
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">{{ produit.nom }}</h1>
+        {% if produit.marque %}
+        <p class="text-sm font-semibold mt-1" style="color:#ea580c;">{{ produit.marque }}</p>
+        {% endif %}
+        {% if produit.reference %}
+        <p class="text-xs text-gray-400 mt-0.5">Réf. {{ produit.reference }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Prix -->
+      <div class="bg-orange-50 rounded-2xl px-5 py-4">
+        {% if produit.is_en_promo %}
+        <p class="text-sm text-gray-400 line-through">{{ produit.prix|floatformat:0 }} FCFA / {{ produit.unite }}</p>
+        {% endif %}
+        <p class="text-3xl font-black" style="color:#c2410c;">
+          {{ produit.prix_actuel|floatformat:0 }}
+          <span class="text-lg font-semibold">FCFA</span>
+          <span class="text-sm font-medium text-gray-500">/ {{ produit.unite }}</span>
+        </p>
+        {% if produit.is_en_promo %}
+        <p class="text-xs font-bold mt-1 text-red-500">Vous économisez {{ produit.remise_pct }}% !</p>
+        {% endif %}
+      </div>
+
+      <!-- Specs rapides -->
+      <div class="grid grid-cols-2 gap-3">
+        {% if produit.garantie %}
+        <div class="flex items-center gap-2 bg-white rounded-xl p-3 border border-gray-100">
+          <span class="material-symbols-outlined text-xl" style="color:#ea580c;">verified_user</span>
+          <div>
+            <p class="text-[10px] text-gray-400 uppercase font-bold">Garantie</p>
+            <p class="text-sm font-bold text-gray-900">{{ produit.garantie }}</p>
+          </div>
+        </div>
+        {% endif %}
+        {% if produit.poids %}
+        <div class="flex items-center gap-2 bg-white rounded-xl p-3 border border-gray-100">
+          <span class="material-symbols-outlined text-xl" style="color:#ea580c;">scale</span>
+          <div>
+            <p class="text-[10px] text-gray-400 uppercase font-bold">Poids</p>
+            <p class="text-sm font-bold text-gray-900">{{ produit.poids }} kg</p>
+          </div>
+        </div>
+        {% endif %}
+        <div class="flex items-center gap-2 bg-white rounded-xl p-3 border border-gray-100">
+          <span class="material-symbols-outlined text-xl" style="color:#ea580c;">inventory_2</span>
+          <div>
+            <p class="text-[10px] text-gray-400 uppercase font-bold">Stock</p>
+            <p class="text-sm font-bold text-gray-900">{{ produit.quantite_stock }} {{ produit.unite }}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 bg-white rounded-xl p-3 border border-gray-100">
+          <span class="material-symbols-outlined text-xl {% if produit.livraison_disponible %}text-green-500{% else %}text-gray-300{% endif %}">local_shipping</span>
+          <div>
+            <p class="text-[10px] text-gray-400 uppercase font-bold">Livraison</p>
+            <p class="text-sm font-bold {% if produit.livraison_disponible %}text-green-700{% else %}text-gray-400{% endif %}">
+              {% if produit.livraison_disponible %}Disponible{% else %}Non dispo{% endif %}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Localisation -->
+      <div class="flex items-center gap-2 text-sm text-gray-500">
+        <span class="material-symbols-outlined text-base" style="color:#ea580c;">location_on</span>
+        {{ produit.adresse }}{% if produit.ville %}, {{ produit.ville }}{% endif %}
+        {% if produit.boutique %}
+        · <span class="font-semibold text-gray-700">{{ produit.boutique }}</span>
+        {% endif %}
+      </div>
+
+      <!-- CTA -->
+      <div class="flex gap-3 pt-2">
+        <button onclick="detailAddToCart()"
+                id="addCartBtn"
+                class="flex-1 flex items-center justify-center gap-2 text-white font-bold px-5 py-3.5 rounded-xl transition shadow-sm text-sm"
+                style="background:#ea580c;">
+          <span class="material-symbols-outlined text-xl">add_shopping_cart</span>
+          Ajouter au panier
+        </button>
+        <a href="{% url 'marche:panier' %}"
+           class="flex items-center justify-center gap-2 font-bold px-5 py-3.5 rounded-xl transition text-sm border-2"
+           style="border-color:#ea580c;color:#ea580c;">
+          Voir panier
+        </a>
+      </div>
+
+    </div>
+  </div><!-- /grid -->
+
+  <!-- ══ Description ═══════════════════════════════════════════════════════ -->
+  {% if produit.description %}
+  <section class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-10">
+    <h2 class="font-extrabold text-gray-900 text-lg mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined" style="color:#ea580c;">description</span>
+      Description
+    </h2>
+    <div class="text-gray-600 text-sm leading-relaxed prose max-w-none">
+      {{ produit.description|linebreaksbr }}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ══ Produits similaires ════════════════════════════════════════════════ -->
+  {% if similaires %}
+  <section>
+    <h2 class="font-extrabold text-gray-900 text-xl mb-5 flex items-center gap-2">
+      <span class="text-2xl">🔩</span> Produits similaires
+    </h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+      {% for p in similaires %}
+      {% with img=p.images.all.0 %}
+      <a href="{% url 'quicaillerie:detail' p.pk %}"
+         class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all">
+        <div class="h-32 overflow-hidden bg-gray-50">
+          {% if img %}
+          <img src="{{ img.image.url }}" alt="{{ p.nom }}" class="w-full h-full object-cover">
+          {% else %}
+          <div class="w-full h-full flex items-center justify-center" style="background:#ffedd5;">
+            <span class="text-3xl">🔧</span>
+          </div>
+          {% endif %}
+        </div>
+        <div class="p-3">
+          <p class="text-xs font-bold text-gray-900 line-clamp-2 mb-1">{{ p.nom }}</p>
+          <p class="text-sm font-black" style="color:#c2410c;">{{ p.prix_actuel|floatformat:0 }} FCFA</p>
+        </div>
+      </a>
+      {% endwith %}
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+</div>
+
+<script>
+function switchImg(url){
+  document.getElementById('mainImgEl').src = url;
+  document.querySelectorAll('.thumb-item').forEach(t => {
+    t.classList.toggle('thumb-active', t.querySelector('img').src === url);
+  });
+}
+
+function detailAddToCart(){
+  const CART_KEY = 'mi_cart_v1';
+  function cartGet(){ try{ return JSON.parse(localStorage.getItem(CART_KEY)||'[]'); }catch(e){ return []; } }
+  function cartSave(arr){ localStorage.setItem(CART_KEY, JSON.stringify(arr)); }
+
+  const item = {
+    id: '{{ produit.pk }}',
+    nom: '{{ produit.nom|escapejs }}',
+    prix: {{ produit.prix_actuel }},
+    devise: 'FCFA',
+    unite: '{{ produit.unite|escapejs }}',
+    vendeur: '{{ produit.boutique|default:""|escapejs }}',
+    image: '{% if images %}{{ images.0.image.url }}{% endif %}',
+    url: '{% url "quicaillerie:detail" produit.pk %}',
+    couleur_nom: '', couleur_hex: '',
+    section: 'quicaillerie',
+  };
+  item._key = item.id;
+
+  const cart = cartGet();
+  const idx = cart.findIndex(i => i._key === item._key);
+  if(idx >= 0){ cart[idx].quantite = (cart[idx].quantite||1) + 1; }
+  else { cart.push({...item, quantite:1}); }
+  cartSave(cart);
+
+  const btn = document.getElementById('addCartBtn');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="material-symbols-outlined text-xl">check_circle</span> Ajouté !';
+  btn.style.background = '#16a34a';
+  setTimeout(()=>{ btn.innerHTML=orig; btn.style.background=''; }, 1800);
+
+  // update badge
+  const n = cart.reduce((s,i)=>s+(i.quantite||1),0);
+  const badge = document.getElementById('qCartBadge');
+  if(badge){ badge.textContent = n>99?'99+':n; badge.classList.toggle('hidden',n===0); }
+}
+</script>
+{% endblock %}

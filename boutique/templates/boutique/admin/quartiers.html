@@ -1,0 +1,88 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Quartiers{% endblock %}
+{% block page_title %}Gestion des quartiers{% endblock %}
+{% block page_subtitle %}{{ quartiers.count }} quartier{{ quartiers.count|pluralize }}{% endblock %}
+{% block header_actions %}
+<a href="{% url 'admin_geo' %}" class="text-sm text-gray-500 hover:text-gray-800 transition">← Géographie</a>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 h-fit">
+    <h2 class="text-sm font-bold text-gray-700 mb-4">Ajouter un quartier</h2>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="creer">
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">Nom <span class="text-red-400">*</span></label>
+          {{ form.nom }}
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">Commune <span class="text-red-400">*</span></label>
+          {{ form.commune }}
+        </div>
+        <label class="flex items-center gap-2 cursor-pointer">
+          {{ form.actif }}<span class="text-sm text-gray-700">Actif</span>
+        </label>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-2">Position GPS <span class="text-gray-400 font-normal">(cliquer sur la carte)</span></label>
+          {% include 'boutique/_map_picker.html' %}
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-xl transition">Créer le quartier</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="lg:col-span-2">
+    <form method="get" class="mb-4 flex gap-2">
+      <div class="relative flex-1">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-base">search</span>
+        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher un quartier…"
+               class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none">
+      </div>
+      <select name="commune" class="px-3 py-2.5 rounded-xl border border-gray-200 text-sm bg-white">
+        <option value="">Toutes les communes</option>
+        {% for c in communes %}<option value="{{ c.pk }}" {% if c.pk|stringformat:'s' == commune_filter %}selected{% endif %}>{{ c.nom }} ({{ c.ville.nom }})</option>{% endfor %}
+      </select>
+      <button type="submit" class="px-4 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl">Filtrer</button>
+    </form>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100 bg-gray-50">
+            <th class="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase">Quartier</th>
+            <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase">Commune</th>
+            <th class="text-left px-4 py-3 text-xs font-bold text-gray-500 uppercase">Statut</th>
+            <th class="text-right px-5 py-3 text-xs font-bold text-gray-500 uppercase">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          {% for q_obj in quartiers %}
+          <tr class="hover:bg-gray-50/50">
+            <td class="px-5 py-3 font-semibold text-gray-900">{{ q_obj.nom }}</td>
+            <td class="px-4 py-3 text-xs text-gray-500">{{ q_obj.commune.nom }} · {{ q_obj.commune.ville.nom }}</td>
+            <td class="px-4 py-3">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {% if q_obj.actif %}bg-emerald-100 text-emerald-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+                {% if q_obj.actif %}Actif{% else %}Inactif{% endif %}
+              </span>
+            </td>
+            <td class="px-5 py-3 text-right flex items-center justify-end gap-2">
+              <form method="post" class="inline">{% csrf_token %}<input type="hidden" name="action" value="toggle"><input type="hidden" name="pk" value="{{ q_obj.pk }}">
+                <button class="text-xs font-semibold px-3 py-1.5 rounded-lg {% if q_obj.actif %}bg-amber-50 text-amber-700{% else %}bg-emerald-50 text-emerald-700{% endif %} transition">{% if q_obj.actif %}Désactiver{% else %}Activer{% endif %}</button>
+              </form>
+              <form method="post" class="inline" onsubmit="return confirm('Supprimer ?')">{% csrf_token %}<input type="hidden" name="action" value="supprimer"><input type="hidden" name="pk" value="{{ q_obj.pk }}">
+                <button class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 transition">Supprimer</button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}<tr><td colspan="4" class="px-5 py-8 text-center text-gray-400 text-sm">Aucun quartier</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

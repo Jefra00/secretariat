@@ -1,700 +1,290 @@
 {% extends 'base/base.html' %}
 {% load static %}
-
-{% block title %}A propos{% endblock %}
+{% block title %}À propos — Marché Intelligent Urban Eat{% endblock %}
 
 {% block content %}
-<main class="flex flex-col gap-12 sm:gap-16 md:gap-20">
 
-  <!-- HeroSection avec image FIXE -->
-  <section class="relative w-full h-[75vh] overflow-hidden">
-    <!-- Image d’arrière-plan fixe -->
-    <div
-      class="absolute inset-0 bg-cover bg-center bg-no-repeat"
-      style="
-        background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC4OTYzRUUyYho9GHyfVFcyB9bva4P1RDdOpE6KCHFeKKZ8oXort4FwrzoQydxbtr9jjeQto_Vp2KH54NRJVijXzYYkjjGEOSQP9VSAMIY9ETCGRQqvuiv9nRjq4t5plhOaPouX0AqYTmdar05l8ZUZqa58yjEbgZKffRxqVKGiuLTWOHdejt7BD_8RM9W_Cbc5lJ0imWnVz52_MQSYi7t3F_iyZm4ilYID_1aXCSiql00FC80BpQ6H2pIAlrv7p98KM-yqW81CVsg');
-        background-attachment: fixed;
-        filter: brightness(0.65);
-      "
-    ></div>
+<!-- ══ HERO ══ -->
+<section class="relative overflow-hidden bg-gradient-to-br from-emerald-700 via-green-600 to-teal-600 py-24 sm:py-32">
+  <div class="absolute inset-0 pointer-events-none overflow-hidden">
+    <div class="absolute -top-32 -right-32 w-96 h-96 bg-yellow-400 rounded-full opacity-10 blur-3xl"></div>
+    <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-300 rounded-full opacity-15 blur-3xl"></div>
+  </div>
 
-    <!-- Contenu par-dessus -->
-    <div class="relative z-10 flex flex-col justify-center items-start h-full px-6 sm:px-10 md:px-16 lg:px-24 text-left text-white max-w-3xl">
-      <h1 class="text-4xl sm:text-5xl md:text-6xl font-black leading-tight drop-shadow-lg mb-4">
-        Votre Partenaire de Confiance pour une Gestion Optimisée
-      </h1>
-      <p class="text-base sm:text-lg md:text-xl text-gray-200 font-light leading-relaxed mb-8 drop-shadow-md">
-        Nous libérons les entrepreneurs des tâches administratives pour qu'ils puissent se concentrer sur leur cœur de métier.
-      </p>
-      <a
-        href="{% url 'services:liste' %}"
-        class="inline-flex items-center justify-center rounded-xl bg-primary hover:bg-primary/90 transition-colors text-white font-semibold text-base sm:text-lg px-6 py-3 shadow-lg"
-      >
-        Découvrez nos services
-      </a>
+  <div class="relative max-w-5xl mx-auto px-6 text-center">
+    <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm text-emerald-100 font-semibold mb-6 backdrop-blur-sm">
+      <span class="w-2 h-2 rounded-full bg-yellow-300 animate-pulse"></span>
+      Brazzaville, République du Congo
     </div>
-  </section>
 
-  <!-- FeatureSection -->
-  <div class="flex flex-col gap-10 px-4 @container">
-    <div class="flex flex-col gap-4 text-center items-center">
-      <h2
-        class="text-[#0e141b] dark:text-white tracking-light text-[32px] font-bold leading-tight @[480px]:text-4xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em] max-w-[720px]"
-      >
-        Notre Mission &amp; Nos Valeurs
+    <h1 class="text-4xl sm:text-6xl font-extrabold text-white leading-tight mb-6">
+      Le Marché Intelligent<br>
+      <span class="text-yellow-300">de demain,</span> aujourd'hui.
+    </h1>
+    <p class="text-emerald-100 text-lg sm:text-xl leading-relaxed max-w-3xl mx-auto mb-10">
+      Urban Eat réunit en un seul endroit tout ce dont vous avez besoin au quotidien — de l'alimentation à l'immobilier,
+      en passant par la mode, la beauté et la mobilité. Conçu pour Brazzaville, pensé pour vous.
+    </p>
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
+      <div class="bg-white/10 border border-white/15 backdrop-blur-sm rounded-2xl p-4 text-center">
+        <p class="text-3xl font-extrabold text-yellow-300">6</p>
+        <p class="text-emerald-200 text-xs mt-1 font-medium">Sections actives</p>
+      </div>
+      <div class="bg-white/10 border border-white/15 backdrop-blur-sm rounded-2xl p-4 text-center">
+        <p class="text-3xl font-extrabold text-white">100+</p>
+        <p class="text-emerald-200 text-xs mt-1 font-medium">Vendeurs</p>
+      </div>
+      <div class="bg-white/10 border border-white/15 backdrop-blur-sm rounded-2xl p-4 text-center">
+        <p class="text-3xl font-extrabold text-white">500+</p>
+        <p class="text-emerald-200 text-xs mt-1 font-medium">Produits</p>
+      </div>
+      <div class="bg-white/10 border border-white/15 backdrop-blur-sm rounded-2xl p-4 text-center">
+        <p class="text-3xl font-extrabold text-white">4.9★</p>
+        <p class="text-emerald-200 text-xs mt-1 font-medium">Note moyenne</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ MISSION ══ -->
+<section class="max-w-5xl mx-auto px-6 py-20">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
+    <div>
+      <span class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-4">
+        <span class="material-symbols-outlined text-sm">flag</span>
+        Notre mission
+      </span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-5">
+        Rendre le commerce local<br><span class="text-emerald-500">accessible à tous</span>
       </h2>
-      <p
-        class="text-gray-700 dark:text-gray-400 text-base font-normal leading-normal max-w-[720px]"
-      >
-        Notre mission est de vous offrir un soutien administratif impeccable, basé sur des valeurs fondamentales qui guident chacune de nos actions.
+      <p class="text-gray-500 text-base leading-relaxed mb-5">
+        À Brazzaville, trouver les bons produits au bon prix reste un défi quotidien. Les marchés sont éparpillés,
+        les informations peu fiables, et les paiements parfois compliqués. Marché Intelligent est né pour changer ça.
       </p>
+      <p class="text-gray-500 text-base leading-relaxed mb-8">
+        Notre plateforme met en relation directe acheteurs et vendeurs locaux dans un espace numérique sécurisé,
+        simple et rapide — payez par Mobile Money, suivez vos livraisons, comparez les prix.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a href="{% url 'marche:accueil_marche' %}"
+           class="flex items-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-sm shadow-emerald-200 transition-all duration-200 text-sm">
+          <span class="text-base">🛒</span> Explorer le marché
+        </a>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'inscription_client' %}"
+           class="flex items-center gap-2 px-5 py-3 border-2 border-emerald-500 text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition-all duration-200 text-sm">
+          <span class="material-symbols-outlined text-base">person_add</span> Créer un compte
+        </a>
+        {% endif %}
+      </div>
     </div>
 
-    <div class="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4 p-0">
-      <div
-        class="flex flex-1 gap-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark p-6 flex-col items-center text-center"
-      >
-        <span class="material-symbols-outlined text-primary text-4xl mb-2">star</span>
-        <div class="flex flex-col gap-1">
-          <h3 class="text-[#0e141b] dark:text-white text-base font-bold leading-tight">Qualité</h3>
-          <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
-            Nous nous engageons à fournir des services de la plus haute qualité, avec une attention méticuleuse aux détails.
-          </p>
+    <div class="relative">
+      <div class="aspect-square max-w-sm mx-auto bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl border border-emerald-100 flex items-center justify-center">
+        <div class="grid grid-cols-3 gap-4 p-8">
+          {% for item in "🛒🛍️💇🚗🏠🔧🍽️🌍🎁" %}
+          <div class="w-14 h-14 rounded-2xl bg-white shadow-md flex items-center justify-center text-2xl hover:scale-110 transition-transform duration-200">{{ item }}</div>
+          {% endfor %}
         </div>
       </div>
-
-      <div
-        class="flex flex-1 gap-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark p-6 flex-col items-center text-center"
-      >
-        <span class="material-symbols-outlined text-primary text-4xl mb-2">lock</span>
-        <div class="flex flex-col gap-1">
-          <h3 class="text-[#0e141b] dark:text-white text-base font-bold leading-tight">Confiance</h3>
-          <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
-            La confidentialité et l'intégrité sont au cœur de notre métier. Vos informations sont entre de bonnes mains.
-          </p>
+      <div class="absolute -bottom-4 -right-4 bg-white rounded-2xl shadow-xl border border-gray-100 px-4 py-3 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white">
+          <span class="material-symbols-outlined text-xl">verified</span>
         </div>
-      </div>
-
-      <div
-        class="flex flex-1 gap-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark p-6 flex-col items-center text-center"
-      >
-        <span class="material-symbols-outlined text-primary text-4xl mb-2">bolt</span>
-        <div class="flex flex-col gap-1">
-          <h3 class="text-[#0e141b] dark:text-white text-base font-bold leading-tight">Efficacité</h3>
-          <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
-            Nous optimisons vos processus pour vous faire gagner du temps et améliorer votre productivité au quotidien.
-          </p>
+        <div>
+          <p class="text-xs text-gray-400 font-medium">Vendeurs vérifiés</p>
+          <p class="text-sm font-extrabold text-gray-900">100% fiables</p>
         </div>
       </div>
     </div>
   </div>
+</section>
 
-  <!-- Team Section -->
-              <div class="flex flex-col gap-6 px-4">
-                <div class="text-center">
-                  <h2
-                    class="text-[#0e141b] dark:text-white text-[28px] md:text-[32px] font-bold leading-tight tracking-[-0.015em]"
-                  >
-                    Notre Équipe d'Experts
-                  </h2>
-                  <p
-                    class="text-gray-700 dark:text-gray-400 text-base font-normal leading-normal max-w-2xl mx-auto mt-2"
-                  >
-                    Rencontrez les professionnels dévoués qui sont prêts à vous
-                    accompagner dans la réussite de vos projets.
-                  </p>
-                </div>
-                <div
-                  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-                >
-                  <!-- Team Member Card 1 -->
-                  <div
-                    class="flex flex-col items-center text-center bg-white dark:bg-gray-900/50 p-6 rounded-xl border border-gray-200 dark:border-gray-800"
-                  >
-                    <img
-                      alt="Portrait de Marc Dubois"
-                      class="w-28 h-28 rounded-full object-cover mb-4 border-4 border-primary/20"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiux5y_uQduKMBNZTYAmHxxmLHzR-mOe85hzcKo7FpR3nDxU2L9QBlf62yS9pBVjSfq9PwPQH9xF7posulXVmFIycINsVcjUrK1kP8AwE5h4dBu1GyrKoVCaaknHB_ouoSUTqj2qwd8BaMcOH0mo3MvVmkTU7Veq7_YSArSwI1UfSL3BlOr1qO2jbFFyZ8eRG7_R81Jpqv45TNhf_3HqPJao9hJCF3C8JdxVNGd-S3kl82OZV9LMTsZ-QwdlsncdlqyD0vAFTU-Ys"
-                    />
-                    <h3
-                      class="text-lg font-bold text-[#0e141b] dark:text-white"
-                    >
-                      Marc Dubois
-                    </h3>
-                    <p class="text-sm text-primary font-medium">
-                      Fondateur &amp; Gérant
-                    </p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                      Fort de 15 ans d'expérience en gestion administrative,
-                      Marc a fondé Secrétariat Pro pour aider les entrepreneurs
-                      à se concentrer sur leur croissance.
-                    </p>
-                  </div>
-                  <!-- Team Member Card 2 -->
-                  <div
-                    class="flex flex-col items-center text-center bg-white dark:bg-gray-900/50 p-6 rounded-xl border border-gray-200 dark:border-gray-800"
-                  >
-                    <img
-                      alt="Portrait de Sophie Lemaire"
-                      class="w-28 h-28 rounded-full object-cover mb-4 border-4 border-primary/20"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxczI4hBUI1tdw4O2YXnC7fXSlZX9QhbdlI0AG7lfQIZrMaOloOQGDJQnw5_mGkRbBgJ0P4Ml_IPSWEqKDpj-cuOjQaIY97yFDBsrEqcw-A57ckAvu3r_MAHBM5KV1VMXeem3wx1zwxmVNjFUhRiixltsonjHy-9DJyThYWqEpjgGXjSomUac3i3bavbEhQ47lmwO8s0SIqqBb1Dg-JJ_3CAGE17gtxjXkeHdXsnzoXCQgW9Qven4aaSqeNvOFO7MV77JgzD7ARJ8"
-                    />
-                    <h3
-                      class="text-lg font-bold text-[#0e141b] dark:text-white"
-                    >
-                      Sophie Lemaire
-                    </h3>
-                    <p class="text-sm text-primary font-medium">
-                      Responsable Clientèle
-                    </p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                      Sophie est votre point de contact privilégié. Elle
-                      s'assure que chaque client reçoit un service sur-mesure et
-                      une attention irréprochable.
-                    </p>
-                  </div>
-                  <!-- Team Member Card 3 -->
-                  <div
-                    class="flex flex-col items-center text-center bg-white dark:bg-gray-900/50 p-6 rounded-xl border border-gray-200 dark:border-gray-800"
-                  >
-                    <img
-                      alt="Portrait de Julien Petit"
-                      class="w-28 h-28 rounded-full object-cover mb-4 border-4 border-primary/20"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGZaD8TwLFKvt4be-jakjSqN1bNpdfHB5xIJmGL9wouebepV88f9ndgZGC90xtaqH3Vvylv_5z-A8HyspYmbwcxffUqZVCbCTFuJjh6Q0zjSHmR8NMKRGw_5QLVn6joEfHYWl9etBYaXFiR4ci7ypEqwdXfqYHGTx8TiVstHUemffUs849OfjV6mQpyQlLmPVnMCaSQyvxxFPxQJ_A-AIpLgDasSnS8mnZi8HdfpYjGxUjUk31QZbowlKDu1QLoEqU1bLjtX_OlIE"
-                    />
-                    <h3
-                      class="text-lg font-bold text-[#0e141b] dark:text-white"
-                    >
-                      Julien Petit
-                    </h3>
-                    <p class="text-sm text-primary font-medium">
-                      Expert Numérique
-                    </p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                      Spécialiste de la digitalisation, Julien vous accompagne
-                      dans l'optimisation de vos outils et la gestion de vos
-                      projets en ligne.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <!-- Trust Block / Social Proof -->
-              <div class="px-4 py-10">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                  <div class="flex flex-col items-center">
-                    <span
-                      class="material-symbols-outlined text-4xl text-primary mb-2"
-                      >sentiment_satisfied</span
-                    >
-                    <p
-                      class="text-4xl font-black text-[#0e141b] dark:text-white"
-                    >
-                      98%
-                    </p>
-                    <p class="text-gray-600 dark:text-gray-400">
-                      de satisfaction client
-                    </p>
-                  </div>
-                  <div class="flex flex-col items-center">
-                    <span
-                      class="material-symbols-outlined text-4xl text-primary mb-2"
-                      >workspace_premium</span
-                    >
-                    <p
-                      class="text-4xl font-black text-[#0e141b] dark:text-white"
-                    >
-                      +10
-                    </p>
-                    <p class="text-gray-600 dark:text-gray-400">
-                      années d'expérience cumulée
-                    </p>
-                  </div>
-                  <div class="flex flex-col items-center">
-                    <span
-                      class="material-symbols-outlined text-4xl text-primary mb-2"
-                      >groups</span
-                    >
-                    <p
-                      class="text-4xl font-black text-[#0e141b] dark:text-white"
-                    >
-                      +50
-                    </p>
-                    <p class="text-gray-600 dark:text-gray-400">
-                      clients accompagnés
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <!-- CTA Section -->
-              <div
-                class="bg-primary/10 dark:bg-primary/20 rounded-xl mx-4 my-10 p-8 text-center flex flex-col items-center gap-6"
-              >
-                <h2
-                  class="text-2xl md:text-3xl font-bold text-[#0e141b] dark:text-white"
-                >
-                  Prêt à optimiser votre gestion ?
-                </h2>
-                <p class="text-gray-700 dark:text-gray-300 max-w-xl">
-                  Discutons de vos besoins et découvrez comment notre équipe
-                  peut vous aider à atteindre vos objectifs. Contactez-nous pour
-                  un devis personnalisé.
-                </p>
-                <a
-                  class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-colors"
-                  href="contacts.html"
-                >
-                  <span class="truncate">Contactez-nous</span>
-                </a>
-              </div>
-              <!-- Timeline / Our Story Section -->
-              <div class="px-4 py-16">
-                <div class="max-w-4xl mx-auto">
-                  <div class="text-center mb-16">
-                    <h2
-                      class="text-[#0e141b] dark:text-white text-[32px] md:text-4xl font-bold leading-tight mb-4"
-                    >
-                      Notre Histoire
-                    </h2>
-                    <p
-                      class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto"
-                    >
-                      Un parcours marqué par l'innovation et l'engagement client
-                    </p>
-                  </div>
-                  <div class="relative">
-                    <!-- Timeline line -->
-                    <div
-                      class="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-primary to-accent"
-                    ></div>
-                    <!-- Timeline items -->
-                    <div class="space-y-12">
-                      <!-- Timeline Item 1 -->
-                      <div class="relative flex items-center">
-                        <div class="flex-1 text-right pr-8">
-                          <h3
-                            class="text-xl font-bold text-[#0e141b] dark:text-white mb-2"
-                          >
-                            2024 - Innovation Continue
-                          </h3>
-                          <p class="text-gray-600 dark:text-gray-400">
-                            Nous continuons d'innover avec des solutions
-                            digitales avancées et une formation continue de
-                            notre équipe.
-                          </p>
-                        </div>
-                        <div
-                          class="relative z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center border-4 border-white dark:border-gray-900 shadow-lg"
-                        >
-                          <span class="material-symbols-outlined text-white"
-                            >rocket_launch</span
-                          >
-                        </div>
-                        <div class="flex-1 pl-8"></div>
-                      </div>
-                      <!-- Timeline Item 2 -->
-                      <div class="relative flex items-center">
-                        <div class="flex-1 pr-8"></div>
-                        <div
-                          class="relative z-10 w-12 h-12 bg-accent rounded-full flex items-center justify-center border-4 border-white dark:border-gray-900 shadow-lg"
-                        >
-                          <span class="material-symbols-outlined text-white"
-                            >trending_up</span
-                          >
-                        </div>
-                        <div class="flex-1 text-left pl-8">
-                          <h3
-                            class="text-xl font-bold text-[#0e141b] dark:text-white mb-2"
-                          >
-                            2022 - Expansion
-                          </h3>
-                          <p class="text-gray-600 dark:text-gray-400">
-                            Élargissement de nos services avec une équipe
-                            renforcée et de nouveaux partenariats stratégiques.
-                          </p>
-                        </div>
-                      </div>
-                      <!-- Timeline Item 3 -->
-                      <div class="relative flex items-center">
-                        <div class="flex-1 text-right pr-8">
-                          <h3
-                            class="text-xl font-bold text-[#0e141b] dark:text-white mb-2"
-                          >
-                            2019 - Fondation
-                          </h3>
-                          <p class="text-gray-600 dark:text-gray-400">
-                            Création de Secrétariat Pro avec une vision :
-                            libérer les entrepreneurs de la charge
-                            administrative.
-                          </p>
-                        </div>
-                        <div
-                          class="relative z-10 w-12 h-12 bg-primary rounded-full flex items-center justify-center border-4 border-white dark:border-gray-900 shadow-lg"
-                        >
-                          <span class="material-symbols-outlined text-white"
-                            >celebration</span
-                          >
-                        </div>
-                        <div class="flex-1 pl-8"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </main>
+<!-- ══ NOS SECTIONS ══ -->
+<section class="bg-gray-50 py-20">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-14">
+      <span class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-4">
+        <span class="material-symbols-outlined text-sm">apps</span>
+        Toutes nos sections
+      </span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900">Un univers, 6 sections</h2>
+      <p class="text-gray-500 mt-3 max-w-2xl mx-auto">Chaque section est un marché spécialisé, avec ses vendeurs, ses produits et ses fonctionnalités dédiées.</p>
+    </div>
 
-            <footer class="bg-card-light dark:bg-card-dark mt-16" id="contact">
-              <div class="mx-auto w-full max-w-screen-xl p-8 py-10 lg:py-16">
-                <div class="md:flex md:justify-between">
-                  <div class="mb-8 md:mb-0 md:w-1/3">
-                    <a class="flex items-center gap-4 mb-4" href="accueil.html">
-                      <div class="size-6 text-primary">
-                        <svg
-                          fill="none"
-                          viewbox="0 0 48 48"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z"
-                            fill="currentColor"
-                          ></path>
-                        </svg>
-                      </div>
-                      <h2
-                        class="text-text-light dark:text-text-dark text-xl font-bold leading-tight"
-                      >
-                        Secrétariat Pro
-                      </h2>
-                    </a>
-                    <p class="text-text-muted-light dark:text-text-muted-dark">
-                      Votre partenaire de confiance pour une gestion
-                      administrative et numérique simplifiée.
-                    </p>
-                  </div>
-                  <div
-                    class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3 md:w-2/3"
-                  >
-                    <div>
-                      <h3
-                        class="mb-4 text-sm font-semibold uppercase text-text-light dark:text-text-dark"
-                      >
-                        Navigation
-                      </h3>
-                      <ul
-                        class="text-text-muted-light dark:text-text-muted-dark font-medium space-y-3"
-                      >
-                        <li>
-                          <a class="hover:text-primary" href="accueil.html"
-                            >Accueil</a
-                          >
-                        </li>
-                        <li>
-                          <a class="hover:text-primary" href="services.html"
-                            >Services</a
-                          >
-                        </li>
-                        <li>
-                          <a class="hover:text-primary" href="apropo.html"
-                            >À propos</a
-                          >
-                        </li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h3
-                        class="mb-4 text-sm font-semibold uppercase text-text-light dark:text-text-dark"
-                      >
-                        Contact
-                      </h3>
-                      <ul
-                        class="text-text-muted-light dark:text-text-muted-dark font-medium space-y-3"
-                      >
-                        <li>
-                          <a
-                            class="hover:text-primary"
-                            href="mailto:contact@secretariatpro.com"
-                            >contact@secretariatpro.com</a
-                          >
-                        </li>
-                        <li>
-                          <a class="hover:text-primary" href="tel:+33123456789"
-                            >+33 1 23 45 67 89</a
-                          >
-                        </li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h3
-                        class="mb-4 text-sm font-semibold uppercase text-text-light dark:text-text-dark"
-                      >
-                        Suivez-nous
-                      </h3>
-                      <ul
-                        class="text-text-muted-light dark:text-text-muted-dark font-medium space-y-3"
-                      >
-                        <li>
-                          <a class="hover:text-primary" href="#">LinkedIn</a>
-                        </li>
-                        <li>
-                          <a class="hover:text-primary" href="#">Twitter</a>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                <hr
-                  class="my-6 border-slate-200 sm:mx-auto dark:border-slate-700 lg:my-8"
-                />
-                <div class="sm:flex sm:items-center sm:justify-between">
-                  <span
-                    class="text-sm text-text-muted-light dark:text-text-muted-dark sm:text-center"
-                    >© 2024
-                    <a class="hover:underline" href="#">Secrétariat Pro™</a>.
-                    Tous droits réservés.</span
-                  >
-                </div>
-              </div>
-            </footer>
-          </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <a href="{% url 'marche:accueil_marche' %}" class="group bg-white rounded-3xl border border-gray-100 p-6 hover:shadow-xl hover:shadow-emerald-100 hover:-translate-y-1 transition-all duration-300">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center text-3xl shadow-sm mb-4 group-hover:scale-110 transition-transform duration-300">🛒</div>
+        <h3 class="text-lg font-extrabold text-gray-900 mb-2">Marché Intelligent</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Fruits, légumes, viandes, épices, poissons — trouvez tout chez les marchands de Brazzaville.</p>
+        <div class="mt-4 flex items-center gap-1 text-emerald-600 text-xs font-bold">Explorer <span class="material-symbols-outlined text-sm">arrow_forward</span></div>
+      </a>
+      <a href="{% url 'shopping:shopping_accueil' %}" class="group bg-white rounded-3xl border border-gray-100 p-6 hover:shadow-xl hover:shadow-pink-100 hover:-translate-y-1 transition-all duration-300">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-400 to-rose-600 flex items-center justify-center text-3xl shadow-sm mb-4 group-hover:scale-110 transition-transform duration-300">🛍️</div>
+        <h3 class="text-lg font-extrabold text-gray-900 mb-2">Shopping</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Vêtements, chaussures, accessoires, électronique — un vrai centre commercial en ligne.</p>
+        <div class="mt-4 flex items-center gap-1 text-pink-600 text-xs font-bold">Explorer <span class="material-symbols-outlined text-sm">arrow_forward</span></div>
+      </a>
+      <a href="{% url 'perruque:perruque_accueil' %}" class="group bg-white rounded-3xl border border-gray-100 p-6 hover:shadow-xl hover:shadow-violet-100 hover:-translate-y-1 transition-all duration-300">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-3xl shadow-sm mb-4 group-hover:scale-110 transition-transform duration-300">💇</div>
+        <h3 class="text-lg font-extrabold text-gray-900 mb-2">Beauté & Perruques</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Perruques, extensions, produits capillaires et soins beauté.</p>
+        <div class="mt-4 flex items-center gap-1 text-violet-600 text-xs font-bold">Explorer <span class="material-symbols-outlined text-sm">arrow_forward</span></div>
+      </a>
+      <a href="{% url 'voiture:voiture_accueil' %}" class="group bg-white rounded-3xl border border-gray-100 p-6 hover:shadow-xl hover:shadow-blue-100 hover:-translate-y-1 transition-all duration-300">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-3xl shadow-sm mb-4 group-hover:scale-110 transition-transform duration-300">🚗</div>
+        <h3 class="text-lg font-extrabold text-gray-900 mb-2">Location de voiture</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Réservez un véhicule pour vos déplacements à Brazzaville en quelques clics.</p>
+        <div class="mt-4 flex items-center gap-1 text-blue-600 text-xs font-bold">Explorer <span class="material-symbols-outlined text-sm">arrow_forward</span></div>
+      </a>
+      <a href="{% url 'immobilier:accueil' %}" class="group bg-white rounded-3xl border border-gray-100 p-6 hover:shadow-xl hover:shadow-amber-100 hover:-translate-y-1 transition-all duration-300">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-3xl shadow-sm mb-4 group-hover:scale-110 transition-transform duration-300">🏠</div>
+        <h3 class="text-lg font-extrabold text-gray-900 mb-2">Immobilier</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Location et vente de maisons, appartements et terrains à Brazzaville.</p>
+        <div class="mt-4 flex items-center gap-1 text-amber-600 text-xs font-bold">Explorer <span class="material-symbols-outlined text-sm">arrow_forward</span></div>
+      </a>
+      <a href="{% url 'quicaillerie:accueil' %}" class="group bg-white rounded-3xl border border-gray-100 p-6 hover:shadow-xl hover:shadow-slate-100 hover:-translate-y-1 transition-all duration-300">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-3xl shadow-sm mb-4 group-hover:scale-110 transition-transform duration-300">🔧</div>
+        <h3 class="text-lg font-extrabold text-gray-900 mb-2">Quincaillerie</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Outils, matériaux de construction, équipements ménagers.</p>
+        <div class="mt-4 flex items-center gap-1 text-slate-600 text-xs font-bold">Explorer <span class="material-symbols-outlined text-sm">arrow_forward</span></div>
+      </a>
+    </div>
+
+    <div class="mt-6 bg-white rounded-3xl border border-dashed border-orange-200 p-6 flex items-center gap-5">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-300 to-red-400 flex items-center justify-center text-3xl shadow-sm opacity-60 flex-shrink-0">🍽️</div>
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <h3 class="text-lg font-extrabold text-gray-700">Urban Eat — Restaurants</h3>
+          <span class="text-[11px] bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-bold">Bientôt disponible</span>
         </div>
+        <p class="text-gray-400 text-sm">Commandez vos repas depuis les meilleurs restaurants avec livraison à domicile.</p>
       </div>
     </div>
-    <script>
-      // ============ ANIMATION AU CHARGEMENT ============
-      window.addEventListener("load", () => {
-        // Animation du titre principal
-        const h1 = document.querySelector("h1");
-        if (h1) {
-          h1.style.opacity = "0";
-          h1.style.transform = "translateY(30px)";
-          h1.style.transition = "all 0.8s ease-out";
-          setTimeout(() => {
-            h1.style.opacity = "1";
-            h1.style.transform = "translateY(0)";
-          }, 100);
-        }
+  </div>
+</section>
 
-        // Animation des cartes de valeurs
-        const valueCards = document.querySelectorAll(
-          ".grid.grid-cols-\\[repeat\\(auto-fit\\,minmax\\(240px\\,1fr\\)\\)\\] > div"
-        );
-        valueCards.forEach((card, index) => {
-          card.style.opacity = "0";
-          card.style.transform = "translateY(30px)";
-          card.style.transition = `all 0.6s ease-out ${index * 0.15}s`;
-          setTimeout(() => {
-            card.style.opacity = "1";
-            card.style.transform = "translateY(0)";
-          }, 300 + index * 100);
-        });
+<!-- ══ VALEURS ══ -->
+<section class="max-w-5xl mx-auto px-6 py-20">
+  <div class="text-center mb-14">
+    <span class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-4">
+      <span class="material-symbols-outlined text-sm">favorite</span>
+      Nos valeurs
+    </span>
+    <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900">Ce qui nous distingue</h2>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="text-center p-6">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 flex items-center justify-center mb-4">
+        <span class="material-symbols-outlined text-2xl text-emerald-500">payments</span>
+      </div>
+      <h3 class="font-extrabold text-gray-900 mb-2">Paiement Mobile</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">Airtel Money, MTN Mobile et Orange Money — payez comme vous en avez l'habitude.</p>
+    </div>
+    <div class="text-center p-6">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
+        <span class="material-symbols-outlined text-2xl text-blue-500">local_shipping</span>
+      </div>
+      <h3 class="font-extrabold text-gray-900 mb-2">Livraison rapide</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">Nos livreurs connaissent Brazzaville. Commande reçue en quelques heures.</p>
+    </div>
+    <div class="text-center p-6">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-violet-50 flex items-center justify-center mb-4">
+        <span class="material-symbols-outlined text-2xl text-violet-500">verified_user</span>
+      </div>
+      <h3 class="font-extrabold text-gray-900 mb-2">Vendeurs vérifiés</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">Chaque vendeur est contrôlé avant de rejoindre la plateforme.</p>
+    </div>
+    <div class="text-center p-6">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
+        <span class="material-symbols-outlined text-2xl text-amber-500">support_agent</span>
+      </div>
+      <h3 class="font-extrabold text-gray-900 mb-2">Support 7j/7</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">Notre équipe est disponible tous les jours pour vous aider.</p>
+    </div>
+  </div>
+</section>
 
-        // Animation des membres de l'équipe
-        const teamCards = document.querySelectorAll(
-          ".grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3 > div"
-        );
-        const teamObserver = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry, index) => {
-              if (entry.isIntersecting) {
-                setTimeout(() => {
-                  entry.target.style.opacity = "1";
-                  entry.target.style.transform = "scale(1)";
-                }, index * 100);
-                teamObserver.unobserve(entry.target);
-              }
-            });
-          },
-          { threshold: 0.2 }
-        );
+<!-- ══ COMMENT ÇA MARCHE ══ -->
+<section class="bg-gray-950 py-20">
+  <div class="max-w-5xl mx-auto px-6">
+    <div class="text-center mb-14">
+      <span class="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-400 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-4">
+        <span class="material-symbols-outlined text-sm">info</span>
+        Comment ça marche
+      </span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Acheter en 4 étapes simples</h2>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="relative bg-white/5 border border-white/10 rounded-3xl p-6">
+        <div class="text-6xl font-black text-white/5 absolute top-2 right-4 select-none leading-none">1</div>
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-white text-xl">search</span>
+        </div>
+        <h3 class="font-extrabold text-white mb-2">Parcourez</h3>
+        <p class="text-gray-400 text-sm leading-relaxed">Explorez les sections, recherchez vos produits, comparez les prix.</p>
+      </div>
+      <div class="relative bg-white/5 border border-white/10 rounded-3xl p-6">
+        <div class="text-6xl font-black text-white/5 absolute top-2 right-4 select-none leading-none">2</div>
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-white text-xl">add_shopping_cart</span>
+        </div>
+        <h3 class="font-extrabold text-white mb-2">Ajoutez au panier</h3>
+        <p class="text-gray-400 text-sm leading-relaxed">Un seul panier pour toutes vos sections.</p>
+      </div>
+      <div class="relative bg-white/5 border border-white/10 rounded-3xl p-6">
+        <div class="text-6xl font-black text-white/5 absolute top-2 right-4 select-none leading-none">3</div>
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-white text-xl">payments</span>
+        </div>
+        <h3 class="font-extrabold text-white mb-2">Payez</h3>
+        <p class="text-gray-400 text-sm leading-relaxed">Airtel Money, MTN, Orange Money ou espèces à la livraison.</p>
+      </div>
+      <div class="relative bg-white/5 border border-white/10 rounded-3xl p-6">
+        <div class="text-6xl font-black text-white/5 absolute top-2 right-4 select-none leading-none">4</div>
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-white text-xl">home_pin</span>
+        </div>
+        <h3 class="font-extrabold text-white mb-2">Recevez</h3>
+        <p class="text-gray-400 text-sm leading-relaxed">Livré à domicile ou récupéré sur place dans votre quartier.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-        teamCards.forEach((card) => {
-          card.style.opacity = "0";
-          card.style.transform = "scale(0.9)";
-          card.style.transition = "all 0.5s ease-out";
-          teamObserver.observe(card);
-        });
+<!-- ══ CTA ══ -->
+<section class="max-w-4xl mx-auto px-6 py-20 text-center">
+  <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl p-12 shadow-2xl shadow-emerald-200 relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute -top-10 -right-10 w-40 h-40 bg-yellow-300 rounded-full opacity-10 blur-2xl"></div>
+      <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full opacity-10 blur-2xl"></div>
+    </div>
+    <div class="relative">
+      <div class="text-5xl mb-4">🌍</div>
+      <h2 class="text-3xl font-extrabold text-white mb-3">Rejoignez Marché Intelligent</h2>
+      <p class="text-emerald-100 mb-8 max-w-lg mx-auto leading-relaxed">
+        Des centaines de Brazzavillois font déjà leurs achats sur Urban Eat. Créez votre compte gratuit en 30 secondes.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        {% if user.is_authenticated %}
+          <a href="{% url 'marche:accueil_marche' %}"
+             class="flex items-center gap-2 px-8 py-4 bg-white text-emerald-600 font-extrabold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 text-base">
+            <span class="text-xl">🛒</span> Aller au marché
+          </a>
+        {% else %}
+          <a href="{% url 'inscription_client' %}"
+             class="flex items-center gap-2 px-8 py-4 bg-white text-emerald-600 font-extrabold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 text-base">
+            <span class="material-symbols-outlined text-xl">person_add</span> Créer un compte gratuit
+          </a>
+          <a href="{% url 'connexion_client' %}"
+             class="flex items-center gap-2 px-8 py-4 bg-emerald-600/50 border border-white/30 text-white font-bold rounded-2xl hover:bg-emerald-600/70 transition-all duration-200 text-base">
+            <span class="material-symbols-outlined text-xl">login</span> Se connecter
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
 
-        // Animation des statistiques
-        const statsSection = document.querySelectorAll(
-          ".grid.grid-cols-1.md\\:grid-cols-3 > div"
-        );
-        const statsObserver = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry, index) => {
-              if (entry.isIntersecting) {
-                const numberElement = entry.target.querySelector(".text-4xl");
-                if (numberElement) {
-                  const finalValue = numberElement.textContent;
-                  animateCounter(numberElement, finalValue);
-                }
-                setTimeout(() => {
-                  entry.target.style.opacity = "1";
-                  entry.target.style.transform = "translateY(0)";
-                }, index * 100);
-                statsObserver.unobserve(entry.target);
-              }
-            });
-          },
-          { threshold: 0.5 }
-        );
-
-        statsSection.forEach((stat, index) => {
-          stat.style.opacity = "0";
-          stat.style.transform = "translateY(30px)";
-          stat.style.transition = "all 0.6s ease-out";
-          statsObserver.observe(stat);
-        });
-
-        // Animation de la Timeline
-        const timelineItems = document.querySelectorAll(".space-y-12 > div");
-        const timelineObserver = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry, index) => {
-              if (entry.isIntersecting) {
-                setTimeout(() => {
-                  entry.target.style.opacity = "1";
-                  entry.target.style.transform = "translateX(0)";
-                }, index * 200);
-                timelineObserver.unobserve(entry.target);
-              }
-            });
-          },
-          { threshold: 0.3 }
-        );
-
-        timelineItems.forEach((item, index) => {
-          item.style.opacity = "0";
-          if (index % 2 === 0) {
-            item.style.transform = "translateX(-50px)";
-          } else {
-            item.style.transform = "translateX(50px)";
-          }
-          item.style.transition = "all 0.6s ease-out";
-          timelineObserver.observe(item);
-        });
-      });
-
-      // ============ FONCTION ANIMATION COMPTEUR ============
-      function animateCounter(element, target) {
-        const isPercentage = target.includes("%");
-        const isPlus = target.includes("+");
-        const numericTarget = parseInt(target.replace(/[^0-9]/g, ""));
-        let current = 0;
-        const duration = 2000;
-        const increment = numericTarget / (duration / 16);
-
-        function updateCounter() {
-          current += increment;
-          if (current < numericTarget) {
-            element.textContent =
-              (isPlus ? "+" : "") +
-              Math.floor(current) +
-              (isPercentage ? "%" : "");
-            requestAnimationFrame(updateCounter);
-          } else {
-            element.textContent = target;
-          }
-        }
-        updateCounter();
-      }
-
-      // ============ SMOOTH SCROLL ============
-      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-        anchor.addEventListener("click", function (e) {
-          const href = this.getAttribute("href");
-          if (href !== "#") {
-            e.preventDefault();
-            const target = document.querySelector(href);
-            if (target) {
-              target.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-            }
-          }
-        });
-      });
-
-      // ============ EFFET PARALLAX SUR L'IMAGE HERO ============
-      window.addEventListener("scroll", () => {
-        const heroImage = document.querySelector(
-          '[data-alt*="équipe souriante"]'
-        );
-        if (heroImage) {
-          const scrolled = window.scrollY;
-          const rate = scrolled * 0.5;
-          heroImage.style.transform = `translateY(${rate}px)`;
-        }
-      });
-
-      // ============ ANIMATION DES CARTES AU SURVOL ============
-      const teamMemberCards = document.querySelectorAll(
-        ".grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3 > div"
-      );
-      teamMemberCards.forEach((card) => {
-        card.addEventListener("mouseenter", function () {
-          this.style.transform = "translateY(-10px)";
-          const img = this.querySelector("img");
-          if (img) {
-            img.style.transform = "scale(1.1)";
-          }
-        });
-
-        card.addEventListener("mouseleave", function () {
-          this.style.transform = "translateY(0)";
-          const img = this.querySelector("img");
-          if (img) {
-            img.style.transform = "scale(1)";
-          }
-        });
-      });
-
-      // ============ ANIMATION DES ICÔNES AU SURVOL ============
-      const iconContainers = document.querySelectorAll(
-        ".flex.flex-1.gap-3.rounded-lg"
-      );
-      iconContainers.forEach((container) => {
-        container.addEventListener("mouseenter", function () {
-          const icon = this.querySelector(".material-symbols-outlined");
-          if (icon) {
-            icon.style.transform = "scale(1.2) rotate(10deg)";
-          }
-        });
-
-        container.addEventListener("mouseleave", function () {
-          const icon = this.querySelector(".material-symbols-outlined");
-          if (icon) {
-            icon.style.transform = "scale(1) rotate(0deg)";
-          }
-        });
-      });
-
-      // ============ EFFET GLASSMORPHISM DYNAMIQUE ============
-      window.addEventListener("scroll", () => {
-        const header = document.querySelector("header");
-        if (window.scrollY > 50) {
-          header.style.backgroundColor = "rgba(246, 247, 248, 0.95)";
-        } else {
-          header.style.backgroundColor = "";
-        }
-      });
-    </script>
-<!-- ... (tout le reste de ta page — équipe, statistiques, CTA, timeline, footer, etc. inchangé) ... -->
-
-</main>
-
-<script>
-  // Animation au chargement (inchangée)
-  window.addEventListener("load", () => {
-    const h1 = document.querySelector("h1");
-    if (h1) {
-      h1.style.opacity = "0";
-      h1.style.transform = "translateY(30px)";
-      h1.style.transition = "all 0.8s ease-out";
-      setTimeout(() => {
-        h1.style.opacity = "1";
-        h1.style.transform = "translateY(0)";
-      }, 200);
-    }
-  });
-</script>
 {% endblock %}

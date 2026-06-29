@@ -1,0 +1,322 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Quincaillerie — Outils & Matériaux{% endblock %}
+{% block navbar %}{% include 'base/navbar_quicaillerie.html' %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+<style>
+.prod-card:hover .prod-img{transform:scale(1.07);}
+.prod-img{transition:transform .35s ease;}
+.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+<section class="relative overflow-hidden text-white"
+         style="background:linear-gradient(135deg,#7c2d12 0%,#c2410c 55%,#ea580c 100%);">
+
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-10 blur-3xl" style="background:#fed7aa;"></div>
+    <div class="absolute -bottom-16 -left-16 w-72 h-72 rounded-full opacity-15 blur-3xl" style="background:#fdba74;"></div>
+  </div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
+
+      <div class="max-w-xl">
+        <div class="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full text-xs font-bold"
+             style="background:rgba(255,255,255,0.15);color:#fed7aa;">
+          <span class="w-2 h-2 rounded-full bg-yellow-300 animate-pulse inline-block"></span>
+          Brazzaville · République du Congo
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight mb-3">
+          Outils, matériaux &amp; équipements<br>
+          <span style="color:#fde68a;">pour vos chantiers &amp; réparations</span>
+        </h1>
+        <p class="text-base" style="color:#fed7aa;">
+          Trouvez les bons outils au meilleur prix. Livraison disponible à Brazzaville.
+        </p>
+      </div>
+
+      <!-- Stats -->
+      <div class="flex gap-3 flex-shrink-0">
+        <div class="rounded-2xl px-5 py-4 text-center backdrop-blur-sm" style="background:rgba(255,255,255,0.12);">
+          <p class="text-2xl font-black">{{ total }}</p>
+          <p class="text-xs font-semibold mt-0.5" style="color:#fed7aa;">produit{{ total|pluralize }}</p>
+        </div>
+        <div class="rounded-2xl px-5 py-4 text-center backdrop-blur-sm" style="background:rgba(255,255,255,0.12);">
+          <p class="text-2xl font-black">🚚</p>
+          <p class="text-xs font-semibold mt-0.5" style="color:#fed7aa;">livraison dispo</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barre de recherche -->
+    <form method="get" class="mt-8 flex gap-2 max-w-2xl">
+      <div class="relative flex-1">
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </span>
+        <input type="text" name="q" value="{{ q }}" id="search-quicaillerie"
+               placeholder="Marteau, ciment, perceuse, Bosch…"
+               class="w-full pl-12 pr-4 py-3.5 rounded-xl text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 shadow-sm"
+               style="--tw-ring-color:#fb923c;">
+      </div>
+      {% if cat_id %}<input type="hidden" name="cat" value="{{ cat_id }}">{% endif %}
+      {% if etat    %}<input type="hidden" name="etat" value="{{ etat }}">{% endif %}
+      {% if ville   %}<input type="hidden" name="ville" value="{{ ville }}">{% endif %}
+      {% if prix_max%}<input type="hidden" name="prix_max" value="{{ prix_max }}">{% endif %}
+      <button type="submit"
+              class="font-bold px-6 py-3.5 rounded-xl text-sm transition shadow-sm bg-white hover:bg-orange-50"
+              style="color:#c2410c;">
+        Rechercher
+      </button>
+    </form>
+  </div>
+</section>
+
+
+<!-- ── Corps ──────────────────────────────────────────────────────────────── -->
+<div class="bg-gray-50 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col lg:flex-row gap-7">
+
+      <!-- ═══ Sidebar filtres ══════════════════════════════════════════════ -->
+      <aside class="w-full lg:w-60 flex-shrink-0">
+        <form method="get" id="filterForm"
+              class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sticky top-20">
+          {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+
+          <div class="flex items-center gap-2 mb-5">
+            <span class="material-symbols-outlined text-xl" style="color:#ea580c;">tune</span>
+            <h2 class="font-bold text-gray-900 text-sm">Filtres</h2>
+            {% if q or cat_id or ville or marque or prix_max or etat or promo_only %}
+            <a href="{% url 'quicaillerie:accueil' %}"
+               class="ml-auto text-xs font-semibold text-red-400 hover:text-red-600 flex items-center gap-0.5">
+              <span class="material-symbols-outlined text-sm">close</span>Reset
+            </a>
+            {% endif %}
+          </div>
+
+          <!-- Catégorie -->
+          {% if categories %}
+          <div class="mb-4">
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Catégorie</p>
+            <div class="space-y-1">
+              <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="radio" name="cat" value="" {% if not cat_id %}checked{% endif %}
+                       onchange="this.form.submit()" class="accent-orange-500">
+                <span class="text-sm text-gray-600 group-hover:text-orange-600">Toutes</span>
+              </label>
+              {% for cat in categories %}
+              <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="radio" name="cat" value="{{ cat.pk }}"
+                       {% if cat_id == cat.pk|stringformat:"s" %}checked{% endif %}
+                       onchange="this.form.submit()" class="accent-orange-500">
+                <span class="text-sm text-gray-600 group-hover:text-orange-600">
+                  {% if cat.icone %}{{ cat.icone }} {% endif %}{{ cat.nom }}
+                </span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- État -->
+          <div class="mb-4">
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">État</p>
+            <select name="etat" onchange="this.form.submit()"
+                    class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none">
+              <option value="">Neuf & Occasion</option>
+              {% for val, label in ETAT_CHOICES %}
+              <option value="{{ val }}" {% if etat == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Ville -->
+          <div class="mb-4">
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Ville</p>
+            <input type="text" name="ville" value="{{ ville }}" placeholder="Brazzaville…"
+                   class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none"
+                   onchange="this.form.submit()">
+          </div>
+
+          <!-- Marque -->
+          <div class="mb-4">
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Marque</p>
+            <input type="text" name="marque" value="{{ marque }}" placeholder="Bosch, Makita…"
+                   class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none"
+                   onchange="this.form.submit()">
+          </div>
+
+          <!-- Prix max -->
+          <div class="mb-4">
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Prix max (FCFA)</p>
+            <input type="number" name="prix_max" value="{{ prix_max }}" placeholder="500 000" min="0"
+                   class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none"
+                   onchange="this.form.submit()">
+          </div>
+
+          <!-- Promo uniquement -->
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="promo" value="1" {% if promo_only == "1" %}checked{% endif %}
+                   class="rounded accent-orange-500" onchange="this.form.submit()">
+            <span class="text-sm text-gray-600">Promotions uniquement</span>
+          </label>
+
+        </form>
+      </aside>
+
+      <!-- ═══ Grille des produits ════════════════════════════════════════════ -->
+      <section class="flex-1 min-w-0">
+
+        <div class="flex items-center justify-between mb-5">
+          <p class="text-sm text-gray-500">
+            <span class="font-bold text-gray-900">{{ total }}</span>
+            produit{{ total|pluralize }} disponible{{ total|pluralize }}
+            {% if q %} · « <em class="not-italic font-semibold text-gray-700">{{ q }}</em> »{% endif %}
+          </p>
+          <a href="{% url 'marche:panier' %}"
+             class="flex items-center gap-1.5 font-bold px-4 py-2 rounded-xl text-sm transition text-white shadow-sm"
+             style="background:#ea580c;">
+            <span class="material-symbols-outlined text-base">shopping_cart</span>
+            Panier
+          </a>
+        </div>
+
+        {% if produits %}
+        <div class="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {% for p in produits %}
+          {% with img=p.images.all.0 %}
+          <div class="prod-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col"
+               data-searchable="{{ p.nom|lower|escapejs }}{% if p.categorie %} {{ p.categorie.nom|lower|escapejs }}{% endif %}{% if p.marque %} {{ p.marque|lower|escapejs }}{% endif %}">
+
+            <!-- Image -->
+            <a href="{% url 'quicaillerie:detail' p.pk %}" class="relative block h-44 overflow-hidden bg-gray-50">
+              {% if img %}
+              <img src="{{ img.image.url }}" alt="{{ p.nom }}"
+                   class="prod-img w-full h-full object-cover">
+              {% else %}
+              <div class="w-full h-full flex items-center justify-center"
+                   style="background:linear-gradient(135deg,#ffedd5,#fed7aa);">
+                <span class="text-5xl">🔧</span>
+              </div>
+              {% endif %}
+
+              <!-- Badge promo -->
+              {% if p.is_en_promo %}
+              <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow">
+                -{{ p.remise_pct }}%
+              </span>
+              {% endif %}
+
+              <!-- Badge état -->
+              {% if p.etat == 'occasion' %}
+              <span class="absolute top-2 right-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Occasion</span>
+              {% endif %}
+            </a>
+
+            <!-- Infos -->
+            <div class="flex-1 p-3 flex flex-col">
+
+              {% if p.categorie %}
+              <p class="text-[10px] font-bold uppercase tracking-wide mb-1" style="color:#ea580c;">
+                {% if p.categorie.icone %}{{ p.categorie.icone }} {% endif %}{{ p.categorie.nom }}
+              </p>
+              {% endif %}
+
+              <a href="{% url 'quicaillerie:detail' p.pk %}"
+                 class="font-bold text-gray-900 text-sm leading-tight line-clamp-2 hover:text-orange-600 transition mb-1">
+                {{ p.nom }}
+              </a>
+
+              {% if p.marque %}
+              <p class="text-xs text-gray-400 mb-2">{{ p.marque }}</p>
+              {% endif %}
+
+              <div class="mt-auto pt-2 border-t border-gray-50 flex items-end justify-between gap-2">
+                <div>
+                  {% if p.is_en_promo %}
+                  <p class="text-[11px] text-gray-400 line-through leading-tight">{{ p.prix|floatformat:0 }} FCFA</p>
+                  {% endif %}
+                  <p class="font-black text-base leading-tight" style="color:#c2410c;">
+                    {{ p.prix_actuel|floatformat:0 }}
+                    <span class="text-xs font-semibold">FCFA</span>
+                  </p>
+                  <p class="text-[10px] text-gray-400">/ {{ p.unite }}</p>
+                </div>
+
+                <button onclick="quickAddToCart(this)"
+                        data-id="{{ p.pk }}"
+                        data-nom="{{ p.nom }}"
+                        data-prix="{{ p.prix_actuel }}"
+                        data-devise="FCFA"
+                        data-unite="{{ p.unite }}"
+                        data-vendeur="{% if p.boutique %}{{ p.boutique }}{% endif %}"
+                        data-image="{% if img %}{{ img.image.url }}{% endif %}"
+                        data-url="{% url 'quicaillerie:detail' p.pk %}"
+                        class="flex-shrink-0 flex items-center gap-1 text-white text-xs font-bold px-3 py-2 rounded-xl transition shadow-sm"
+                        style="background:#ea580c;">
+                  <span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+                  <span class="hidden sm:inline">Ajouter</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+          {% endwith %}
+          {% endfor %}
+        </div>
+        <div id="no-results-quic" style="display:none;"
+             class="flex flex-col items-center justify-center py-14 text-center">
+          <span class="material-symbols-outlined text-5xl text-gray-200 mb-3">search_off</span>
+          <p class="font-bold text-gray-700">Aucun résultat trouvé</p>
+          <p class="text-xs text-gray-400 mt-1">Essayez un autre mot-clé</p>
+        </div>
+
+        {% else %}
+        <div class="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border border-gray-100">
+          <div class="w-20 h-20 rounded-full flex items-center justify-center mb-4 text-4xl" style="background:#ffedd5;">🔧</div>
+          <h3 class="font-bold text-gray-900 mb-2">Aucun produit disponible</h3>
+          <p class="text-sm text-gray-500 max-w-xs">
+            {% if q or cat_id or ville or marque or prix_max or etat or promo_only %}
+              Essayez d'autres critères ou
+              <a href="{% url 'quicaillerie:accueil' %}" class="underline font-semibold" style="color:#ea580c;">réinitialisez les filtres</a>.
+            {% else %}
+              Aucun produit n'est disponible pour le moment.
+            {% endif %}
+          </p>
+        </div>
+        {% endif %}
+
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const input = document.getElementById('search-quicaillerie');
+  if (!input) return;
+  const noRes = document.getElementById('no-results-quic');
+  input.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    const cards = document.querySelectorAll('.prod-card[data-searchable]');
+    let visible = 0;
+    cards.forEach(card => {
+      const match = !q || card.dataset.searchable.includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    if (noRes) noRes.style.display = visible === 0 && q ? '' : 'none';
+  });
+})();
+</script>
+
+{% endblock %}
